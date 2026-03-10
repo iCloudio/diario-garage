@@ -1,14 +1,70 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
-  provider = "prisma-client"
-  output   = "../app/generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum DeadlineType {
+  BOLLO
+  REVISIONE
+  ASSICURAZIONE
+}
+
+model User {
+  id           String     @id @default(cuid())
+  email        String     @unique
+  passwordHash String
+  name         String?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  deletedAt    DateTime?
+  sessions     Session[]
+  vehicles     Vehicle[]
+}
+
+model Session {
+  id        String   @id
+  userId    String
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model Vehicle {
+  id        String     @id @default(cuid())
+  userId    String
+  plate     String
+  make      String?
+  model     String?
+  year      Int?
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  deletedAt DateTime?
+  user      User       @relation(fields: [userId], references: [id])
+  deadlines Deadline[]
+
+  @@index([userId])
+  @@index([plate])
+}
+
+model Deadline {
+  id        String       @id @default(cuid())
+  vehicleId String
+  type      DeadlineType
+  dueDate   DateTime
+  notes     String?
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  deletedAt DateTime?
+  vehicle   Vehicle      @relation(fields: [vehicleId], references: [id])
+
+  @@index([vehicleId])
+  @@index([type])
+  @@index([dueDate])
 }
