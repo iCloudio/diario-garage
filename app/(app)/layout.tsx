@@ -44,13 +44,13 @@ export default async function AppLayout({
           <div className="sticky top-4 h-[calc(100vh-2rem)] rounded-2xl border border-border bg-card p-4 shadow-lg">
             <div className="flex h-full flex-col">
             <div className="mb-6 space-y-1">
-              <p className="text-xs uppercase tracking-[0.3em] text-zinc-400">
+              <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
                 DiarioGarage
               </p>
               <p className="text-base font-semibold">
                 Ciao{user.name ? `, ${user.name}` : ""}
               </p>
-              <p className="text-xs text-zinc-400">
+              <p className="text-xs text-muted-foreground">
                 Il tuo garage sempre in regola.
               </p>
             </div>

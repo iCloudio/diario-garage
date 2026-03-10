@@ -59,13 +59,13 @@ export default async function DashboardPage() {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <p className="text-xs uppercase tracking-[0.3em] text-zinc-400">
+          <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
             Dashboard
           </p>
           <h2 className="mt-2 text-2xl font-semibold">
             Il tuo garage sempre in regola.
           </h2>
-          <p className="mt-2 text-sm text-zinc-400">
+          <p className="mt-2 text-sm text-muted-foreground">
             Non trascurare la tua auto: manutenzione e scadenze sotto controllo.
           </p>
         </div>
@@ -90,13 +90,13 @@ export default async function DashboardPage() {
 
       {vehicleCount === 0 ? (
         <Card className="border-border bg-card p-6">
-          <div className="flex items-center gap-3 text-zinc-300">
+          <div className="flex items-center gap-3 text-muted-foreground">
             <Target className="h-5 w-5" />
             <div>
               <p className="text-sm font-medium text-foreground">
                 Inizia dal tuo primo veicolo
               </p>
-              <p className="text-xs text-zinc-400">
+              <p className="text-xs text-muted-foreground">
                 Inserisci una targa per attivare scadenze e manutenzione.
               </p>
             </div>
@@ -112,33 +112,33 @@ export default async function DashboardPage() {
           <div className="grid gap-4 md:grid-cols-3">
             <Card className="border-border bg-card p-5">
               <div className="flex items-center justify-between">
-                <p className="text-sm text-zinc-400">Veicoli attivi</p>
-                <Car className="h-4 w-4 text-zinc-300" />
+                <p className="text-sm text-muted-foreground">Veicoli attivi</p>
+                <Car className="h-4 w-4 text-muted-foreground" />
               </div>
               <p className="mt-3 text-3xl font-semibold">{vehicleCount}</p>
-              <p className="mt-2 text-xs text-zinc-500">
+              <p className="mt-2 text-xs text-muted-foreground">
                 Un solo veicolo, chiaro e ordinato.
               </p>
             </Card>
             <Card className="border-border bg-card p-5">
               <div className="flex items-center justify-between">
-                <p className="text-sm text-zinc-400">Scadenze nei prossimi 30 giorni</p>
-                <CalendarClock className="h-4 w-4 text-zinc-300" />
+                <p className="text-sm text-muted-foreground">Scadenze nei prossimi 30 giorni</p>
+                <CalendarClock className="h-4 w-4 text-muted-foreground" />
               </div>
               <p className="mt-3 text-3xl font-semibold">{dueSoonCount}</p>
-              <p className="mt-2 text-xs text-zinc-500">
+              <p className="mt-2 text-xs text-muted-foreground">
                 Ti basta un colpo d'occhio per essere in regola.
               </p>
             </Card>
             <Card className="border-border bg-card p-5">
               <div className="flex items-center justify-between">
-                <p className="text-sm text-zinc-400">Stato generale</p>
-                <CheckCircle2 className="h-4 w-4 text-zinc-300" />
+                <p className="text-sm text-muted-foreground">Stato generale</p>
+                <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
               </div>
               <p className="mt-3 text-lg font-semibold">
                 {dueSoonCount === 0 ? "Tutto sotto controllo" : "Hai scadenze in arrivo"}
               </p>
-              <p className="mt-2 text-xs text-zinc-500">
+              <p className="mt-2 text-xs text-muted-foreground">
                 Aggiorna le scadenze per tenere il garage in ordine.
               </p>
             </Card>
@@ -148,15 +148,15 @@ export default async function DashboardPage() {
             <Card className="border-border bg-card p-6">
               <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div>
-                  <p className="text-sm text-zinc-400">Veicolo attivo</p>
+                  <p className="text-sm text-muted-foreground">Veicolo attivo</p>
                   <h3 className="mt-1 text-xl font-semibold">{primaryVehicle.plate}</h3>
-                  <p className="text-sm text-zinc-400">
+                  <p className="text-sm text-muted-foreground">
                     {primaryVehicle.make ?? "Marca"} {primaryVehicle.model ?? ""}
                     {primaryVehicle.year ? ` · ${primaryVehicle.year}` : ""}
                   </p>
                 </div>
-                <div className="rounded-lg border border-border bg-white/5 px-4 py-3 text-sm text-zinc-300">
-                  <p className="text-xs uppercase tracking-[0.2em] text-zinc-500">
+                <div className="rounded-lg border border-border bg-card px-4 py-3 text-sm text-muted-foreground">
+                  <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
                     Prossima scadenza
                   </p>
                   <p className="mt-2 font-medium text-foreground">
@@ -171,12 +171,12 @@ export default async function DashboardPage() {
 
           <Card className="border-border bg-card p-6">
             <div className="flex items-center justify-between">
-              <p className="text-sm text-zinc-400">Prossime scadenze</p>
-              <Link className="text-xs text-zinc-400 hover:text-foreground" href="/deadlines">
+              <p className="text-sm text-muted-foreground">Prossime scadenze</p>
+              <Link className="text-xs text-muted-foreground hover:text-foreground" href="/deadlines">
                 Vedi tutte →
               </Link>
             </div>
-            <div className="mt-4 space-y-3 text-sm text-zinc-300">
+            <div className="mt-4 space-y-3 text-sm text-muted-foreground">
               {upcoming.length === 0 ? (
                 <p>Nessuna scadenza imminente.</p>
               ) : (
@@ -184,7 +184,7 @@ export default async function DashboardPage() {
                   <div key={deadline.id} className="flex items-center justify-between">
                     <div>
                       <p className="font-medium">{deadline.type}</p>
-                      <p className="text-xs text-zinc-500">
+                      <p className="text-xs text-muted-foreground">
                         {deadline.vehicle.plate} · {deadline.vehicle.make ?? ""} {deadline.vehicle.model ?? ""}
                       </p>
                     </div>

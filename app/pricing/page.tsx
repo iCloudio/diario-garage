@@ -56,11 +56,11 @@ export default function PricingPage() {
     <div className="min-h-screen bg-background text-foreground">
       <div className="mx-auto w-full max-w-5xl px-6 py-12">
         <div className="mb-10 text-center">
-          <p className="text-xs uppercase tracking-[0.3em] text-zinc-400">Piani</p>
+          <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Piani</p>
           <h1 className="mt-3 text-3xl font-semibold">
             Un piano chiaro per ogni garage.
           </h1>
-          <p className="mt-3 text-sm text-zinc-400">
+          <p className="mt-3 text-sm text-muted-foreground">
             Parti gratis. Passa a Family quando gestisci piu veicoli o guidatori.
           </p>
         </div>
@@ -74,9 +74,9 @@ export default function PricingPage() {
               </div>
               <div className="mt-4 flex items-end gap-2">
                 <span className="text-3xl font-semibold">{plan.price}</span>
-                <span className="text-sm text-zinc-400">{plan.period}</span>
+                <span className="text-sm text-muted-foreground">{plan.period}</span>
               </div>
-              <ul className="mt-4 space-y-2 text-sm text-zinc-300">
+              <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
                 {plan.features.map((feature) => (
                   <li key={feature} className="flex items-center gap-2">
                     <Check className="h-4 w-4" />

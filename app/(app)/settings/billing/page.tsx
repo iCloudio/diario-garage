@@ -7,9 +7,9 @@ export default function BillingPage() {
   return (
     <div className="space-y-6">
       <div>
-        <p className="text-xs uppercase tracking-[0.3em] text-zinc-400">Piano</p>
+        <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Piano</p>
         <h2 className="mt-2 text-2xl font-semibold">Piano attuale</h2>
-        <p className="mt-2 text-sm text-zinc-400">
+        <p className="mt-2 text-sm text-muted-foreground">
           Scegli il piano adatto al tuo garage.
         </p>
       </div>
@@ -17,12 +17,12 @@ export default function BillingPage() {
       <Card className="border-border bg-card p-6">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm text-zinc-400">Piano attuale</p>
+            <p className="text-sm text-muted-foreground">Piano attuale</p>
             <p className="mt-2 text-xl font-semibold">Free</p>
           </div>
           <Badge variant="secondary">MVP</Badge>
         </div>
-        <div className="mt-4 text-sm text-zinc-400">
+        <div className="mt-4 text-sm text-muted-foreground">
           1 veicolo · 1 guidatore · scadenze base
         </div>
         <div className="mt-6 flex flex-wrap gap-2">

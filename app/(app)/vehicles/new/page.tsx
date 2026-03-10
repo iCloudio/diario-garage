@@ -76,18 +76,18 @@ export default function NewVehiclePage() {
   return (
     <div className="space-y-6">
       <div>
-        <p className="text-xs uppercase tracking-[0.3em] text-zinc-400">
+        <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
           Veicoli
         </p>
         <h2 className="mt-2 text-2xl font-semibold">Nuovo veicolo</h2>
-        <p className="mt-2 text-sm text-zinc-400">
+        <p className="mt-2 text-sm text-muted-foreground">
           Inserisci i dati manualmente o usa la ricerca targa.
         </p>
       </div>
 
       <Card className="border-border bg-card p-6">
         <form className="space-y-6" onSubmit={onSubmit}>
-          <p className="text-xs text-zinc-500">
+          <p className="text-xs text-muted-foreground">
             In questa versione puoi inserire un solo veicolo.
           </p>
           <div className="grid gap-4 md:grid-cols-[1fr_auto]">

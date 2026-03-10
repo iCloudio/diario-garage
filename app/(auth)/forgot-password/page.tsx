@@ -37,7 +37,7 @@ export default function ForgotPasswordPage() {
   return (
     <Card className="border-border bg-card p-6 shadow-xl backdrop-blur">
       <h2 className="text-xl font-semibold text-foreground">Reset password</h2>
-      <p className="mt-2 text-sm text-zinc-400">
+      <p className="mt-2 text-sm text-muted-foreground">
         Inserisci la tua email. Per ora è una simulazione.
       </p>
       <form className="mt-6 space-y-4" onSubmit={onSubmit}>
@@ -57,7 +57,7 @@ export default function ForgotPasswordPage() {
           {sent ? "Richiesta inviata" : pending ? "Invio..." : "Invia"}
         </Button>
       </form>
-      <div className="mt-4 text-xs text-zinc-400">
+      <div className="mt-4 text-xs text-muted-foreground">
         <Link className="hover:text-foreground" href="/login">
           Torna al login
         </Link>

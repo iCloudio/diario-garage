@@ -78,18 +78,18 @@ export function VehicleDeadlinesForm({
 
   return (
     <Card className="border-border bg-card p-6">
-      <div className="flex items-center gap-2 text-sm text-zinc-300">
+      <div className="flex items-center gap-2 text-sm text-muted-foreground">
         <CalendarClock className="h-4 w-4" />
         <p className="font-medium text-foreground">Scadenze principali</p>
       </div>
-      <p className="mt-2 text-xs text-zinc-400">
+      <p className="mt-2 text-xs text-muted-foreground">
         Inserisci scadenza e prezzo (facoltativo). Puoi aggiornare quando vuoi.
       </p>
 
       <form className="mt-6 space-y-4" onSubmit={onSubmit}>
         {TYPES.map((item) => (
           <div key={item.type} className="grid gap-3 md:grid-cols-[1.2fr_1fr_1fr]">
-            <div className="flex items-center text-sm text-zinc-300">
+            <div className="flex items-center text-sm text-muted-foreground">
               <span className="font-medium text-foreground">{item.label}</span>
             </div>
             <div className="space-y-2">
@@ -103,7 +103,7 @@ export function VehicleDeadlinesForm({
             <div className="space-y-2">
               <Label>Prezzo (opzionale)</Label>
               <div className="relative">
-                <Euro className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-zinc-500" />
+                <Euro className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
                   type="number"
                   min="0"

@@ -40,7 +40,7 @@ export default function RegisterPage() {
   return (
     <Card className="border-border bg-card p-6 shadow-xl backdrop-blur">
       <h2 className="text-xl font-semibold text-foreground">Crea il tuo accesso</h2>
-      <p className="mt-2 text-sm text-zinc-400">
+      <p className="mt-2 text-sm text-muted-foreground">
         Il tuo garage sempre in regola, a partire da qui.
       </p>
       <form className="mt-6 space-y-4" onSubmit={onSubmit}>
@@ -80,7 +80,7 @@ export default function RegisterPage() {
           {pending ? "Creazione..." : "Crea account"}
         </Button>
       </form>
-      <div className="mt-4 text-xs text-zinc-400">
+      <div className="mt-4 text-xs text-muted-foreground">
         Hai già un account?{" "}
         <Link className="hover:text-foreground" href="/login">
           Accedi

@@ -39,7 +39,7 @@ export default function LoginPage() {
   return (
     <Card className="border-border bg-card p-6 shadow-xl backdrop-blur">
       <h2 className="text-xl font-semibold text-foreground">Bentornato</h2>
-      <p className="mt-2 text-sm text-zinc-400">
+      <p className="mt-2 text-sm text-muted-foreground">
         Il tuo garage sempre in regola, in pochi secondi.
       </p>
       <form className="mt-6 space-y-4" onSubmit={onSubmit}>
@@ -69,7 +69,7 @@ export default function LoginPage() {
           {pending ? "Accesso..." : "Entra"}
         </Button>
       </form>
-      <div className="mt-4 flex items-center justify-between text-xs text-zinc-400">
+      <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground">
         <Link className="hover:text-foreground" href="/forgot-password">
           Password dimenticata?
         </Link>

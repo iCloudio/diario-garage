@@ -1,39 +1,32 @@
 import Link from "next/link";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { CalendarClock, Wrench, Snowflake, Gauge, AlertTriangle, BarChart3, Ticket } from "lucide-react";
 import { Card } from "@/components/ui/card";
 
-const tabs = [
-  { value: "deadlines", label: "Scadenze", href: "/vehicles" },
-  { value: "maintenance", label: "Manutenzioni", href: "/maintenance" },
-  { value: "tires", label: "Gomme", href: "/tires" },
-  { value: "components", label: "Componenti", href: "/components" },
+const actions = [
+  { label: "Scadenze", href: "deadlines", icon: CalendarClock, description: "Bollo, assicurazione e revisione." },
+  { label: "Manutenzioni", href: "maintenance", icon: Wrench, description: "Interventi e costi." },
+  { label: "Gomme", href: "tires", icon: Snowflake, description: "Cambio stagionale e sostituzioni." },
+  { label: "Componenti", href: "components", icon: Gauge, description: "Regole per cinghia, freni, filtri." },
+  { label: "Incidenti", href: "incidents", icon: AlertTriangle, description: "Costi e copertura assicurativa." },
+  { label: "Multe", href: "fines", icon: Ticket, description: "Registro e stato pagamenti." },
+  { label: "Statistiche", href: "statistics", icon: BarChart3, description: "Costi annuali e KPI." },
+  { label: "Spie", href: "warning-lights", icon: AlertTriangle, description: "Manuale spie del cruscotto." },
 ];
 
-export default function VehicleDetailPage() {
+export default function VehicleOverviewPage({ params }: { params: { id: string } }) {
   return (
-    <div className="space-y-6">
-      <div>
-        <p className="text-xs uppercase tracking-[0.3em] text-zinc-400">Veicolo</p>
-        <h2 className="mt-2 text-2xl font-semibold">Dettaglio veicolo</h2>
-        <p className="mt-2 text-sm text-zinc-400">
-          Questa pagina e&apos; un&apos;anteprima della struttura multi-veicolo.
-        </p>
-      </div>
-
-      <Card className="border-border bg-card p-6">
-        <Tabs defaultValue="deadlines">
-          <TabsList>
-            {tabs.map((tab) => (
-              <TabsTrigger key={tab.value} value={tab.value} asChild>
-                <Link href={tab.href}>{tab.label}</Link>
-              </TabsTrigger>
-            ))}
-          </TabsList>
-          <TabsContent value="deadlines" className="mt-4 text-sm text-zinc-400">
-            In MVP la gestione scadenze vive nella pagina Veicolo.
-          </TabsContent>
-        </Tabs>
-      </Card>
+    <div className="grid gap-4 md:grid-cols-2">
+      {actions.map((action) => (
+        <Card key={action.label} className="border-border bg-card p-5">
+          <Link href={`/vehicles/${params.id}/${action.href}`} className="flex items-start gap-3">
+            <action.icon className="h-5 w-5 text-muted-foreground" />
+            <div>
+              <p className="text-sm font-medium text-foreground">{action.label}</p>
+              <p className="mt-1 text-xs text-muted-foreground">{action.description}</p>
+            </div>
+          </Link>
+        </Card>
+      ))}
     </div>
   );
 }

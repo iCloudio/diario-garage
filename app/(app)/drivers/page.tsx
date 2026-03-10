@@ -12,9 +12,9 @@ export default function DriversPage() {
     <div className="space-y-6">
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div>
-          <p className="text-xs uppercase tracking-[0.3em] text-zinc-400">Guidatori</p>
+          <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Guidatori</p>
           <h2 className="mt-2 text-2xl font-semibold">Patenti e contatti</h2>
-          <p className="mt-2 text-sm text-zinc-400">
+          <p className="mt-2 text-sm text-muted-foreground">
             Reminder patente per ogni guidatore.
           </p>
         </div>
@@ -22,7 +22,7 @@ export default function DriversPage() {
       </div>
 
       <Card className="border-border bg-card p-6">
-        <div className="space-y-3 text-sm text-zinc-300">
+        <div className="space-y-3 text-sm text-muted-foreground">
           {drivers.map((driver) => (
             <div key={driver.name} className="flex flex-col gap-2 border-b border-white/5 pb-3 last:border-b-0 last:pb-0 md:flex-row md:items-center md:justify-between">
               <div>
@@ -30,9 +30,9 @@ export default function DriversPage() {
                   <User className="h-4 w-4" />
                   {driver.name}
                 </p>
-                <p className="text-xs text-zinc-500">Patente: {driver.license}</p>
+                <p className="text-xs text-muted-foreground">Patente: {driver.license}</p>
               </div>
-              <div className="flex items-center gap-3 text-xs text-zinc-400">
+              <div className="flex items-center gap-3 text-xs text-muted-foreground">
                 <span className="flex items-center gap-1">
                   <Calendar className="h-3 w-3" />
                   Reminder attivo
@@ -45,7 +45,7 @@ export default function DriversPage() {
             </div>
           ))}
         </div>
-        <p className="mt-4 text-xs text-zinc-500">
+        <p className="mt-4 text-xs text-muted-foreground">
           Sezione in sviluppo: gestione guidatori in Fase 2.
         </p>
       </Card>
