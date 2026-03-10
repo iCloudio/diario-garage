@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CalendarClock, Car, CheckCircle2, Plus, Target } from "lucide-react";
+import { CalendarClock, Car, Gauge, Plus, Target } from "lucide-react";
 import { db } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { Card } from "@/components/ui/card";
@@ -57,6 +57,16 @@ export default async function DashboardPage() {
   const deadlinesHref = primaryVehicle
     ? `/vehicles/${primaryVehicle.id}/deadlines`
     : "/vehicles/new";
+  const monthSpent = 0;
+  const monthSpentLabel =
+    monthSpent > 0
+      ? new Intl.NumberFormat("it-IT", {
+          style: "currency",
+          currency: "EUR",
+          maximumFractionDigits: 0,
+        }).format(monthSpent)
+      : "Nessun dato";
+  const fuelTrend = [42, 55, 38, 64, 49, 72, 58, 63];
 
   return (
     <div className="space-y-6">
@@ -112,7 +122,7 @@ export default async function DashboardPage() {
         </Card>
       ) : (
         <div className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             <Card className="border-border bg-card p-5">
               <div className="flex items-center justify-between">
                 <p className="text-sm text-muted-foreground">Veicoli attivi</p>
@@ -125,24 +135,50 @@ export default async function DashboardPage() {
             </Card>
             <Card className="border-border bg-card p-5">
               <div className="flex items-center justify-between">
-                <p className="text-sm text-muted-foreground">Scadenze nei prossimi 30 giorni</p>
+                <p className="text-sm text-muted-foreground">Spese mese corrente</p>
+                <Target className="h-4 w-4 text-muted-foreground" />
+              </div>
+              <p className="mt-3 text-3xl font-semibold">{monthSpentLabel}</p>
+              <p className="mt-2 text-xs text-muted-foreground">
+                Aggiungi spese per avere un quadro completo.
+              </p>
+            </Card>
+
+            <Card className="border-border bg-card p-5">
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-muted-foreground">Mini consumo</p>
+                <Gauge className="h-4 w-4 text-muted-foreground" />
+              </div>
+              <div className="mt-4 flex h-12 items-end gap-1">
+                {fuelTrend.map((value, index) => (
+                  <div
+                    key={`${value}-${index}`}
+                    className="w-full rounded-sm bg-primary/20"
+                    style={{ height: `${value}%` }}
+                  />
+                ))}
+              </div>
+              <p className="mt-2 text-xs text-muted-foreground">
+                Consumo medio delle ultime settimane.
+              </p>
+            </Card>
+
+            <Card
+              className={`border-border p-5 ${
+                dueSoonCount > 0
+                  ? "border-amber-500/30 bg-amber-500/10"
+                  : "bg-card"
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-muted-foreground">Alert scadenze</p>
                 <CalendarClock className="h-4 w-4 text-muted-foreground" />
               </div>
               <p className="mt-3 text-3xl font-semibold">{dueSoonCount}</p>
               <p className="mt-2 text-xs text-muted-foreground">
-                Ti basta un colpo d'occhio per essere in regola.
-              </p>
-            </Card>
-            <Card className="border-border bg-card p-5">
-              <div className="flex items-center justify-between">
-                <p className="text-sm text-muted-foreground">Stato generale</p>
-                <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
-              </div>
-              <p className="mt-3 text-lg font-semibold">
-                {dueSoonCount === 0 ? "Tutto sotto controllo" : "Hai scadenze in arrivo"}
-              </p>
-              <p className="mt-2 text-xs text-muted-foreground">
-                Aggiorna le scadenze per tenere il garage in ordine.
+                {dueSoonCount > 0
+                  ? "Scadenze entro 30 giorni."
+                  : "Nessuna scadenza imminente."}
               </p>
             </Card>
           </div>
@@ -174,7 +210,7 @@ export default async function DashboardPage() {
 
           <Card className="border-border bg-card p-6">
             <div className="flex items-center justify-between">
-              <p className="text-sm text-muted-foreground">Prossime scadenze</p>
+              <p className="text-sm text-muted-foreground">Timeline eventi recenti</p>
               <Link
                 className="text-xs text-muted-foreground hover:text-foreground"
                 href={deadlinesHref}
@@ -182,21 +218,30 @@ export default async function DashboardPage() {
                 Vedi tutte →
               </Link>
             </div>
-            <div className="mt-4 space-y-3 text-sm text-muted-foreground">
+            <div className="mt-4 space-y-4">
               {upcoming.length === 0 ? (
-                <p>Nessuna scadenza imminente.</p>
+                <p className="text-sm text-muted-foreground">
+                  Nessun evento in programma.
+                </p>
               ) : (
                 upcoming.map((deadline) => (
-                  <div key={deadline.id} className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">{deadline.type}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {deadline.vehicle.plate} · {deadline.vehicle.make ?? ""} {deadline.vehicle.model ?? ""}
-                      </p>
+                  <div key={deadline.id} className="flex gap-4">
+                    <div className="flex flex-col items-center">
+                      <span className="h-2 w-2 rounded-full bg-primary/70" />
+                      <span className="mt-2 h-full w-px bg-border" />
                     </div>
-                    <Badge variant="outline">
-                      {deadline.dueDate.toLocaleDateString("it-IT")}
-                    </Badge>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-foreground">
+                        {deadline.type}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {deadline.vehicle.plate} · {deadline.vehicle.make ?? ""}{" "}
+                        {deadline.vehicle.model ?? ""}
+                      </p>
+                      <Badge variant="outline" className="mt-2">
+                        {deadline.dueDate.toLocaleDateString("it-IT")}
+                      </Badge>
+                    </div>
                   </div>
                 ))
               )}

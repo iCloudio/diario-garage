@@ -1,249 +1,222 @@
-import Link from "next/link";
-import { Plus, TrendingUp, Fuel, Wrench, CircleDollarSign, FileDown } from "lucide-react";
+"use client";
+
+import { useMemo, useState } from "react";
+import {
+  CartesianGrid,
+  Cell,
+  Line,
+  LineChart,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  XAxis,
+  YAxis,
+} from "recharts";
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { db } from "@/lib/db";
-import { requireUser } from "@/lib/auth";
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
-const CATEGORY_LABELS = {
-  RIFORNIMENTO: "Rifornimento",
-  MANUTENZIONE: "Manutenzione",
-  ASSICURAZIONE: "Assicurazione",
-  BOLLO: "Bollo",
-  MULTA: "Multa",
-  PARCHEGGIO: "Parcheggio",
-  LAVAGGIO: "Lavaggio",
-  PEDAGGI: "Pedaggi",
-  ALTRO: "Altro",
-} as const;
+const CATEGORIES = [
+  { key: "fuel", label: "Carburante", color: "hsl(var(--primary))" },
+  { key: "maintenance", label: "Manutenzione", color: "hsl(var(--accent))" },
+  { key: "insurance", label: "Assicurazione", color: "hsl(var(--ring))" },
+  { key: "tax", label: "Bollo", color: "hsl(var(--muted-foreground))" },
+] as const;
 
-const CATEGORY_ICONS = {
-  RIFORNIMENTO: Fuel,
-  MANUTENZIONE: Wrench,
-  ASSICURAZIONE: CircleDollarSign,
-  BOLLO: CircleDollarSign,
-  MULTA: CircleDollarSign,
-  PARCHEGGIO: CircleDollarSign,
-  LAVAGGIO: CircleDollarSign,
-  PEDAGGI: CircleDollarSign,
-  ALTRO: CircleDollarSign,
-} as const;
+const EXPENSES = [
+  { year: 2025, month: "Gen", fuel: 110, maintenance: 80, insurance: 0, tax: 0 },
+  { year: 2025, month: "Feb", fuel: 95, maintenance: 0, insurance: 0, tax: 0 },
+  { year: 2025, month: "Mar", fuel: 130, maintenance: 0, insurance: 120, tax: 0 },
+  { year: 2025, month: "Apr", fuel: 105, maintenance: 50, insurance: 0, tax: 0 },
+  { year: 2025, month: "Mag", fuel: 140, maintenance: 0, insurance: 0, tax: 0 },
+  { year: 2025, month: "Giu", fuel: 125, maintenance: 0, insurance: 0, tax: 90 },
+  { year: 2025, month: "Lug", fuel: 150, maintenance: 120, insurance: 0, tax: 0 },
+  { year: 2025, month: "Ago", fuel: 135, maintenance: 0, insurance: 0, tax: 0 },
+  { year: 2025, month: "Set", fuel: 160, maintenance: 0, insurance: 0, tax: 0 },
+  { year: 2025, month: "Ott", fuel: 120, maintenance: 220, insurance: 0, tax: 0 },
+  { year: 2025, month: "Nov", fuel: 115, maintenance: 0, insurance: 0, tax: 0 },
+  { year: 2025, month: "Dic", fuel: 140, maintenance: 0, insurance: 140, tax: 0 },
+  { year: 2026, month: "Gen", fuel: 130, maintenance: 0, insurance: 0, tax: 0 },
+  { year: 2026, month: "Feb", fuel: 120, maintenance: 90, insurance: 0, tax: 0 },
+  { year: 2026, month: "Mar", fuel: 150, maintenance: 0, insurance: 0, tax: 0 },
+  { year: 2026, month: "Apr", fuel: 135, maintenance: 0, insurance: 110, tax: 0 },
+];
 
-export default async function VehicleExpensesPage({ params }: { params: Promise<{ id: string }> }) {
-  const user = await requireUser();
-  const { id } = await params;
-  const vehicle = await db.vehicle.findFirst({
-    where: { id, userId: user.id, deletedAt: null },
-    include: {
-      expenses: {
-        where: { deletedAt: null },
-        orderBy: { date: "desc" },
-      },
-      refuels: {
-        where: { deletedAt: null },
-        orderBy: { date: "desc" },
-      },
-    },
-  });
+const CATEGORY_OPTIONS = [
+  { value: "total", label: "Totale" },
+  { value: "fuel", label: "Carburante" },
+  { value: "maintenance", label: "Manutenzione" },
+  { value: "insurance", label: "Assicurazione" },
+  { value: "tax", label: "Bollo" },
+];
 
-  if (!vehicle) return null;
+const currencyFormatter = new Intl.NumberFormat("it-IT", {
+  style: "currency",
+  currency: "EUR",
+  maximumFractionDigits: 0,
+});
 
-  // Combina spese e rifornimenti in un unico array ordinato
-  const allExpenses = [
-    ...vehicle.expenses,
-    ...vehicle.refuels.map((refuel) => ({
-      id: refuel.id,
-      date: refuel.date,
-      category: "RIFORNIMENTO" as const,
-      amountEur: refuel.amountEur,
-      odometerKm: refuel.odometerKm,
-      description: refuel.liters ? `${refuel.liters.toFixed(1)} litri` : "Ricarica",
-      notes: refuel.notes,
-    })),
-  ].sort((a, b) => b.date.getTime() - a.date.getTime());
+function sumRow(row: (typeof EXPENSES)[number]) {
+  return CATEGORIES.reduce((acc, category) => acc + row[category.key], 0);
+}
 
-  // Calcola totali anno corrente
-  const currentYear = new Date().getFullYear();
-  const yearExpenses = allExpenses.filter((exp) => exp.date.getFullYear() === currentYear);
-  const totalYear = yearExpenses.reduce((sum, exp) => sum + exp.amountEur, 0);
+export default function VehicleExpensesPage() {
+  const years = Array.from(new Set(EXPENSES.map((item) => item.year)));
+  const [year, setYear] = useState(`${years[0] ?? new Date().getFullYear()}`);
+  const [category, setCategory] = useState("total");
 
-  // Calcola totali per categoria
-  const categoryTotals = yearExpenses.reduce((acc, exp) => {
-    const cat = exp.category;
-    acc[cat] = (acc[cat] || 0) + exp.amountEur;
-    return acc;
-  }, {} as Record<string, number>);
+  const filtered = useMemo(
+    () => EXPENSES.filter((item) => `${item.year}` === year),
+    [year]
+  );
 
-  // Calcola costo/km se disponibile
-  let costPerKm: number | null = null;
-  if (vehicle.odometerKm && vehicle.odometerKm > 0) {
-    costPerKm = totalYear / vehicle.odometerKm;
-  }
+  const monthlyData = useMemo(() => {
+    return filtered.map((item) => {
+      const total = category === "total" ? sumRow(item) : item[category as keyof typeof item];
+      return {
+        month: item.month,
+        total,
+        fuel: item.fuel,
+      };
+    });
+  }, [filtered, category]);
+
+  const pieData = useMemo(() => {
+    return CATEGORIES.map((categoryItem) => ({
+      name: categoryItem.label,
+      value: filtered.reduce((acc, item) => acc + item[categoryItem.key], 0),
+      color: categoryItem.color,
+    }));
+  }, [filtered]);
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
-            Spese
+            Grafici spese
           </p>
-          <h2 className="mt-2 text-2xl font-semibold">Storico completo</h2>
+          <h2 className="mt-2 text-2xl font-semibold">Andamento spese</h2>
           <p className="mt-2 text-sm text-muted-foreground">
-            Tutte le spese del veicolo in un unico posto.
+            Filtra anno e categoria per vedere l&apos;impatto sul budget.
           </p>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <Button asChild>
-            <Link href={`/vehicles/${id}/refuels/new`}>
-              <Fuel className="mr-2 h-4 w-4" />
-              Rifornimento
-            </Link>
-          </Button>
-          <Button asChild variant="secondary">
-            <Link href={`/vehicles/${id}/expenses/new`}>
-              <Plus className="mr-2 h-4 w-4" />
-              Spesa
-            </Link>
-          </Button>
-          <Button asChild variant="outline">
-            <a href={`/api/vehicles/${id}/export-pdf`} download>
-              <FileDown className="mr-2 h-4 w-4" />
-              Esporta PDF
-            </a>
-          </Button>
+        <div className="flex flex-wrap gap-3">
+          <div className="space-y-1">
+            <p className="text-xs text-muted-foreground">Anno</p>
+            <Select value={year} onValueChange={setYear}>
+              <SelectTrigger className="w-32">
+                <SelectValue placeholder="Anno" />
+              </SelectTrigger>
+              <SelectContent>
+                {years.map((value) => (
+                  <SelectItem key={value} value={`${value}`}>
+                    {value}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-1">
+            <p className="text-xs text-muted-foreground">Categoria</p>
+            <Select value={category} onValueChange={setCategory}>
+              <SelectTrigger className="w-44">
+                <SelectValue placeholder="Categoria" />
+              </SelectTrigger>
+              <SelectContent>
+                {CATEGORY_OPTIONS.map((item) => (
+                  <SelectItem key={item.value} value={item.value}>
+                    {item.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
       </div>
 
-      {/* KPI Cards */}
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card className="border-border bg-card p-5">
-          <div className="flex items-center justify-between">
-            <p className="text-sm text-muted-foreground">Totale {currentYear}</p>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+      <div className="grid gap-4 xl:grid-cols-[2fr_1fr]">
+        <Card className="border-border bg-card p-6">
+          <div className="mb-4">
+            <p className="text-sm font-medium">Spese mensili</p>
+            <p className="text-xs text-muted-foreground">
+              Linee per totale e trend carburante.
+            </p>
           </div>
-          <p className="mt-3 text-2xl font-semibold">€{totalYear.toFixed(2)}</p>
-          <p className="mt-2 text-xs text-muted-foreground">
-            Media mensile: €{(totalYear / new Date().getMonth() || 1).toFixed(2)}
-          </p>
+          <ChartContainer>
+            <ResponsiveContainer>
+              <LineChart data={monthlyData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <XAxis
+                  dataKey="month"
+                  tickLine={false}
+                  axisLine={false}
+                  tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
+                />
+                <YAxis
+                  tickLine={false}
+                  axisLine={false}
+                  tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
+                />
+                <ChartTooltip content={<ChartTooltipContent formatter={currencyFormatter.format} />} />
+                <Line
+                  type="monotone"
+                  dataKey="total"
+                  name="Totale"
+                  stroke="hsl(var(--primary))"
+                  strokeWidth={2}
+                  dot={false}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="fuel"
+                  name="Carburante"
+                  stroke="hsl(var(--primary))"
+                  strokeWidth={2}
+                  dot={false}
+                  strokeDasharray="6 6"
+                  strokeOpacity={0.45}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </ChartContainer>
         </Card>
 
-        <Card className="border-border bg-card p-5">
-          <div className="flex items-center justify-between">
-            <p className="text-sm text-muted-foreground">Voci registrate</p>
-            <CircleDollarSign className="h-4 w-4 text-muted-foreground" />
+        <Card className="border-border bg-card p-6">
+          <div className="mb-4">
+            <p className="text-sm font-medium">Breakdown categorie</p>
+            <p className="text-xs text-muted-foreground">Distribuzione annuale.</p>
           </div>
-          <p className="mt-3 text-2xl font-semibold">{allExpenses.length}</p>
-          <p className="mt-2 text-xs text-muted-foreground">
-            Quest&apos;anno: {yearExpenses.length}
-          </p>
-        </Card>
-
-        <Card className="border-border bg-card p-5">
-          <div className="flex items-center justify-between">
-            <p className="text-sm text-muted-foreground">Costo per km</p>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+          <ChartContainer className="h-64">
+            <ResponsiveContainer>
+              <PieChart>
+                <ChartTooltip content={<ChartTooltipContent formatter={currencyFormatter.format} />} />
+                <Pie data={pieData} dataKey="value" nameKey="name" innerRadius={55} outerRadius={85}>
+                  {pieData.map((entry) => (
+                    <Cell key={entry.name} fill={entry.color} />
+                  ))}
+                </Pie>
+              </PieChart>
+            </ResponsiveContainer>
+          </ChartContainer>
+          <div className="mt-4 space-y-2 text-xs text-muted-foreground">
+            {pieData.map((entry) => (
+              <div key={entry.name} className="flex items-center justify-between">
+                <span>{entry.name}</span>
+                <span className="font-medium text-foreground">
+                  {currencyFormatter.format(entry.value)}
+                </span>
+              </div>
+            ))}
           </div>
-          {costPerKm !== null ? (
-            <>
-              <p className="mt-3 text-2xl font-semibold">€{costPerKm.toFixed(2)}</p>
-              <p className="mt-2 text-xs text-muted-foreground">
-                Basato su {vehicle.odometerKm?.toLocaleString("it-IT")} km
-              </p>
-            </>
-          ) : (
-            <p className="mt-3 text-sm text-muted-foreground">Km non specificati</p>
-          )}
         </Card>
       </div>
-
-      {/* Breakdown per categoria */}
-      <Card className="border-border bg-card p-6">
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <CircleDollarSign className="h-4 w-4" />
-          <span className="font-medium text-foreground">Spese per categoria ({currentYear})</span>
-        </div>
-        <div className="mt-4 grid gap-3 md:grid-cols-2">
-          {Object.entries(categoryTotals)
-            .sort(([, a], [, b]) => b - a)
-            .map(([category, total]) => {
-              const percentage = ((total / totalYear) * 100).toFixed(0);
-              const Icon = CATEGORY_ICONS[category as keyof typeof CATEGORY_ICONS];
-              return (
-                <div
-                  key={category}
-                  className="flex items-center justify-between rounded-lg border border-border bg-card px-4 py-3 text-sm"
-                >
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <Icon className="h-4 w-4" />
-                    <span>{CATEGORY_LABELS[category as keyof typeof CATEGORY_LABELS]}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium text-foreground">€{total.toFixed(2)}</span>
-                    <Badge variant="outline">{percentage}%</Badge>
-                  </div>
-                </div>
-              );
-            })}
-        </div>
-      </Card>
-
-      {/* Lista spese */}
-      <Card className="border-border bg-card p-6">
-        <div className="flex items-center justify-between">
-          <p className="text-sm font-medium">Tutte le spese</p>
-          <p className="text-xs text-muted-foreground">
-            {allExpenses.length} voci
-          </p>
-        </div>
-        <div className="mt-4 space-y-3">
-          {allExpenses.length === 0 ? (
-            <p className="text-sm text-muted-foreground">Nessuna spesa registrata.</p>
-          ) : (
-            allExpenses.slice(0, 20).map((expense) => {
-              const Icon = CATEGORY_ICONS[expense.category as keyof typeof CATEGORY_ICONS];
-              return (
-                <div
-                  key={expense.id}
-                  className="flex flex-col gap-2 border-b border-border pb-3 last:border-b-0 last:pb-0 md:flex-row md:items-center md:justify-between"
-                >
-                  <div className="flex items-start gap-3">
-                    <Icon className="mt-0.5 h-4 w-4 text-muted-foreground" />
-                    <div>
-                      <p className="text-sm font-medium">
-                        {CATEGORY_LABELS[expense.category as keyof typeof CATEGORY_LABELS]}
-                      </p>
-                      {expense.description && (
-                        <p className="text-xs text-muted-foreground">{expense.description}</p>
-                      )}
-                      <p className="text-xs text-muted-foreground">
-                        {expense.date.toLocaleDateString("it-IT")}
-                        {expense.odometerKm && ` · ${expense.odometerKm.toLocaleString("it-IT")} km`}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-medium">€{expense.amountEur.toFixed(2)}</p>
-                  </div>
-                </div>
-              );
-            })
-          )}
-        </div>
-        {allExpenses.length > 20 && (
-          <p className="mt-4 text-xs text-muted-foreground">
-            Mostrando le prime 20 spese. Totale: {allExpenses.length}
-          </p>
-        )}
-      </Card>
-
-      {/* Nota sviluppo futuro */}
-      <Card className="border-border bg-card p-4">
-        <p className="text-xs text-muted-foreground">
-          📊 Grafico interattivo delle spese in arrivo nella prossima versione
-        </p>
-      </Card>
     </div>
   );
 }
