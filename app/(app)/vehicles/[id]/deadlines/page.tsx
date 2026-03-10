@@ -7,11 +7,12 @@ import { VehicleDeadlinesForm } from "@/components/vehicle-deadlines-form";
 export default async function VehicleDeadlinesPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
   const user = await requireUser();
+  const { id } = await params;
   const vehicle = await db.vehicle.findFirst({
-    where: { id: params.id, userId: user.id, deletedAt: null },
+    where: { id, userId: user.id, deletedAt: null },
     include: {
       deadlines: { where: { deletedAt: null }, orderBy: { dueDate: "asc" } },
     },

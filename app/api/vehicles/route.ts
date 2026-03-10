@@ -6,6 +6,9 @@ const schema = z.object({
   plate: z.string().min(5).max(10),
   make: z.string().max(60).optional().or(z.literal("")),
   model: z.string().max(60).optional().or(z.literal("")),
+  odometerKm: z.coerce.number().int().nonnegative().optional(),
+  type: z.enum(["AUTO", "MOTO", "CAMPER"]).optional(),
+  fuelType: z.enum(["BENZINA", "DIESEL", "GPL", "METANO", "ELETTRICO", "IBRIDO_BENZINA", "IBRIDO_DIESEL"]).nullable().optional(),
 });
 
 export async function GET(request: NextRequest) {
@@ -65,13 +68,16 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const { plate, make, model } = parsed.data;
+  const { plate, make, model, odometerKm, type, fuelType } = parsed.data;
   const created = await db.vehicle.create({
     data: {
       userId: session.userId,
       plate: plate.replace(/\s+/g, "").toUpperCase(),
       make: make?.trim() || null,
       model: model?.trim() || null,
+      odometerKm: odometerKm ?? null,
+      type: type ?? "AUTO",
+      fuelType: fuelType ?? null,
     },
   });
 

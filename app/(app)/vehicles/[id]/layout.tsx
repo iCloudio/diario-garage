@@ -1,26 +1,35 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Car } from "lucide-react";
+import { Car, Pencil, FileDown } from "lucide-react";
 import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { VehicleSubnav } from "@/components/vehicle-subnav";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { QuickAddFab } from "@/components/quick-add-fab";
 
 export default async function VehicleLayout({
   children,
   params,
 }: {
   children: React.ReactNode;
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
   const user = await requireUser();
+  const { id } = await params;
   const vehicle = await db.vehicle.findFirst({
-    where: { id: params.id, userId: user.id, deletedAt: null },
+    where: { id, userId: user.id, deletedAt: null },
   });
 
   if (!vehicle) {
     notFound();
   }
+
+  const formattedKm = vehicle.odometerKm
+    ? new Intl.NumberFormat("it-IT").format(vehicle.odometerKm)
+    : null;
+  const vehicleTypeLabel =
+    vehicle.type === "MOTO" ? "Moto" : vehicle.type === "CAMPER" ? "Camper" : "Auto";
 
   return (
     <div className="space-y-6">
@@ -34,11 +43,36 @@ export default async function VehicleLayout({
             <p className="mt-2 text-sm text-muted-foreground">
               {vehicle.make ?? "Marca"} {vehicle.model ?? ""}
             </p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              {vehicleTypeLabel}
+            </p>
+            {formattedKm ? (
+              <p className="mt-1 text-xs text-muted-foreground">
+                {formattedKm} km
+              </p>
+            ) : null}
           </div>
-          <Link className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground" href="/vehicles">
-            <Car className="h-4 w-4" />
-            Torna al veicolo
-          </Link>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button asChild variant="secondary" size="sm">
+              <Link href={`/vehicles/${vehicle.id}/edit`}>
+                <Pencil className="mr-2 h-4 w-4" />
+                Modifica dati
+              </Link>
+            </Button>
+            <Button asChild variant="outline" size="sm">
+              <a href={`/api/vehicles/${vehicle.id}/export-pdf`} download>
+                <FileDown className="mr-2 h-4 w-4" />
+                Esporta PDF
+              </a>
+            </Button>
+            <Link
+              className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground"
+              href="/vehicles"
+            >
+              <Car className="h-4 w-4" />
+              Torna ai veicoli
+            </Link>
+          </div>
         </div>
         <div className="mt-4">
           <VehicleSubnav vehicleId={vehicle.id} />
@@ -46,6 +80,8 @@ export default async function VehicleLayout({
       </Card>
 
       {children}
+
+      <QuickAddFab vehicleId={vehicle.id} />
     </div>
   );
 }

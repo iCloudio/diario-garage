@@ -12,6 +12,40 @@ enum DeadlineType {
   ASSICURAZIONE
 }
 
+enum VehicleType {
+  AUTO
+  MOTO
+  CAMPER
+}
+
+enum FuelType {
+  BENZINA
+  DIESEL
+  GPL
+  METANO
+  ELETTRICO
+  IBRIDO_BENZINA
+  IBRIDO_DIESEL
+}
+
+enum VehicleStatus {
+  ATTIVO
+  VENDUTO
+  ROTTAMATO
+}
+
+enum ExpenseCategory {
+  RIFORNIMENTO
+  MANUTENZIONE
+  ASSICURAZIONE
+  BOLLO
+  MULTA
+  PARCHEGGIO
+  LAVAGGIO
+  PEDAGGI
+  ALTRO
+}
+
 model User {
   id           String     @id @default(cuid())
   email        String     @unique
@@ -36,20 +70,30 @@ model Session {
 }
 
 model Vehicle {
-  id        String     @id @default(cuid())
-  userId    String
-  plate     String
-  make      String?
-  model     String?
-  year      Int?
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-  deletedAt DateTime?
-  user      User       @relation(fields: [userId], references: [id])
-  deadlines Deadline[]
+  id         String         @id @default(cuid())
+  userId     String
+  plate      String
+  make       String?
+  model      String?
+  odometerKm Int?
+  type       VehicleType    @default(AUTO)
+  fuelType   FuelType?
+  year       Int?
+  status     VehicleStatus  @default(ATTIVO)
+  soldDate   DateTime?
+  soldPrice  Float?
+  soldNotes  String?
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+  deletedAt  DateTime?
+  user       User           @relation(fields: [userId], references: [id])
+  deadlines  Deadline[]
+  refuels    Refuel[]
+  expenses   Expense[]
 
   @@index([userId])
   @@index([plate])
+  @@index([status])
 }
 
 model Deadline {
@@ -68,4 +112,42 @@ model Deadline {
   @@index([type])
   @@index([dueDate])
   @@unique([vehicleId, type])
+}
+
+model Refuel {
+  id         String    @id @default(cuid())
+  vehicleId  String
+  date       DateTime
+  liters     Float?    // null per veicoli elettrici
+  amountEur  Float
+  odometerKm Int
+  fuelType   FuelType
+  pricePerLiter Float? // calcolato automaticamente
+  notes      String?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  deletedAt  DateTime?
+  vehicle    Vehicle   @relation(fields: [vehicleId], references: [id])
+
+  @@index([vehicleId])
+  @@index([date])
+}
+
+model Expense {
+  id          String           @id @default(cuid())
+  vehicleId   String
+  date        DateTime
+  category    ExpenseCategory
+  amountEur   Float
+  odometerKm  Int?
+  description String?
+  notes       String?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  deletedAt   DateTime?
+  vehicle     Vehicle          @relation(fields: [vehicleId], references: [id])
+
+  @@index([vehicleId])
+  @@index([date])
+  @@index([category])
 }

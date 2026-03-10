@@ -8,6 +8,13 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function NewVehiclePage() {
   const router = useRouter();
@@ -17,6 +24,9 @@ export default function NewVehiclePage() {
   const [plate, setPlate] = useState("");
   const [make, setMake] = useState("");
   const [model, setModel] = useState("");
+  const [odometerKm, setOdometerKm] = useState("");
+  const [type, setType] = useState("AUTO");
+  const [fuelType, setFuelType] = useState("");
   async function handleLookup() {
     if (!plate.trim()) {
       toast.error("Inserisci una targa.");
@@ -51,6 +61,11 @@ export default function NewVehiclePage() {
     event.preventDefault();
 
     startTransition(async () => {
+      const parsedKm = odometerKm.trim()
+        ? Number.parseInt(odometerKm, 10)
+        : undefined;
+      const safeKm = Number.isNaN(parsedKm) ? undefined : parsedKm;
+
       const response = await fetch("/api/vehicles", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -58,6 +73,9 @@ export default function NewVehiclePage() {
           plate,
           make,
           model,
+          odometerKm: safeKm,
+          type,
+          fuelType: fuelType || null,
         }),
       });
 
@@ -127,6 +145,48 @@ export default function NewVehiclePage() {
                 onChange={(event) => setModel(event.target.value)}
                 placeholder="Panda"
               />
+            </div>
+            <div className="space-y-2">
+              <Label>Tipologia</Label>
+              <Select value={type} onValueChange={(val) => setType(val as typeof type)}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Seleziona tipologia" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="AUTO">Auto</SelectItem>
+                  <SelectItem value="MOTO">Moto</SelectItem>
+                  <SelectItem value="CAMPER">Camper</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="odometerKm">Km attuali</Label>
+              <Input
+                id="odometerKm"
+                value={odometerKm}
+                onChange={(event) => setOdometerKm(event.target.value)}
+                placeholder="Es. 82000"
+                inputMode="numeric"
+                type="number"
+                min={0}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Alimentazione</Label>
+              <Select value={fuelType || undefined} onValueChange={setFuelType}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Seleziona alimentazione" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="BENZINA">⛽ Benzina</SelectItem>
+                  <SelectItem value="DIESEL">⛽ Diesel</SelectItem>
+                  <SelectItem value="GPL">🔥 GPL</SelectItem>
+                  <SelectItem value="METANO">💨 Metano</SelectItem>
+                  <SelectItem value="ELETTRICO">🔌 Elettrico</SelectItem>
+                  <SelectItem value="IBRIDO_BENZINA">🔋 Ibrido Benzina</SelectItem>
+                  <SelectItem value="IBRIDO_DIESEL">🔋 Ibrido Diesel</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
 

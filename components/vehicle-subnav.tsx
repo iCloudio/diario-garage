@@ -7,13 +7,7 @@ import { cn } from "@/lib/utils";
 const tabs = [
   { slug: "", label: "Panoramica" },
   { slug: "deadlines", label: "Scadenze" },
-  { slug: "maintenance", label: "Manutenzioni" },
-  { slug: "tires", label: "Gomme" },
-  { slug: "components", label: "Componenti" },
-  { slug: "incidents", label: "Incidenti" },
-  { slug: "fines", label: "Multe" },
-  { slug: "statistics", label: "Statistiche" },
-  { slug: "warning-lights", label: "Spie" },
+  { slug: "expenses", label: "Spese" },
 ];
 
 export function VehicleSubnav({ vehicleId }: { vehicleId: string }) {

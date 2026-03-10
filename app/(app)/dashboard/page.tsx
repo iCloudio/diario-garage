@@ -54,6 +54,9 @@ export default async function DashboardPage() {
         orderBy: { dueDate: "asc" },
       })
     : null;
+  const deadlinesHref = primaryVehicle
+    ? `/vehicles/${primaryVehicle.id}/deadlines`
+    : "/vehicles/new";
 
   return (
     <div className="space-y-6">
@@ -83,7 +86,7 @@ export default async function DashboardPage() {
             </Button>
           )}
           <Button asChild variant="secondary">
-            <Link href="/deadlines">Vai alle scadenze</Link>
+            <Link href={deadlinesHref}>Vai alle scadenze</Link>
           </Button>
         </div>
       </div>
@@ -172,7 +175,10 @@ export default async function DashboardPage() {
           <Card className="border-border bg-card p-6">
             <div className="flex items-center justify-between">
               <p className="text-sm text-muted-foreground">Prossime scadenze</p>
-              <Link className="text-xs text-muted-foreground hover:text-foreground" href="/deadlines">
+              <Link
+                className="text-xs text-muted-foreground hover:text-foreground"
+                href={deadlinesHref}
+              >
                 Vedi tutte →
               </Link>
             </div>

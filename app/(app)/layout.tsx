@@ -1,32 +1,17 @@
 import Link from "next/link";
 import {
-  AlertTriangle,
-  BarChart3,
-  CalendarClock,
   Car,
-  Gauge,
   Home,
   Settings,
-  Snowflake,
-  Ticket,
   Users,
-  Wrench,
 } from "lucide-react";
 import { requireUser } from "@/lib/auth";
 import { LogoutButton } from "@/components/logout-button";
 
 const navItems = [
   { href: "/dashboard", label: "Home", icon: Home },
-  { href: "/vehicles", label: "Veicolo", icon: Car },
-  { href: "/deadlines", label: "Scadenze", icon: CalendarClock },
-  { href: "/maintenance", label: "Manutenzioni", icon: Wrench },
-  { href: "/tires", label: "Gomme", icon: Snowflake },
-  { href: "/components", label: "Componenti", icon: Gauge },
-  { href: "/warning-lights", label: "Spie", icon: AlertTriangle },
+  { href: "/vehicles", label: "Veicoli", icon: Car },
   { href: "/drivers", label: "Guidatori", icon: Users },
-  { href: "/incidents", label: "Incidenti", icon: AlertTriangle },
-  { href: "/fines", label: "Multe", icon: Ticket },
-  { href: "/statistics", label: "Statistiche", icon: BarChart3 },
   { href: "/settings", label: "Impostazioni", icon: Settings },
 ];
 
