@@ -30,8 +30,9 @@ export async function createSession(userId: string) {
   return { token, expiresAt, session };
 }
 
-export function setSessionCookie(token: string, expiresAt: Date) {
-  cookies().set(SESSION_COOKIE, token, {
+export async function setSessionCookie(token: string, expiresAt: Date) {
+  const cookieStore = await cookies();
+  cookieStore.set(SESSION_COOKIE, token, {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
@@ -40,8 +41,9 @@ export function setSessionCookie(token: string, expiresAt: Date) {
   });
 }
 
-export function clearSessionCookie() {
-  cookies().set(SESSION_COOKIE, "", {
+export async function clearSessionCookie() {
+  const cookieStore = await cookies();
+  cookieStore.set(SESSION_COOKIE, "", {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
@@ -51,7 +53,8 @@ export function clearSessionCookie() {
 }
 
 export async function getSession(): Promise<Session | null> {
-  const token = cookies().get(SESSION_COOKIE)?.value;
+  const cookieStore = await cookies();
+  const token = cookieStore.get(SESSION_COOKIE)?.value;
   if (!token) return null;
 
   const session = await db.session.findUnique({
