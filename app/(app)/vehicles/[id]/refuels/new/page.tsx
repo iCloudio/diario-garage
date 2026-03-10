@@ -26,7 +26,11 @@ export default async function NewRefuelPage({ params }: { params: Promise<{ id: 
         </p>
       </div>
 
-      <RefuelForm vehicleId={vehicle.id} currentOdometer={vehicle.odometerKm ?? 0} />
+      <RefuelForm
+        vehicleId={vehicle.id}
+        currentOdometer={vehicle.odometerKm ?? 0}
+        vehicleFuelType={vehicle.fuelType}
+      />
     </div>
   );
 }

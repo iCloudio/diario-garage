@@ -136,120 +136,100 @@ export default async function VehicleOverviewPage({ params }: { params: Promise<
         </div>
       </Card>
 
-      {/* Quick Stats */}
+      {/* Quick Stats - Card cliccabili */}
       <div className="grid gap-4 md:grid-cols-3">
-        <Card className="border-border bg-card p-5">
-          <div className="flex items-center justify-between">
-            <p className="text-sm text-muted-foreground">Prossima scadenza</p>
-            <CalendarClock className="h-4 w-4 text-muted-foreground" />
-          </div>
-          {nextDeadline ? (
-            <>
-              <p className="mt-3 text-xl font-semibold">{nextDeadline.type}</p>
-              <p className="mt-1 text-xs text-muted-foreground">
-                {nextDeadline.dueDate.toLocaleDateString("it-IT")}
-              </p>
-            </>
-          ) : (
-            <p className="mt-3 text-sm text-muted-foreground">Nessuna scadenza</p>
-          )}
-        </Card>
+        <Link href={`/vehicles/${id}/deadlines`}>
+          <Card className="border-border bg-card p-5 transition hover:border-primary/50 hover:shadow-lg">
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-muted-foreground">Prossima scadenza</p>
+              <CalendarClock className="h-4 w-4 text-muted-foreground" />
+            </div>
+            {nextDeadline ? (
+              <>
+                <p className="mt-3 text-xl font-semibold">{nextDeadline.type}</p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {nextDeadline.dueDate.toLocaleDateString("it-IT")}
+                </p>
+              </>
+            ) : (
+              <p className="mt-3 text-sm text-muted-foreground">Nessuna scadenza</p>
+            )}
+          </Card>
+        </Link>
 
-        <Card className="border-border bg-card p-5">
-          <div className="flex items-center justify-between">
-            <p className="text-sm text-muted-foreground">Spese {currentYear}</p>
-            <CircleDollarSign className="h-4 w-4 text-muted-foreground" />
-          </div>
-          <p className="mt-3 text-xl font-semibold">
-            €{totalYearExpenses.toFixed(2)}
-          </p>
-          <p className="mt-1 text-xs text-muted-foreground">
-            {yearExpenses.length} voci registrate
-          </p>
-        </Card>
+        <Link href={`/vehicles/${id}/expenses`}>
+          <Card className="border-border bg-card p-5 transition hover:border-primary/50 hover:shadow-lg">
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-muted-foreground">Spese {currentYear}</p>
+              <CircleDollarSign className="h-4 w-4 text-muted-foreground" />
+            </div>
+            <p className="mt-3 text-xl font-semibold">
+              €{totalYearExpenses.toFixed(2)}
+            </p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              {yearExpenses.length} voci registrate
+            </p>
+          </Card>
+        </Link>
 
-        <Card className="border-border bg-card p-5">
-          <div className="flex items-center justify-between">
-            <p className="text-sm text-muted-foreground">Consumo medio</p>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </div>
-          {avgConsumption !== null ? (
-            <>
-              <p className="mt-3 text-xl font-semibold">
-                {avgConsumption.toFixed(1)} l/100km
-              </p>
-              <p className="mt-1 text-xs text-muted-foreground">
-                Basato su {recentRefuels.length} rifornimenti
-              </p>
-            </>
-          ) : (
-            <p className="mt-3 text-sm text-muted-foreground">Dati insufficienti</p>
-          )}
-        </Card>
+        <Link href={`/vehicles/${id}/expenses`}>
+          <Card className="border-border bg-card p-5 transition hover:border-primary/50 hover:shadow-lg">
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-muted-foreground">Consumo medio</p>
+              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            </div>
+            {avgConsumption !== null ? (
+              <>
+                <p className="mt-3 text-xl font-semibold">
+                  {avgConsumption.toFixed(1)} l/100km
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Basato su {recentRefuels.length} rifornimenti
+                </p>
+              </>
+            ) : (
+              <p className="mt-3 text-sm text-muted-foreground">Dati insufficienti</p>
+            )}
+          </Card>
+        </Link>
       </div>
 
       {/* Ultimo rifornimento */}
       {lastRefuel && (
-        <Card className="border-border bg-card p-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Fuel className="h-4 w-4 text-muted-foreground" />
-              <p className="text-sm font-medium">Ultimo rifornimento</p>
+        <Link href={`/vehicles/${id}/expenses`}>
+          <Card className="border-border bg-card p-6 transition hover:border-primary/50 hover:shadow-lg">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Fuel className="h-4 w-4 text-muted-foreground" />
+                <p className="text-sm font-medium">Ultimo rifornimento</p>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {lastRefuel.date.toLocaleDateString("it-IT")}
+              </p>
             </div>
-            <p className="text-xs text-muted-foreground">
-              {lastRefuel.date.toLocaleDateString("it-IT")}
-            </p>
-          </div>
-          <div className="mt-3 grid gap-3 text-sm md:grid-cols-3">
-            <div>
-              <p className="text-muted-foreground">Importo</p>
-              <p className="mt-1 font-medium">€{lastRefuel.amountEur.toFixed(2)}</p>
+            <div className="mt-3 grid gap-3 text-sm md:grid-cols-3">
+              <div>
+                <p className="text-muted-foreground">Importo</p>
+                <p className="mt-1 font-medium">€{lastRefuel.amountEur.toFixed(2)}</p>
+              </div>
+              {lastRefuel.liters && (
+                <>
+                  <div>
+                    <p className="text-muted-foreground">Litri</p>
+                    <p className="mt-1 font-medium">{lastRefuel.liters.toFixed(1)} l</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Prezzo/litro</p>
+                    <p className="mt-1 font-medium">
+                      €{lastRefuel.pricePerLiter?.toFixed(2) ?? "—"}
+                    </p>
+                  </div>
+                </>
+              )}
             </div>
-            {lastRefuel.liters && (
-              <>
-                <div>
-                  <p className="text-muted-foreground">Litri</p>
-                  <p className="mt-1 font-medium">{lastRefuel.liters.toFixed(1)} l</p>
-                </div>
-                <div>
-                  <p className="text-muted-foreground">Prezzo/litro</p>
-                  <p className="mt-1 font-medium">
-                    €{lastRefuel.pricePerLiter?.toFixed(2) ?? "—"}
-                  </p>
-                </div>
-              </>
-            )}
-          </div>
-        </Card>
+          </Card>
+        </Link>
       )}
-
-      {/* Quick actions */}
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card className="border-border bg-card p-5">
-          <Link href={`/vehicles/${id}/refuels/new`} className="flex items-start gap-3">
-            <Fuel className="h-5 w-5 text-muted-foreground" />
-            <div className="flex-1">
-              <p className="text-sm font-medium text-foreground">Aggiungi rifornimento</p>
-              <p className="mt-1 text-xs text-muted-foreground">
-                Registra un nuovo rifornimento e calcola i consumi.
-              </p>
-            </div>
-            <Plus className="h-4 w-4 text-muted-foreground" />
-          </Link>
-        </Card>
-        <Card className="border-border bg-card p-5">
-          <Link href={`/vehicles/${id}/expenses/new`} className="flex items-start gap-3">
-            <CircleDollarSign className="h-5 w-5 text-muted-foreground" />
-            <div className="flex-1">
-              <p className="text-sm font-medium text-foreground">Aggiungi spesa</p>
-              <p className="mt-1 text-xs text-muted-foreground">
-                Manutenzione, multe, parcheggi e altro.
-              </p>
-            </div>
-            <Plus className="h-4 w-4 text-muted-foreground" />
-          </Link>
-        </Card>
-      </div>
     </div>
   );
 }

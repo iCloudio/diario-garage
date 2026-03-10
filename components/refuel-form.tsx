@@ -15,47 +15,93 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
+import { Fuel, Flame, Wind, Zap, Battery } from "lucide-react";
 
 const FUEL_TYPES = [
-  { value: "BENZINA", label: "⛽ Benzina" },
-  { value: "DIESEL", label: "⛽ Diesel" },
-  { value: "GPL", label: "🔥 GPL" },
-  { value: "METANO", label: "💨 Metano" },
-  { value: "ELETTRICO", label: "🔌 Elettrico" },
-  { value: "IBRIDO_BENZINA", label: "🔋 Ibrido Benzina" },
-  { value: "IBRIDO_DIESEL", label: "🔋 Ibrido Diesel" },
+  { value: "BENZINA", label: "Benzina", icon: Fuel },
+  { value: "DIESEL", label: "Diesel", icon: Fuel },
+  { value: "GPL", label: "GPL", icon: Flame },
+  { value: "METANO", label: "Metano", icon: Wind },
+  { value: "ELETTRICO", label: "Elettrico", icon: Zap },
+  { value: "IBRIDO_BENZINA", label: "Ibrido Benzina", icon: Battery },
+  { value: "IBRIDO_DIESEL", label: "Ibrido Diesel", icon: Battery },
 ];
+
+type FuelType = "BENZINA" | "DIESEL" | "GPL" | "METANO" | "ELETTRICO" | "IBRIDO_BENZINA" | "IBRIDO_DIESEL";
 
 interface RefuelFormProps {
   vehicleId: string;
   currentOdometer: number;
+  vehicleFuelType?: FuelType | null;
 }
 
-export function RefuelForm({ vehicleId, currentOdometer }: RefuelFormProps) {
+export function RefuelForm({ vehicleId, currentOdometer, vehicleFuelType }: RefuelFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedFuelType, setSelectedFuelType] = useState<FuelType>(vehicleFuelType || "BENZINA");
 
   const today = new Date().toISOString().split("T")[0];
+
+  // Determina quali campi mostrare in base al tipo di carburante
+  const showPrimaryFuel = ["BENZINA", "DIESEL", "IBRIDO_BENZINA", "IBRIDO_DIESEL"].includes(selectedFuelType);
+  const showSecondaryFuel = ["GPL", "METANO"].includes(selectedFuelType);
+  const showElectric = selectedFuelType === "ELETTRICO";
+  const isGPL = selectedFuelType === "GPL";
+  const isMetano = selectedFuelType === "METANO";
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
 
     const formData = new FormData(e.currentTarget);
+
+    // Per GPL/Metano: almeno uno dei due campi deve essere compilato
+    const litersPrimary = formData.get("litersPrimary") ? parseFloat(formData.get("litersPrimary") as string) : null;
+    const litersSecondary = formData.get("litersSecondary") ? parseFloat(formData.get("litersSecondary") as string) : null;
+    const kwh = formData.get("kwh") ? parseFloat(formData.get("kwh") as string) : null;
+
+    if ((isGPL || isMetano) && !litersPrimary && !litersSecondary) {
+      toast.error("Compila almeno uno dei due carburanti");
+      setIsSubmitting(false);
+      return;
+    }
+
+    // Calcola il valore totale di litri/kwh in base al tipo
+    let totalLiters = null;
+    let totalKwh = null;
+
+    if (showElectric) {
+      totalKwh = kwh;
+    } else if (showSecondaryFuel) {
+      // Per GPL/Metano: somma entrambi se presenti (per tracking totale)
+      // ma salviamo anche separatamente
+      totalLiters = (litersPrimary || 0) + (litersSecondary || 0);
+    } else {
+      totalLiters = litersPrimary;
+    }
+
+    const amountEur = parseFloat(formData.get("amountEur") as string);
+
     const data = {
       vehicleId,
       date: formData.get("date") as string,
-      liters: formData.get("liters") ? parseFloat(formData.get("liters") as string) : null,
-      amountEur: parseFloat(formData.get("amountEur") as string),
+      liters: totalLiters,
+      kwh: totalKwh,
+      amountEur,
       odometerKm: parseInt(formData.get("odometerKm") as string),
-      fuelType: formData.get("fuelType") as string,
+      fuelType: selectedFuelType,
       notes: formData.get("notes") as string || null,
+      // Dati aggiuntivi per GPL/Metano
+      litersPrimary: showSecondaryFuel ? litersPrimary : null,
+      litersSecondary: showSecondaryFuel ? litersSecondary : null,
     };
 
-    // Calcola prezzo per litro
+    // Calcola prezzo per litro/kwh
     let pricePerLiter = null;
-    if (data.liters && data.liters > 0) {
-      pricePerLiter = data.amountEur / data.liters;
+    if (showElectric && totalKwh && totalKwh > 0) {
+      pricePerLiter = amountEur / totalKwh; // €/kWh
+    } else if (totalLiters && totalLiters > 0) {
+      pricePerLiter = amountEur / totalLiters; // €/litro
     }
 
     try {
@@ -99,49 +145,125 @@ export function RefuelForm({ vehicleId, currentOdometer }: RefuelFormProps) {
 
             <div className="space-y-2">
               <Label htmlFor="fuelType">Tipo carburante</Label>
-              <Select name="fuelType" defaultValue="BENZINA" required>
+              <Select
+                name="fuelType"
+                value={selectedFuelType}
+                onValueChange={(val) => setSelectedFuelType(val as FuelType)}
+                disabled={!!vehicleFuelType}
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {FUEL_TYPES.map((fuel) => (
-                    <SelectItem key={fuel.value} value={fuel.value}>
-                      {fuel.label}
-                    </SelectItem>
-                  ))}
+                  {FUEL_TYPES.map((fuel) => {
+                    const Icon = fuel.icon;
+                    return (
+                      <SelectItem key={fuel.value} value={fuel.value}>
+                        <div className="flex items-center gap-2">
+                          <Icon className="h-4 w-4" />
+                          <span>{fuel.label}</span>
+                        </div>
+                      </SelectItem>
+                    );
+                  })}
                 </SelectContent>
               </Select>
+              {vehicleFuelType && (
+                <p className="text-xs text-muted-foreground">
+                  Tipo carburante impostato dal veicolo
+                </p>
+              )}
             </div>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="amountEur">Importo (€)</Label>
-              <Input
-                id="amountEur"
-                name="amountEur"
-                type="number"
-                step="0.01"
-                min="0"
-                placeholder="es. 75.50"
-                required
-              />
-            </div>
+          {/* Importo totale sempre visibile */}
+          <div className="space-y-2">
+            <Label htmlFor="amountEur">Importo totale (€)</Label>
+            <Input
+              id="amountEur"
+              name="amountEur"
+              type="number"
+              step="0.01"
+              min="0"
+              placeholder="es. 75.50"
+              required
+            />
+          </div>
 
+          {/* Campi per carburanti tradizionali (benzina/diesel) */}
+          {showPrimaryFuel && !showSecondaryFuel && (
             <div className="space-y-2">
-              <Label htmlFor="liters">
-                Litri (opzionale per elettrico)
+              <Label htmlFor="litersPrimary">
+                Litri {selectedFuelType === "DIESEL" ? "diesel" : "benzina"}
               </Label>
               <Input
-                id="liters"
-                name="liters"
+                id="litersPrimary"
+                name="litersPrimary"
                 type="number"
                 step="0.01"
                 min="0"
                 placeholder="es. 42.5"
+                required
               />
             </div>
-          </div>
+          )}
+
+          {/* Campi per elettrico */}
+          {showElectric && (
+            <div className="space-y-2">
+              <Label htmlFor="kwh">kWh ricaricati</Label>
+              <Input
+                id="kwh"
+                name="kwh"
+                type="number"
+                step="0.01"
+                min="0"
+                placeholder="es. 25.5"
+                required
+              />
+            </div>
+          )}
+
+          {/* Campi per GPL/Metano (doppio carburante) */}
+          {showSecondaryFuel && (
+            <div className="space-y-4 rounded-lg border border-border bg-muted/30 p-4">
+              <p className="text-sm font-medium">
+                Rifornimento misto - Compila solo quello che hai effettivamente rifornito
+              </p>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="litersPrimary" className="flex items-center gap-2">
+                    <Fuel className="h-4 w-4" />
+                    Litri benzina
+                  </Label>
+                  <Input
+                    id="litersPrimary"
+                    name="litersPrimary"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    placeholder="es. 30.0"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="litersSecondary" className="flex items-center gap-2">
+                    {isGPL ? <Flame className="h-4 w-4" /> : <Wind className="h-4 w-4" />}
+                    {isGPL ? "Litri GPL" : "kg Metano"}
+                  </Label>
+                  <Input
+                    id="litersSecondary"
+                    name="litersSecondary"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    placeholder={isGPL ? "es. 15.0" : "es. 10.5"}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
 
           <div className="space-y-2">
             <Label htmlFor="odometerKm">Chilometraggio attuale (km)</Label>

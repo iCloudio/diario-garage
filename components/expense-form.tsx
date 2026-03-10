@@ -15,16 +15,17 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
+import { Wrench, AlertCircle, Shield, DollarSign, ParkingCircle, Droplet, Route, FileText } from "lucide-react";
 
 const EXPENSE_CATEGORIES = [
-  { value: "MANUTENZIONE", label: "🔧 Manutenzione", description: "Tagliandi, riparazioni, ricambi" },
-  { value: "MULTA", label: "🚨 Multa", description: "Infrazioni, autovelox" },
-  { value: "ASSICURAZIONE", label: "🛡️ Assicurazione", description: "RCA, Kasko" },
-  { value: "BOLLO", label: "💰 Bollo", description: "Tassa di circolazione" },
-  { value: "PARCHEGGIO", label: "🅿️ Parcheggio", description: "Sosta, abbonamenti" },
-  { value: "LAVAGGIO", label: "🧼 Lavaggio", description: "Autolavaggio" },
-  { value: "PEDAGGI", label: "🛣️ Pedaggi", description: "Autostrada, caselli" },
-  { value: "ALTRO", label: "📝 Altro", description: "Altre spese" },
+  { value: "MANUTENZIONE", label: "Manutenzione", description: "Tagliandi, riparazioni, ricambi", icon: Wrench },
+  { value: "MULTA", label: "Multa", description: "Infrazioni, autovelox", icon: AlertCircle },
+  { value: "ASSICURAZIONE", label: "Assicurazione", description: "RCA, Kasko", icon: Shield },
+  { value: "BOLLO", label: "Bollo", description: "Tassa di circolazione", icon: DollarSign },
+  { value: "PARCHEGGIO", label: "Parcheggio", description: "Sosta, abbonamenti", icon: ParkingCircle },
+  { value: "LAVAGGIO", label: "Lavaggio", description: "Autolavaggio", icon: Droplet },
+  { value: "PEDAGGI", label: "Pedaggi", description: "Autostrada, caselli", icon: Route },
+  { value: "ALTRO", label: "Altro", description: "Altre spese", icon: FileText },
 ];
 
 interface ExpenseFormProps {
@@ -113,14 +114,20 @@ export function ExpenseForm({ vehicleId, currentOdometer }: ExpenseFormProps) {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {EXPENSE_CATEGORIES.map((cat) => (
-                  <SelectItem key={cat.value} value={cat.value}>
-                    <div className="flex flex-col">
-                      <span>{cat.label}</span>
-                      <span className="text-xs text-muted-foreground">{cat.description}</span>
-                    </div>
-                  </SelectItem>
-                ))}
+                {EXPENSE_CATEGORIES.map((cat) => {
+                  const Icon = cat.icon;
+                  return (
+                    <SelectItem key={cat.value} value={cat.value}>
+                      <div className="flex items-start gap-2">
+                        <Icon className="mt-0.5 h-4 w-4 flex-shrink-0" />
+                        <div className="flex flex-col">
+                          <span>{cat.label}</span>
+                          <span className="text-xs text-muted-foreground">{cat.description}</span>
+                        </div>
+                      </div>
+                    </SelectItem>
+                  );
+                })}
               </SelectContent>
             </Select>
           </div>

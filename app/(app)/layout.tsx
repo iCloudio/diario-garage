@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import {
   Car,
   Home,
@@ -53,8 +54,30 @@ export default async function AppLayout({
               ))}
             </nav>
 
-            <div className="mt-auto space-y-3 border-t border-border pt-4">
-              <LogoutButton />
+            <div className="mt-auto space-y-3">
+              <div className="border-t border-border pt-4">
+                <LogoutButton />
+              </div>
+
+              <div className="border-t border-border pt-3 text-center">
+                <p className="mb-2 text-[10px] uppercase tracking-wider text-muted-foreground">
+                  Sviluppato da
+                </p>
+                <a
+                  href="https://fulmi.net"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-block transition hover:opacity-80"
+                >
+                  <Image
+                    src="/fulminetLogo.png"
+                    alt="Fulminet"
+                    width={120}
+                    height={30}
+                    className="mx-auto"
+                  />
+                </a>
+              </div>
             </div>
             </div>
           </div>

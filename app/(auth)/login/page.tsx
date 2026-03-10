@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -76,6 +77,26 @@ export default function LoginPage() {
         <Link className="hover:text-foreground" href="/register">
           Crea account
         </Link>
+      </div>
+
+      <div className="mt-6 border-t border-border pt-4 text-center">
+        <p className="mb-2 text-[10px] uppercase tracking-wider text-muted-foreground">
+          Sviluppato da
+        </p>
+        <a
+          href="https://fulmi.net"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-block transition hover:opacity-80"
+        >
+          <Image
+            src="/fulminetLogo.png"
+            alt="Fulminet"
+            width={120}
+            height={30}
+            className="mx-auto"
+          />
+        </a>
       </div>
     </Card>
   );

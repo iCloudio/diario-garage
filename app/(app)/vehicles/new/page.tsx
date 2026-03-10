@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Search } from "lucide-react";
+import { Search, Fuel, Flame, Wind, Zap, Battery } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -178,13 +178,48 @@ export default function NewVehiclePage() {
                   <SelectValue placeholder="Seleziona alimentazione" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="BENZINA">⛽ Benzina</SelectItem>
-                  <SelectItem value="DIESEL">⛽ Diesel</SelectItem>
-                  <SelectItem value="GPL">🔥 GPL</SelectItem>
-                  <SelectItem value="METANO">💨 Metano</SelectItem>
-                  <SelectItem value="ELETTRICO">🔌 Elettrico</SelectItem>
-                  <SelectItem value="IBRIDO_BENZINA">🔋 Ibrido Benzina</SelectItem>
-                  <SelectItem value="IBRIDO_DIESEL">🔋 Ibrido Diesel</SelectItem>
+                  <SelectItem value="BENZINA">
+                    <div className="flex items-center gap-2">
+                      <Fuel className="h-4 w-4" />
+                      <span>Benzina</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="DIESEL">
+                    <div className="flex items-center gap-2">
+                      <Fuel className="h-4 w-4" />
+                      <span>Diesel</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="GPL">
+                    <div className="flex items-center gap-2">
+                      <Flame className="h-4 w-4" />
+                      <span>GPL</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="METANO">
+                    <div className="flex items-center gap-2">
+                      <Wind className="h-4 w-4" />
+                      <span>Metano</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="ELETTRICO">
+                    <div className="flex items-center gap-2">
+                      <Zap className="h-4 w-4" />
+                      <span>Elettrico</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="IBRIDO_BENZINA">
+                    <div className="flex items-center gap-2">
+                      <Battery className="h-4 w-4" />
+                      <span>Ibrido Benzina</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="IBRIDO_DIESEL">
+                    <div className="flex items-center gap-2">
+                      <Battery className="h-4 w-4" />
+                      <span>Ibrido Diesel</span>
+                    </div>
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>

@@ -14,6 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Fuel, Flame, Wind, Zap, Battery, CheckCircle, DollarSign, Trash2 } from "lucide-react";
 
 type VehicleEditFormProps = {
   vehicleId: string;
@@ -166,13 +167,48 @@ export function VehicleEditForm({
                 <SelectValue placeholder="Seleziona alimentazione" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="BENZINA">⛽ Benzina</SelectItem>
-                <SelectItem value="DIESEL">⛽ Diesel</SelectItem>
-                <SelectItem value="GPL">🔥 GPL</SelectItem>
-                <SelectItem value="METANO">💨 Metano</SelectItem>
-                <SelectItem value="ELETTRICO">🔌 Elettrico</SelectItem>
-                <SelectItem value="IBRIDO_BENZINA">🔋 Ibrido Benzina</SelectItem>
-                <SelectItem value="IBRIDO_DIESEL">🔋 Ibrido Diesel</SelectItem>
+                <SelectItem value="BENZINA">
+                  <div className="flex items-center gap-2">
+                    <Fuel className="h-4 w-4" />
+                    <span>Benzina</span>
+                  </div>
+                </SelectItem>
+                <SelectItem value="DIESEL">
+                  <div className="flex items-center gap-2">
+                    <Fuel className="h-4 w-4" />
+                    <span>Diesel</span>
+                  </div>
+                </SelectItem>
+                <SelectItem value="GPL">
+                  <div className="flex items-center gap-2">
+                    <Flame className="h-4 w-4" />
+                    <span>GPL</span>
+                  </div>
+                </SelectItem>
+                <SelectItem value="METANO">
+                  <div className="flex items-center gap-2">
+                    <Wind className="h-4 w-4" />
+                    <span>Metano</span>
+                  </div>
+                </SelectItem>
+                <SelectItem value="ELETTRICO">
+                  <div className="flex items-center gap-2">
+                    <Zap className="h-4 w-4" />
+                    <span>Elettrico</span>
+                  </div>
+                </SelectItem>
+                <SelectItem value="IBRIDO_BENZINA">
+                  <div className="flex items-center gap-2">
+                    <Battery className="h-4 w-4" />
+                    <span>Ibrido Benzina</span>
+                  </div>
+                </SelectItem>
+                <SelectItem value="IBRIDO_DIESEL">
+                  <div className="flex items-center gap-2">
+                    <Battery className="h-4 w-4" />
+                    <span>Ibrido Diesel</span>
+                  </div>
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -194,9 +230,24 @@ export function VehicleEditForm({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="ATTIVO">✅ Attivo</SelectItem>
-                <SelectItem value="VENDUTO">💰 Venduto</SelectItem>
-                <SelectItem value="ROTTAMATO">🗑️ Rottamato</SelectItem>
+                <SelectItem value="ATTIVO">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4" />
+                    <span>Attivo</span>
+                  </div>
+                </SelectItem>
+                <SelectItem value="VENDUTO">
+                  <div className="flex items-center gap-2">
+                    <DollarSign className="h-4 w-4" />
+                    <span>Venduto</span>
+                  </div>
+                </SelectItem>
+                <SelectItem value="ROTTAMATO">
+                  <div className="flex items-center gap-2">
+                    <Trash2 className="h-4 w-4" />
+                    <span>Rottamato</span>
+                  </div>
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
