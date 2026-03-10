@@ -39,9 +39,9 @@ export default function RegisterPage() {
 
   return (
     <Card className="border-white/10 bg-black/40 p-6 shadow-xl backdrop-blur">
-      <h2 className="text-xl font-semibold text-white">Crea un account</h2>
+      <h2 className="text-xl font-semibold text-white">Crea il tuo accesso</h2>
       <p className="mt-2 text-sm text-zinc-400">
-        Bastano pochi dati per iniziare.
+        Il tuo garage sempre in regola, a partire da qui.
       </p>
       <form className="mt-6 space-y-4" onSubmit={onSubmit}>
         <div className="space-y-2">

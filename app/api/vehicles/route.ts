@@ -2,23 +2,10 @@ import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 import { db } from "@/lib/db";
 
-const deadlineSchema = z.object({
-  type: z.enum(["BOLLO", "REVISIONE", "ASSICURAZIONE"]),
-  dueDate: z.string().min(4),
-});
-
 const schema = z.object({
   plate: z.string().min(5).max(10),
   make: z.string().max(60).optional().or(z.literal("")),
   model: z.string().max(60).optional().or(z.literal("")),
-  year: z
-    .preprocess((value) => {
-      if (value === "" || value === undefined || value === null) return undefined;
-      if (typeof value === "string") return Number(value);
-      return value;
-    }, z.number().int().min(1900).max(new Date().getFullYear() + 1).optional())
-    .optional(),
-  deadlines: z.array(deadlineSchema).optional(),
 });
 
 export async function GET(request: NextRequest) {
@@ -66,25 +53,25 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Dati veicolo non validi." }, { status: 400 });
   }
 
-  const { plate, make, model, year, deadlines } = parsed.data;
+  const existing = await db.vehicle.findFirst({
+    where: { userId: session.userId, deletedAt: null },
+    select: { id: true },
+  });
+
+  if (existing) {
+    return NextResponse.json(
+      { error: "In questa versione puoi gestire un solo veicolo." },
+      { status: 409 }
+    );
+  }
+
+  const { plate, make, model } = parsed.data;
   const created = await db.vehicle.create({
     data: {
       userId: session.userId,
       plate: plate.replace(/\s+/g, "").toUpperCase(),
       make: make?.trim() || null,
       model: model?.trim() || null,
-      year: year ?? null,
-      deadlines: deadlines?.length
-        ? {
-            create: deadlines.map((item) => ({
-              type: item.type,
-              dueDate: new Date(item.dueDate),
-            })),
-          }
-        : undefined,
-    },
-    include: {
-      deadlines: true,
     },
   });
 

@@ -1,11 +1,12 @@
 import Link from "next/link";
+import { CalendarClock, Car, Home } from "lucide-react";
 import { requireUser } from "@/lib/auth";
 import { LogoutButton } from "@/components/logout-button";
 
 const navItems = [
-  { href: "/dashboard", label: "Home" },
-  { href: "/vehicles", label: "Veicoli" },
-  { href: "/deadlines", label: "Scadenze" },
+  { href: "/dashboard", label: "Home", icon: Home },
+  { href: "/vehicles", label: "Veicoli", icon: Car },
+  { href: "/deadlines", label: "Scadenze", icon: CalendarClock },
 ];
 
 export default async function AppLayout({
@@ -26,11 +27,15 @@ export default async function AppLayout({
             <p className="mt-1 text-lg font-semibold">
               Ciao{user.name ? `, ${user.name}` : ""}
             </p>
+            <p className="mt-1 text-xs text-zinc-400">
+              Il tuo garage sempre in regola.
+            </p>
           </div>
           <div className="flex items-center gap-4">
             <nav className="hidden items-center gap-4 text-sm text-zinc-300 md:flex">
               {navItems.map((item) => (
-                <Link key={item.href} className="hover:text-white" href={item.href}>
+                <Link key={item.href} className="flex items-center gap-2 hover:text-white" href={item.href}>
+                  <item.icon className="h-4 w-4" />
                   {item.label}
                 </Link>
               ))}
@@ -44,10 +49,11 @@ export default async function AppLayout({
         {children}
       </main>
 
-      <nav className="fixed inset-x-0 bottom-0 z-10 border-t border-white/10 bg-black/70 backdrop-blur md:hidden">
-        <div className="flex items-center justify-around py-3 text-xs text-zinc-300">
+      <nav className="fixed inset-x-0 bottom-0 z-10 border-t border-white/10 bg-black/80 backdrop-blur md:hidden">
+        <div className="flex items-center justify-around py-2 text-[11px] text-zinc-300">
           {navItems.map((item) => (
-            <Link key={item.href} className="px-3 py-2" href={item.href}>
+            <Link key={item.href} className="flex flex-col items-center gap-1 px-3 py-2" href={item.href}>
+              <item.icon className="h-4 w-4" />
               {item.label}
             </Link>
           ))}

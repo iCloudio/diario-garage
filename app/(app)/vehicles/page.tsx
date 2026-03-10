@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { CalendarClock, Car, Plus } from "lucide-react";
 import { db } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { Card } from "@/components/ui/card";
@@ -22,44 +23,71 @@ export default async function VehiclesPage() {
     <div className="space-y-6">
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div>
-          <h2 className="text-2xl font-semibold">Veicoli</h2>
-          <p className="text-sm text-zinc-400">
-            Tieni traccia di bollo, revisione e assicurazione.
+          <p className="text-xs uppercase tracking-[0.3em] text-zinc-400">
+            Garage
+          </p>
+          <h2 className="mt-2 text-2xl font-semibold">I tuoi veicoli</h2>
+          <p className="mt-2 text-sm text-zinc-400">
+            Uno o più veicoli, scadenze sempre visibili.
           </p>
         </div>
         <Button asChild>
-          <Link href="/vehicles/new">Aggiungi veicolo</Link>
+          <Link href="/vehicles/new">
+            <Plus className="mr-2 h-4 w-4" />
+            Aggiungi veicolo
+          </Link>
         </Button>
       </div>
 
       {vehicles.length === 0 ? (
         <Card className="border-white/10 bg-black/40 p-6">
-          <p className="text-sm text-zinc-400">Nessun veicolo registrato.</p>
-          <Link className="mt-3 inline-block text-sm text-white" href="/vehicles/new">
-            Inizia ora →
-          </Link>
+          <div className="flex items-center gap-3 text-zinc-300">
+            <Car className="h-5 w-5" />
+            <div>
+              <p className="text-sm font-medium text-white">Nessun veicolo registrato</p>
+              <p className="text-xs text-zinc-400">
+                Inserisci una targa per attivare le scadenze.
+              </p>
+            </div>
+          </div>
+          <div className="mt-4">
+            <Button asChild>
+              <Link href="/vehicles/new">Aggiungi veicolo</Link>
+            </Button>
+          </div>
         </Card>
       ) : (
         <div className="grid gap-4">
           {vehicles.map((vehicle) => (
             <Card key={vehicle.id} className="border-white/10 bg-black/40 p-6">
-              <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+              <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div>
-                  <h3 className="text-lg font-semibold">{vehicle.plate}</h3>
+                  <div className="flex items-center gap-2">
+                    <Car className="h-4 w-4 text-zinc-300" />
+                    <h3 className="text-lg font-semibold">{vehicle.plate}</h3>
+                  </div>
                   <p className="text-sm text-zinc-400">
                     {vehicle.make ?? "Marca"} {vehicle.model ?? ""}
                     {vehicle.year ? ` · ${vehicle.year}` : ""}
                   </p>
                 </div>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   {vehicle.deadlines.length === 0 ? (
-                    <Badge variant="secondary">Nessuna scadenza</Badge>
+                    <Badge variant="secondary" className="flex items-center gap-1">
+                      <CalendarClock className="h-3 w-3" />0 scadenze
+                    </Badge>
                   ) : (
-                    vehicle.deadlines.map((deadline) => (
-                      <Badge key={deadline.id} variant="outline">
-                        {deadline.type} · {deadline.dueDate.toLocaleDateString("it-IT")}
+                    <>
+                      {vehicle.deadlines.map((deadline) => (
+                        <Badge key={deadline.id} variant="outline">
+                          {deadline.type} · {deadline.dueDate.toLocaleDateString("it-IT")}
+                        </Badge>
+                      ))}
+                      <Badge variant="secondary" className="flex items-center gap-1">
+                        <CalendarClock className="h-3 w-3" />
+                        {vehicle.deadlines.length} scadenze
                       </Badge>
-                    ))
+                    </>
                   )}
                 </div>
               </div>

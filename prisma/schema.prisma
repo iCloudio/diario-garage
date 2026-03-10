@@ -57,6 +57,7 @@ model Deadline {
   vehicleId String
   type      DeadlineType
   dueDate   DateTime
+  amount    Float?
   notes     String?
   createdAt DateTime     @default(now())
   updatedAt DateTime     @updatedAt
@@ -66,4 +67,5 @@ model Deadline {
   @@index([vehicleId])
   @@index([type])
   @@index([dueDate])
+  @@unique([vehicleId, type])
 }

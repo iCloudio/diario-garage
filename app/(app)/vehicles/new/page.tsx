@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { Search } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -16,12 +17,6 @@ export default function NewVehiclePage() {
   const [plate, setPlate] = useState("");
   const [make, setMake] = useState("");
   const [model, setModel] = useState("");
-  const [year, setYear] = useState("");
-
-  const [bollo, setBollo] = useState("");
-  const [revisione, setRevisione] = useState("");
-  const [assicurazione, setAssicurazione] = useState("");
-
   async function handleLookup() {
     if (!plate.trim()) {
       toast.error("Inserisci una targa.");
@@ -49,7 +44,6 @@ export default function NewVehiclePage() {
 
     setMake(payload.data.make ?? "");
     setModel(payload.data.model ?? "");
-    setYear(payload.data.year ? String(payload.data.year) : "");
     toast.success("Dati recuperati.");
   }
 
@@ -57,12 +51,6 @@ export default function NewVehiclePage() {
     event.preventDefault();
 
     startTransition(async () => {
-      const deadlines = [
-        bollo ? { type: "BOLLO", dueDate: bollo } : null,
-        revisione ? { type: "REVISIONE", dueDate: revisione } : null,
-        assicurazione ? { type: "ASSICURAZIONE", dueDate: assicurazione } : null,
-      ].filter((item): item is { type: string; dueDate: string } => Boolean(item));
-
       const response = await fetch("/api/vehicles", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -70,8 +58,6 @@ export default function NewVehiclePage() {
           plate,
           make,
           model,
-          year: year ? Number(year) : undefined,
-          deadlines,
         }),
       });
 
@@ -90,8 +76,11 @@ export default function NewVehiclePage() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-semibold">Nuovo veicolo</h2>
-        <p className="text-sm text-zinc-400">
+        <p className="text-xs uppercase tracking-[0.3em] text-zinc-400">
+          Veicoli
+        </p>
+        <h2 className="mt-2 text-2xl font-semibold">Nuovo veicolo</h2>
+        <p className="mt-2 text-sm text-zinc-400">
           Inserisci i dati manualmente o usa la ricerca targa.
         </p>
       </div>
@@ -111,12 +100,13 @@ export default function NewVehiclePage() {
             </div>
             <div className="flex items-end">
               <Button type="button" variant="secondary" onClick={handleLookup} disabled={lookupPending}>
+                <Search className="mr-2 h-4 w-4" />
                 {lookupPending ? "Ricerca..." : "Lookup targa"}
               </Button>
             </div>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="make">Marca</Label>
               <Input
@@ -133,45 +123,6 @@ export default function NewVehiclePage() {
                 value={model}
                 onChange={(event) => setModel(event.target.value)}
                 placeholder="Panda"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="year">Anno</Label>
-              <Input
-                id="year"
-                value={year}
-                onChange={(event) => setYear(event.target.value)}
-                placeholder="2019"
-              />
-            </div>
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-3">
-            <div className="space-y-2">
-              <Label htmlFor="bollo">Bollo</Label>
-              <Input
-                id="bollo"
-                type="date"
-                value={bollo}
-                onChange={(event) => setBollo(event.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="revisione">Revisione</Label>
-              <Input
-                id="revisione"
-                type="date"
-                value={revisione}
-                onChange={(event) => setRevisione(event.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="assicurazione">Assicurazione</Label>
-              <Input
-                id="assicurazione"
-                type="date"
-                value={assicurazione}
-                onChange={(event) => setAssicurazione(event.target.value)}
               />
             </div>
           </div>

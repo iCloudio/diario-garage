@@ -38,9 +38,9 @@ export default function LoginPage() {
 
   return (
     <Card className="border-white/10 bg-black/40 p-6 shadow-xl backdrop-blur">
-      <h2 className="text-xl font-semibold text-white">Accedi</h2>
+      <h2 className="text-xl font-semibold text-white">Bentornato</h2>
       <p className="mt-2 text-sm text-zinc-400">
-        Usa la tua email per entrare nel tuo diario.
+        Il tuo garage sempre in regola, in pochi secondi.
       </p>
       <form className="mt-6 space-y-4" onSubmit={onSubmit}>
         <div className="space-y-2">

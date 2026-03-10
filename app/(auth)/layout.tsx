@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { Car, CalendarCheck, Wrench } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth";
 
 export default async function AuthLayout({
@@ -12,19 +13,35 @@ export default async function AuthLayout({
   }
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top,_#1b1b1f,_#0a0a0b_55%,_#050506_100%)] text-foreground">
-      <div className="mx-auto flex min-h-screen max-w-xl flex-col justify-center px-6 py-12">
-        <div className="mb-8">
+    <div className="min-h-screen bg-gradient-to-b from-[#0f1115] via-[#0b0c10] to-black text-foreground">
+      <div className="mx-auto flex min-h-screen max-w-xl flex-col justify-center gap-8 px-6 py-12">
+        <div>
           <p className="text-xs uppercase tracking-[0.3em] text-zinc-400">
             DiarioGarage
           </p>
           <h1 className="mt-4 text-3xl font-semibold text-white">
-            Tutto il tuo parco auto in un unico diario.
+            Il tuo garage sempre in regola.
           </h1>
           <p className="mt-3 text-sm text-zinc-400">
-            Accesso rapido, scadenze essenziali, zero rumore.
+            Non trascurare la tua auto: scadenze e manutenzione sotto controllo.
           </p>
         </div>
+
+        <div className="grid gap-3 text-sm text-zinc-300">
+          <div className="flex items-center gap-3 rounded-lg border border-white/10 bg-white/5 px-4 py-3">
+            <CalendarCheck className="h-4 w-4 text-white" />
+            <span>Scadenze chiare e sempre aggiornate.</span>
+          </div>
+          <div className="flex items-center gap-3 rounded-lg border border-white/10 bg-white/5 px-4 py-3">
+            <Wrench className="h-4 w-4 text-white" />
+            <span>Storico manutenzioni essenziale e pulito.</span>
+          </div>
+          <div className="flex items-center gap-3 rounded-lg border border-white/10 bg-white/5 px-4 py-3">
+            <Car className="h-4 w-4 text-white" />
+            <span>Gestisci uno o più veicoli senza confusione.</span>
+          </div>
+        </div>
+
         {children}
       </div>
     </div>
