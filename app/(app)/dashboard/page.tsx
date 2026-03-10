@@ -89,11 +89,11 @@ export default async function DashboardPage() {
       </div>
 
       {vehicleCount === 0 ? (
-        <Card className="border-white/10 bg-black/40 p-6">
+        <Card className="border-border bg-card p-6">
           <div className="flex items-center gap-3 text-zinc-300">
             <Target className="h-5 w-5" />
             <div>
-              <p className="text-sm font-medium text-white">
+              <p className="text-sm font-medium text-foreground">
                 Inizia dal tuo primo veicolo
               </p>
               <p className="text-xs text-zinc-400">
@@ -110,7 +110,7 @@ export default async function DashboardPage() {
       ) : (
         <div className="space-y-4">
           <div className="grid gap-4 md:grid-cols-3">
-            <Card className="border-white/10 bg-black/40 p-5">
+            <Card className="border-border bg-card p-5">
               <div className="flex items-center justify-between">
                 <p className="text-sm text-zinc-400">Veicoli attivi</p>
                 <Car className="h-4 w-4 text-zinc-300" />
@@ -120,7 +120,7 @@ export default async function DashboardPage() {
                 Un solo veicolo, chiaro e ordinato.
               </p>
             </Card>
-            <Card className="border-white/10 bg-black/40 p-5">
+            <Card className="border-border bg-card p-5">
               <div className="flex items-center justify-between">
                 <p className="text-sm text-zinc-400">Scadenze nei prossimi 30 giorni</p>
                 <CalendarClock className="h-4 w-4 text-zinc-300" />
@@ -130,7 +130,7 @@ export default async function DashboardPage() {
                 Ti basta un colpo d'occhio per essere in regola.
               </p>
             </Card>
-            <Card className="border-white/10 bg-black/40 p-5">
+            <Card className="border-border bg-card p-5">
               <div className="flex items-center justify-between">
                 <p className="text-sm text-zinc-400">Stato generale</p>
                 <CheckCircle2 className="h-4 w-4 text-zinc-300" />
@@ -145,7 +145,7 @@ export default async function DashboardPage() {
           </div>
 
           {primaryVehicle ? (
-            <Card className="border-white/10 bg-black/40 p-6">
+            <Card className="border-border bg-card p-6">
               <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div>
                   <p className="text-sm text-zinc-400">Veicolo attivo</p>
@@ -155,11 +155,11 @@ export default async function DashboardPage() {
                     {primaryVehicle.year ? ` · ${primaryVehicle.year}` : ""}
                   </p>
                 </div>
-                <div className="rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm text-zinc-300">
+                <div className="rounded-lg border border-border bg-white/5 px-4 py-3 text-sm text-zinc-300">
                   <p className="text-xs uppercase tracking-[0.2em] text-zinc-500">
                     Prossima scadenza
                   </p>
-                  <p className="mt-2 font-medium text-white">
+                  <p className="mt-2 font-medium text-foreground">
                     {nextVehicleDeadline
                       ? `${nextVehicleDeadline.type} · ${nextVehicleDeadline.dueDate.toLocaleDateString("it-IT")}`
                       : "Nessuna scadenza inserita"}
@@ -169,10 +169,10 @@ export default async function DashboardPage() {
             </Card>
           ) : null}
 
-          <Card className="border-white/10 bg-black/40 p-6">
+          <Card className="border-border bg-card p-6">
             <div className="flex items-center justify-between">
               <p className="text-sm text-zinc-400">Prossime scadenze</p>
-              <Link className="text-xs text-zinc-400 hover:text-white" href="/deadlines">
+              <Link className="text-xs text-zinc-400 hover:text-foreground" href="/deadlines">
                 Vedi tutte →
               </Link>
             </div>

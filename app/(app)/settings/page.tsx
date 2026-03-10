@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { User, Bell, CreditCard, BadgePercent, Map } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 const items = [
   { label: "Profilo", href: "/settings/profile", icon: User },
@@ -21,10 +22,10 @@ export default function SettingsPage() {
         </p>
       </div>
 
-      <Card className="border-white/10 bg-black/40 p-6">
+      <Card className="border-border bg-card p-6">
         <div className="space-y-3 text-sm text-zinc-300">
           {items.map((item) => (
-            <Link key={item.href} className="flex items-center justify-between rounded-lg border border-white/10 bg-white/5 px-4 py-3 hover:border-white/20" href={item.href}>
+            <Link key={item.href} className="flex items-center justify-between rounded-lg border border-border bg-white/5 px-4 py-3 hover:border-white/20" href={item.href}>
               <div className="flex items-center gap-2">
                 <item.icon className="h-4 w-4" />
                 <span>{item.label}</span>
@@ -36,6 +37,16 @@ export default function SettingsPage() {
         <p className="mt-4 text-xs text-zinc-500">
           Sezione in sviluppo: impostazioni complete in Fase 3.
         </p>
+      </Card>
+
+      <Card className="border-border bg-card p-6">
+        <p className="text-sm text-zinc-400">Tema</p>
+        <p className="mt-1 text-xs text-zinc-500">
+          Scegli il tema o usa quello del sistema.
+        </p>
+        <div className="mt-4">
+          <ThemeToggle />
+        </div>
       </Card>
     </div>
   );

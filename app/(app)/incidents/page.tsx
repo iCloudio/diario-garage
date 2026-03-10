@@ -17,12 +17,12 @@ export default function IncidentsPage() {
         </p>
       </div>
 
-      <Card className="border-white/10 bg-black/40 p-6">
+      <Card className="border-border bg-card p-6">
         <div className="space-y-3 text-sm text-zinc-300">
           {incidents.map((incident) => (
             <div key={incident.title} className="flex flex-col gap-2 border-b border-white/5 pb-3 last:border-b-0 last:pb-0 md:flex-row md:items-center md:justify-between">
               <div>
-                <p className="flex items-center gap-2 font-medium text-white">
+                <p className="flex items-center gap-2 font-medium text-foreground">
                   <AlertTriangle className="h-4 w-4 text-amber-300" />
                   {incident.title}
                 </p>

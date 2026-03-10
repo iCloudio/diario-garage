@@ -51,11 +51,11 @@ export default async function VehiclesPage() {
       </div>
 
       {!vehicle ? (
-        <Card className="border-white/10 bg-black/40 p-6">
+        <Card className="border-border bg-card p-6">
           <div className="flex items-center gap-3 text-zinc-300">
             <Car className="h-5 w-5" />
             <div>
-              <p className="text-sm font-medium text-white">Nessun veicolo registrato</p>
+              <p className="text-sm font-medium text-foreground">Nessun veicolo registrato</p>
               <p className="text-xs text-zinc-400">
                 Inserisci una targa per attivare le scadenze.
               </p>
@@ -69,7 +69,7 @@ export default async function VehiclesPage() {
         </Card>
       ) : (
         <div className="grid gap-4">
-          <Card className="border-white/10 bg-black/40 p-6">
+          <Card className="border-border bg-card p-6">
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
               <div>
                 <div className="flex items-center gap-2">

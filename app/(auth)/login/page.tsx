@@ -37,8 +37,8 @@ export default function LoginPage() {
   }
 
   return (
-    <Card className="border-white/10 bg-black/40 p-6 shadow-xl backdrop-blur">
-      <h2 className="text-xl font-semibold text-white">Bentornato</h2>
+    <Card className="border-border bg-card p-6 shadow-xl backdrop-blur">
+      <h2 className="text-xl font-semibold text-foreground">Bentornato</h2>
       <p className="mt-2 text-sm text-zinc-400">
         Il tuo garage sempre in regola, in pochi secondi.
       </p>
@@ -70,10 +70,10 @@ export default function LoginPage() {
         </Button>
       </form>
       <div className="mt-4 flex items-center justify-between text-xs text-zinc-400">
-        <Link className="hover:text-white" href="/forgot-password">
+        <Link className="hover:text-foreground" href="/forgot-password">
           Password dimenticata?
         </Link>
-        <Link className="hover:text-white" href="/register">
+        <Link className="hover:text-foreground" href="/register">
           Crea account
         </Link>
       </div>

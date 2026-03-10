@@ -27,26 +27,26 @@ export default function StatisticsPage() {
 
       <div className="grid gap-4 md:grid-cols-3">
         {kpis.map((item) => (
-          <Card key={item.label} className="border-white/10 bg-black/40 p-5">
+          <Card key={item.label} className="border-border bg-card p-5">
             <p className="text-sm text-zinc-400">{item.label}</p>
             <p className="mt-2 text-2xl font-semibold">{item.value}</p>
           </Card>
         ))}
       </div>
 
-      <Card className="border-white/10 bg-black/40 p-6">
+      <Card className="border-border bg-card p-6">
         <div className="flex items-center gap-2 text-sm text-zinc-300">
           <BarChart3 className="h-4 w-4" />
-          <span className="font-medium text-white">Spese per categoria</span>
+          <span className="font-medium text-foreground">Spese per categoria</span>
         </div>
         <div className="mt-4 grid gap-3 md:grid-cols-2">
           {breakdown.map((item) => (
-            <div key={item.label} className="flex items-center justify-between rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm text-zinc-300">
+            <div key={item.label} className="flex items-center justify-between rounded-lg border border-border bg-white/5 px-4 py-3 text-sm text-zinc-300">
               <div className="flex items-center gap-2">
                 <item.icon className="h-4 w-4" />
                 <span>{item.label}</span>
               </div>
-              <span className="text-white">{item.value}</span>
+              <span className="text-foreground">{item.value}</span>
             </div>
           ))}
         </div>

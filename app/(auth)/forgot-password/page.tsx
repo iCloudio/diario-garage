@@ -35,8 +35,8 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <Card className="border-white/10 bg-black/40 p-6 shadow-xl backdrop-blur">
-      <h2 className="text-xl font-semibold text-white">Reset password</h2>
+    <Card className="border-border bg-card p-6 shadow-xl backdrop-blur">
+      <h2 className="text-xl font-semibold text-foreground">Reset password</h2>
       <p className="mt-2 text-sm text-zinc-400">
         Inserisci la tua email. Per ora è una simulazione.
       </p>
@@ -58,7 +58,7 @@ export default function ForgotPasswordPage() {
         </Button>
       </form>
       <div className="mt-4 text-xs text-zinc-400">
-        <Link className="hover:text-white" href="/login">
+        <Link className="hover:text-foreground" href="/login">
           Torna al login
         </Link>
       </div>

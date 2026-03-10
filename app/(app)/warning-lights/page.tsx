@@ -21,7 +21,7 @@ export default function WarningLightsPage() {
         </p>
       </div>
 
-      <Card className="border-white/10 bg-black/40 p-6">
+      <Card className="border-border bg-card p-6">
         <div className="flex items-center gap-2 text-sm text-zinc-300">
           <Search className="h-4 w-4" />
           <Input placeholder="Cerca una spia" />
@@ -31,7 +31,7 @@ export default function WarningLightsPage() {
             <div key={item.name} className="flex items-center justify-between border-b border-white/5 pb-3 last:border-b-0 last:pb-0">
               <div className="flex items-center gap-2">
                 <AlertTriangle className="h-4 w-4 text-amber-300" />
-                <span className="font-medium text-white">{item.name}</span>
+                <span className="font-medium text-foreground">{item.name}</span>
               </div>
               <Badge variant="secondary">{item.level}</Badge>
             </div>

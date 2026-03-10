@@ -53,7 +53,7 @@ const plans = [
 
 export default function PricingPage() {
   return (
-    <div className="min-h-screen bg-[#0c0c0f] text-white">
+    <div className="min-h-screen bg-background text-foreground">
       <div className="mx-auto w-full max-w-5xl px-6 py-12">
         <div className="mb-10 text-center">
           <p className="text-xs uppercase tracking-[0.3em] text-zinc-400">Piani</p>
@@ -67,7 +67,7 @@ export default function PricingPage() {
 
         <div className="grid gap-4 md:grid-cols-3">
           {plans.map((plan) => (
-            <Card key={plan.name} className="border-white/10 bg-black/40 p-6">
+            <Card key={plan.name} className="border-border bg-card p-6">
               <div className="flex items-center justify-between">
                 <h2 className="text-lg font-semibold">{plan.name}</h2>
                 <Badge variant="secondary">{plan.highlight}</Badge>

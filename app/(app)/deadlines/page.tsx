@@ -41,11 +41,11 @@ export default async function DeadlinesPage() {
       </div>
 
       {deadlines.length === 0 ? (
-        <Card className="border-white/10 bg-black/40 p-6">
+        <Card className="border-border bg-card p-6">
           <div className="flex items-center gap-3 text-zinc-300">
             <CalendarClock className="h-5 w-5" />
             <div>
-              <p className="text-sm font-medium text-white">Nessuna scadenza registrata</p>
+              <p className="text-sm font-medium text-foreground">Nessuna scadenza registrata</p>
               <p className="text-xs text-zinc-400">
                 Inserisci una scadenza per restare in regola.
               </p>
@@ -63,15 +63,15 @@ export default async function DeadlinesPage() {
       ) : (
         <>
           <div className="grid gap-4 md:grid-cols-3">
-            <Card className="border-white/10 bg-black/40 p-5">
+            <Card className="border-border bg-card p-5">
               <p className="text-sm text-zinc-400">Scadenze totali</p>
               <p className="mt-2 text-2xl font-semibold">{deadlines.length}</p>
             </Card>
-            <Card className="border-white/10 bg-black/40 p-5">
+            <Card className="border-border bg-card p-5">
               <p className="text-sm text-zinc-400">Entro 30 giorni</p>
               <p className="mt-2 text-2xl font-semibold">{dueSoonCount}</p>
             </Card>
-            <Card className="border-white/10 bg-black/40 p-5">
+            <Card className="border-border bg-card p-5">
               <p className="text-sm text-zinc-400">Scadute</p>
               <p className="mt-2 text-2xl font-semibold">{overdueCount}</p>
             </Card>
@@ -84,10 +84,10 @@ export default async function DeadlinesPage() {
                 ? "border-red-500/40 text-red-300"
                 : isSoon
                   ? "border-amber-500/40 text-amber-300"
-                  : "border-white/10 text-zinc-200";
+                  : "border-border text-zinc-200";
 
               return (
-                <Card key={deadline.id} className="border-white/10 bg-black/40 p-6">
+                <Card key={deadline.id} className="border-border bg-card p-6">
                   <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                     <div className="space-y-2">
                       <div className="flex items-center gap-2">

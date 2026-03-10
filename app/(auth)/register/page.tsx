@@ -38,8 +38,8 @@ export default function RegisterPage() {
   }
 
   return (
-    <Card className="border-white/10 bg-black/40 p-6 shadow-xl backdrop-blur">
-      <h2 className="text-xl font-semibold text-white">Crea il tuo accesso</h2>
+    <Card className="border-border bg-card p-6 shadow-xl backdrop-blur">
+      <h2 className="text-xl font-semibold text-foreground">Crea il tuo accesso</h2>
       <p className="mt-2 text-sm text-zinc-400">
         Il tuo garage sempre in regola, a partire da qui.
       </p>
@@ -82,7 +82,7 @@ export default function RegisterPage() {
       </form>
       <div className="mt-4 text-xs text-zinc-400">
         Hai già un account?{" "}
-        <Link className="hover:text-white" href="/login">
+        <Link className="hover:text-foreground" href="/login">
           Accedi
         </Link>
       </div>

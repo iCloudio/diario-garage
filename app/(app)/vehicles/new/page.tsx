@@ -85,7 +85,7 @@ export default function NewVehiclePage() {
         </p>
       </div>
 
-      <Card className="border-white/10 bg-black/40 p-6">
+      <Card className="border-border bg-card p-6">
         <form className="space-y-6" onSubmit={onSubmit}>
           <p className="text-xs text-zinc-500">
             In questa versione puoi inserire un solo veicolo.

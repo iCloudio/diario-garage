@@ -20,10 +20,10 @@ export default function TiresPage() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
-        <Card className="border-white/10 bg-black/40 p-6">
+        <Card className="border-border bg-card p-6">
           <div className="flex items-center gap-2 text-sm text-zinc-300">
             <Sun className="h-4 w-4" />
-            <span className="font-medium text-white">Gomme estive</span>
+            <span className="font-medium text-foreground">Gomme estive</span>
           </div>
           <p className="mt-3 text-sm text-zinc-400">
             Ultimo cambio: 05/04/2025
@@ -32,10 +32,10 @@ export default function TiresPage() {
             Reminder automatico a ottobre.
           </p>
         </Card>
-        <Card className="border-white/10 bg-black/40 p-6">
+        <Card className="border-border bg-card p-6">
           <div className="flex items-center gap-2 text-sm text-zinc-300">
             <Snowflake className="h-4 w-4" />
-            <span className="font-medium text-white">Gomme invernali</span>
+            <span className="font-medium text-foreground">Gomme invernali</span>
           </div>
           <p className="mt-3 text-sm text-zinc-400">
             Ultimo cambio: 18/10/2024
@@ -46,7 +46,7 @@ export default function TiresPage() {
         </Card>
       </div>
 
-      <Card className="border-white/10 bg-black/40 p-6">
+      <Card className="border-border bg-card p-6">
         <p className="text-sm text-zinc-400">
           Sezione in sviluppo: gestione gomme avanzata in Fase 2.
         </p>

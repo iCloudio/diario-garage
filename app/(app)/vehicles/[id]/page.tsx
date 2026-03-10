@@ -20,7 +20,7 @@ export default function VehicleDetailPage() {
         </p>
       </div>
 
-      <Card className="border-white/10 bg-black/40 p-6">
+      <Card className="border-border bg-card p-6">
         <Tabs defaultValue="deadlines">
           <TabsList>
             {tabs.map((tab) => (

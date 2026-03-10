@@ -36,16 +36,16 @@ export default function MaintenancePage() {
         </Button>
       </div>
 
-      <Card className="border-white/10 bg-black/40 p-6">
+      <Card className="border-border bg-card p-6">
         <div className="flex items-center gap-2 text-sm text-zinc-300">
           <Wrench className="h-4 w-4" />
-          <span className="font-medium text-white">Interventi recenti</span>
+          <span className="font-medium text-foreground">Interventi recenti</span>
         </div>
         <div className="mt-4 space-y-3 text-sm text-zinc-300">
           {items.map((item) => (
             <div key={item.title} className="flex flex-col gap-2 border-b border-white/5 pb-3 last:border-b-0 last:pb-0 md:flex-row md:items-center md:justify-between">
               <div>
-                <p className="font-medium text-white">{item.title}</p>
+                <p className="font-medium text-foreground">{item.title}</p>
                 <p className="text-xs text-zinc-500">{item.date} · {item.km}</p>
               </div>
               <div className="flex items-center gap-3 text-xs text-zinc-400">

@@ -36,7 +36,7 @@ const groups = [
 
 export default function SitemapPage() {
   return (
-    <div className="min-h-screen bg-[#0c0c0f] text-white">
+    <div className="min-h-screen bg-background text-foreground">
       <div className="mx-auto w-full max-w-4xl px-6 py-12">
         <div className="mb-8">
           <p className="text-xs uppercase tracking-[0.3em] text-zinc-400">Sitemap</p>
@@ -48,11 +48,11 @@ export default function SitemapPage() {
 
         <div className="grid gap-4 md:grid-cols-3">
           {groups.map((group) => (
-            <Card key={group.title} className="border-white/10 bg-black/40 p-6">
+            <Card key={group.title} className="border-border bg-card p-6">
               <h2 className="text-lg font-semibold">{group.title}</h2>
               <div className="mt-4 space-y-2 text-sm text-zinc-300">
                 {group.items.map((item) => (
-                  <Link key={item.href} className="block hover:text-white" href={item.href}>
+                  <Link key={item.href} className="block hover:text-foreground" href={item.href}>
                     {item.label}
                   </Link>
                 ))}

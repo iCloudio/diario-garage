@@ -14,7 +14,7 @@ export default function BillingPage() {
         </p>
       </div>
 
-      <Card className="border-white/10 bg-black/40 p-6">
+      <Card className="border-border bg-card p-6">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-sm text-zinc-400">Piano attuale</p>

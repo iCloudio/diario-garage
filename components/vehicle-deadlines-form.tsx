@@ -77,10 +77,10 @@ export function VehicleDeadlinesForm({
   }
 
   return (
-    <Card className="border-white/10 bg-black/40 p-6">
+    <Card className="border-border bg-card p-6">
       <div className="flex items-center gap-2 text-sm text-zinc-300">
         <CalendarClock className="h-4 w-4" />
-        <p className="font-medium text-white">Scadenze principali</p>
+        <p className="font-medium text-foreground">Scadenze principali</p>
       </div>
       <p className="mt-2 text-xs text-zinc-400">
         Inserisci scadenza e prezzo (facoltativo). Puoi aggiornare quando vuoi.
@@ -90,7 +90,7 @@ export function VehicleDeadlinesForm({
         {TYPES.map((item) => (
           <div key={item.type} className="grid gap-3 md:grid-cols-[1.2fr_1fr_1fr]">
             <div className="flex items-center text-sm text-zinc-300">
-              <span className="font-medium text-white">{item.label}</span>
+              <span className="font-medium text-foreground">{item.label}</span>
             </div>
             <div className="space-y-2">
               <Label>Scadenza</Label>
