@@ -34,7 +34,7 @@ export default async function DeadlinesPage() {
         <p className="text-xs uppercase tracking-[0.3em] text-zinc-400">
           Scadenze
         </p>
-        <h2 className="mt-2 text-2xl font-semibold">Tieni tutto sotto controllo</h2>
+        <h2 className="mt-2 text-2xl font-semibold">Scadenze principali</h2>
         <p className="mt-2 text-sm text-zinc-400">
           Bollo, revisione e assicurazione ordinati per urgenza.
         </p>
@@ -53,9 +53,9 @@ export default async function DeadlinesPage() {
           </div>
           <div className="mt-4">
             <Button asChild>
-              <Link href="/vehicles/new">
+              <Link href="/vehicles">
                 <Plus className="mr-2 h-4 w-4" />
-                Aggiungi scadenze
+                Inserisci scadenze
               </Link>
             </Button>
           </div>
@@ -101,6 +101,11 @@ export default async function DeadlinesPage() {
                       <p className="text-sm text-zinc-400">
                         {deadline.vehicle.plate} · {deadline.vehicle.make ?? ""} {deadline.vehicle.model ?? ""}
                       </p>
+                      {deadline.amount != null && (
+                        <p className="text-xs text-zinc-500">
+                          Prezzo: €{deadline.amount.toFixed(2)}
+                        </p>
+                      )}
                     </div>
                     <Badge variant="outline" className={badgeClass}>
                       {deadline.dueDate.toLocaleDateString("it-IT")}

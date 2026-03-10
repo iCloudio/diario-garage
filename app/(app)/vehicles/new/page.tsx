@@ -87,6 +87,9 @@ export default function NewVehiclePage() {
 
       <Card className="border-white/10 bg-black/40 p-6">
         <form className="space-y-6" onSubmit={onSubmit}>
+          <p className="text-xs text-zinc-500">
+            In questa versione puoi inserire un solo veicolo.
+          </p>
           <div className="grid gap-4 md:grid-cols-[1fr_auto]">
             <div className="space-y-2">
               <Label htmlFor="plate">Targa</Label>

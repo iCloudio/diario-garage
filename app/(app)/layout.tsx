@@ -1,12 +1,33 @@
 import Link from "next/link";
-import { CalendarClock, Car, Home } from "lucide-react";
+import {
+  AlertTriangle,
+  BarChart3,
+  CalendarClock,
+  Car,
+  Gauge,
+  Home,
+  Settings,
+  Snowflake,
+  Ticket,
+  Users,
+  Wrench,
+} from "lucide-react";
 import { requireUser } from "@/lib/auth";
 import { LogoutButton } from "@/components/logout-button";
 
 const navItems = [
   { href: "/dashboard", label: "Home", icon: Home },
-  { href: "/vehicles", label: "Veicoli", icon: Car },
+  { href: "/vehicles", label: "Veicolo", icon: Car },
   { href: "/deadlines", label: "Scadenze", icon: CalendarClock },
+  { href: "/maintenance", label: "Manutenzioni", icon: Wrench },
+  { href: "/tires", label: "Gomme", icon: Snowflake },
+  { href: "/components", label: "Componenti", icon: Gauge },
+  { href: "/warning-lights", label: "Spie", icon: AlertTriangle },
+  { href: "/drivers", label: "Guidatori", icon: Users },
+  { href: "/incidents", label: "Incidenti", icon: AlertTriangle },
+  { href: "/fines", label: "Multe", icon: Ticket },
+  { href: "/statistics", label: "Statistiche", icon: BarChart3 },
+  { href: "/settings", label: "Impostazioni", icon: Settings },
 ];
 
 export default async function AppLayout({
@@ -18,36 +39,46 @@ export default async function AppLayout({
 
   return (
     <div className="min-h-screen bg-[#0c0c0f] text-white">
-      <header className="border-b border-white/10 bg-black/40">
-        <div className="mx-auto flex w-full max-w-5xl flex-col gap-4 px-6 py-4 md:flex-row md:items-center md:justify-between">
-          <div>
-            <p className="text-xs uppercase tracking-[0.3em] text-zinc-400">
-              DiarioGarage
-            </p>
-            <p className="mt-1 text-lg font-semibold">
-              Ciao{user.name ? `, ${user.name}` : ""}
-            </p>
-            <p className="mt-1 text-xs text-zinc-400">
-              Il tuo garage sempre in regola.
-            </p>
-          </div>
-          <div className="flex items-center gap-4">
-            <nav className="hidden items-center gap-4 text-sm text-zinc-300 md:flex">
+      <div className="w-full px-3 py-4 md:grid md:grid-cols-[240px_1fr] md:gap-4">
+        <aside className="hidden md:block">
+          <div className="sticky top-4 h-[calc(100vh-2rem)] rounded-2xl border border-white/10 bg-black/40 p-4 shadow-lg">
+            <div className="flex h-full flex-col">
+            <div className="mb-6 space-y-1">
+              <p className="text-xs uppercase tracking-[0.3em] text-zinc-400">
+                DiarioGarage
+              </p>
+              <p className="text-base font-semibold">
+                Ciao{user.name ? `, ${user.name}` : ""}
+              </p>
+              <p className="text-xs text-zinc-400">
+                Il tuo garage sempre in regola.
+              </p>
+            </div>
+
+            <nav className="space-y-1 text-sm text-zinc-300">
               {navItems.map((item) => (
-                <Link key={item.href} className="flex items-center gap-2 hover:text-white" href={item.href}>
+                <Link
+                  key={item.href}
+                  className="flex items-center gap-2 rounded-xl px-3 py-2 hover:bg-white/5 hover:text-white"
+                  href={item.href}
+                >
                   <item.icon className="h-4 w-4" />
                   {item.label}
                 </Link>
               ))}
             </nav>
-            <LogoutButton />
-          </div>
-        </div>
-      </header>
 
-      <main className="mx-auto w-full max-w-5xl px-6 pb-24 pt-6">
-        {children}
-      </main>
+            <div className="mt-auto space-y-3 border-t border-white/10 pt-4">
+              <LogoutButton />
+            </div>
+            </div>
+          </div>
+        </aside>
+
+        <div>
+          <main className="w-full pb-16">{children}</main>
+        </div>
+      </div>
 
       <nav className="fixed inset-x-0 bottom-0 z-10 border-t border-white/10 bg-black/80 backdrop-blur md:hidden">
         <div className="flex items-center justify-around py-2 text-[11px] text-zinc-300">

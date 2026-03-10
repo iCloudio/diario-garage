@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { Car, CalendarCheck, Wrench } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth";
 
@@ -38,11 +39,15 @@ export default async function AuthLayout({
           </div>
           <div className="flex items-center gap-3 rounded-lg border border-white/10 bg-white/5 px-4 py-3">
             <Car className="h-4 w-4 text-white" />
-            <span>Gestisci uno o più veicoli senza confusione.</span>
+            <span>Gestisci il tuo veicolo senza confusione.</span>
           </div>
         </div>
 
         {children}
+
+        <div className="text-xs text-zinc-500">
+          I piani e la sitemap sono disponibili nelle impostazioni.
+        </div>
       </div>
     </div>
   );

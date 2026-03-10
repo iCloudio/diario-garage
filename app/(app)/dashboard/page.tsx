@@ -11,7 +11,7 @@ export default async function DashboardPage() {
   const vehicles = await db.vehicle.findMany({
     where: { userId: user.id, deletedAt: null },
     orderBy: { createdAt: "desc" },
-    take: 3,
+    take: 1,
   });
 
   const vehicleCount = await db.vehicle.count({
@@ -70,12 +70,18 @@ export default async function DashboardPage() {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button asChild>
-            <Link href="/vehicles/new">
-              <Plus className="mr-2 h-4 w-4" />
-              Aggiungi veicolo
-            </Link>
-          </Button>
+          {vehicleCount === 0 ? (
+            <Button asChild>
+              <Link href="/vehicles/new">
+                <Plus className="mr-2 h-4 w-4" />
+                Aggiungi veicolo
+              </Link>
+            </Button>
+          ) : (
+            <Button asChild>
+              <Link href="/vehicles">Gestisci veicolo</Link>
+            </Button>
+          )}
           <Button asChild variant="secondary">
             <Link href="/deadlines">Vai alle scadenze</Link>
           </Button>
@@ -102,139 +108,95 @@ export default async function DashboardPage() {
           </div>
         </Card>
       ) : (
-        <>
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card className="border-white/10 bg-black/40 p-5">
-          <div className="flex items-center justify-between">
-            <p className="text-sm text-zinc-400">Veicoli attivi</p>
-            <Car className="h-4 w-4 text-zinc-300" />
-          </div>
-          <p className="mt-3 text-3xl font-semibold">{vehicleCount}</p>
-          <p className="mt-2 text-xs text-zinc-500">
-            Gestisci uno o più veicoli senza confusione.
-          </p>
-        </Card>
-        <Card className="border-white/10 bg-black/40 p-5">
-          <div className="flex items-center justify-between">
-            <p className="text-sm text-zinc-400">Scadenze nei prossimi 30 giorni</p>
-            <CalendarClock className="h-4 w-4 text-zinc-300" />
-          </div>
-          <p className="mt-3 text-3xl font-semibold">{dueSoonCount}</p>
-          <p className="mt-2 text-xs text-zinc-500">
-            Ti basta un colpo d'occhio per essere in regola.
-          </p>
-        </Card>
-        <Card className="border-white/10 bg-black/40 p-5">
-          <div className="flex items-center justify-between">
-            <p className="text-sm text-zinc-400">Stato generale</p>
-            <CheckCircle2 className="h-4 w-4 text-zinc-300" />
-          </div>
-          <p className="mt-3 text-lg font-semibold">
-            {dueSoonCount === 0 ? "Tutto sotto controllo" : "Hai scadenze in arrivo"}
-          </p>
-          <p className="mt-2 text-xs text-zinc-500">
-            Aggiorna le scadenze per tenere il garage in ordine.
-          </p>
-        </Card>
-      </div>
-
-      {vehicleCount === 1 && primaryVehicle ? (
-        <Card className="border-white/10 bg-black/40 p-6">
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div>
-              <p className="text-sm text-zinc-400">Veicolo attivo</p>
-              <h3 className="mt-1 text-xl font-semibold">{primaryVehicle.plate}</h3>
-              <p className="text-sm text-zinc-400">
-                {primaryVehicle.make ?? "Marca"} {primaryVehicle.model ?? ""}
-                {primaryVehicle.year ? ` · ${primaryVehicle.year}` : ""}
-              </p>
-            </div>
-            <div className="rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm text-zinc-300">
-              <p className="text-xs uppercase tracking-[0.2em] text-zinc-500">
-                Prossima scadenza
-              </p>
-              <p className="mt-2 font-medium text-white">
-                {nextVehicleDeadline
-                  ? `${nextVehicleDeadline.type} · ${nextVehicleDeadline.dueDate.toLocaleDateString("it-IT")}`
-                  : "Nessuna scadenza inserita"}
-              </p>
-            </div>
-          </div>
-        </Card>
-      ) : (
-        <Card className="border-white/10 bg-black/40 p-6">
-          <div className="flex items-center justify-between">
-            <p className="text-sm text-zinc-400">Seleziona un veicolo</p>
-            <Link className="text-xs text-zinc-400 hover:text-white" href="/vehicles">
-              Gestisci veicoli →
-            </Link>
-          </div>
-          <div className="mt-4 grid gap-2 text-sm text-zinc-300">
-            {vehicles.map((vehicle) => (
-              <div key={vehicle.id} className="flex items-center justify-between">
-                <span>
-                  {vehicle.plate} · {vehicle.make ?? "Marca"} {vehicle.model ?? ""}
-                </span>
-                <Badge variant="secondary">Attivo</Badge>
+        <div className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-3">
+            <Card className="border-white/10 bg-black/40 p-5">
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-zinc-400">Veicoli attivi</p>
+                <Car className="h-4 w-4 text-zinc-300" />
               </div>
-            ))}
+              <p className="mt-3 text-3xl font-semibold">{vehicleCount}</p>
+              <p className="mt-2 text-xs text-zinc-500">
+                Un solo veicolo, chiaro e ordinato.
+              </p>
+            </Card>
+            <Card className="border-white/10 bg-black/40 p-5">
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-zinc-400">Scadenze nei prossimi 30 giorni</p>
+                <CalendarClock className="h-4 w-4 text-zinc-300" />
+              </div>
+              <p className="mt-3 text-3xl font-semibold">{dueSoonCount}</p>
+              <p className="mt-2 text-xs text-zinc-500">
+                Ti basta un colpo d'occhio per essere in regola.
+              </p>
+            </Card>
+            <Card className="border-white/10 bg-black/40 p-5">
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-zinc-400">Stato generale</p>
+                <CheckCircle2 className="h-4 w-4 text-zinc-300" />
+              </div>
+              <p className="mt-3 text-lg font-semibold">
+                {dueSoonCount === 0 ? "Tutto sotto controllo" : "Hai scadenze in arrivo"}
+              </p>
+              <p className="mt-2 text-xs text-zinc-500">
+                Aggiorna le scadenze per tenere il garage in ordine.
+              </p>
+            </Card>
           </div>
-        </Card>
-      )}
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card className="border-white/10 bg-black/40 p-6">
-          <div className="flex items-center justify-between">
-            <p className="text-sm text-zinc-400">Veicoli recenti</p>
-            <Link className="text-xs text-zinc-400 hover:text-white" href="/vehicles">
-              Vedi tutti →
-            </Link>
-          </div>
-          <div className="mt-4 space-y-2 text-sm text-zinc-300">
-            {vehicles.length === 0 ? (
-              <p>Nessun veicolo ancora registrato.</p>
-            ) : (
-              vehicles.map((vehicle) => (
-                <div key={vehicle.id} className="flex items-center justify-between">
-                  <span>
-                    {vehicle.plate} · {vehicle.make ?? "Marca"} {vehicle.model ?? ""}
-                  </span>
-                  <Badge variant="secondary">Attivo</Badge>
+          {primaryVehicle ? (
+            <Card className="border-white/10 bg-black/40 p-6">
+              <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                <div>
+                  <p className="text-sm text-zinc-400">Veicolo attivo</p>
+                  <h3 className="mt-1 text-xl font-semibold">{primaryVehicle.plate}</h3>
+                  <p className="text-sm text-zinc-400">
+                    {primaryVehicle.make ?? "Marca"} {primaryVehicle.model ?? ""}
+                    {primaryVehicle.year ? ` · ${primaryVehicle.year}` : ""}
+                  </p>
                 </div>
-              ))
-            )}
-          </div>
-        </Card>
+                <div className="rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm text-zinc-300">
+                  <p className="text-xs uppercase tracking-[0.2em] text-zinc-500">
+                    Prossima scadenza
+                  </p>
+                  <p className="mt-2 font-medium text-white">
+                    {nextVehicleDeadline
+                      ? `${nextVehicleDeadline.type} · ${nextVehicleDeadline.dueDate.toLocaleDateString("it-IT")}`
+                      : "Nessuna scadenza inserita"}
+                  </p>
+                </div>
+              </div>
+            </Card>
+          ) : null}
 
-        <Card className="border-white/10 bg-black/40 p-6">
-          <div className="flex items-center justify-between">
-            <p className="text-sm text-zinc-400">Prossime scadenze</p>
-            <Link className="text-xs text-zinc-400 hover:text-white" href="/deadlines">
-              Vedi tutte →
-            </Link>
-          </div>
-          <div className="mt-4 space-y-3 text-sm text-zinc-300">
-            {upcoming.length === 0 ? (
-              <p>Nessuna scadenza imminente.</p>
-            ) : (
-              upcoming.map((deadline) => (
-                <div key={deadline.id} className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium">{deadline.type}</p>
-                    <p className="text-xs text-zinc-500">
-                      {deadline.vehicle.plate} · {deadline.vehicle.make ?? ""} {deadline.vehicle.model ?? ""}
-                    </p>
+          <Card className="border-white/10 bg-black/40 p-6">
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-zinc-400">Prossime scadenze</p>
+              <Link className="text-xs text-zinc-400 hover:text-white" href="/deadlines">
+                Vedi tutte →
+              </Link>
+            </div>
+            <div className="mt-4 space-y-3 text-sm text-zinc-300">
+              {upcoming.length === 0 ? (
+                <p>Nessuna scadenza imminente.</p>
+              ) : (
+                upcoming.map((deadline) => (
+                  <div key={deadline.id} className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">{deadline.type}</p>
+                      <p className="text-xs text-zinc-500">
+                        {deadline.vehicle.plate} · {deadline.vehicle.make ?? ""} {deadline.vehicle.model ?? ""}
+                      </p>
+                    </div>
+                    <Badge variant="outline">
+                      {deadline.dueDate.toLocaleDateString("it-IT")}
+                    </Badge>
                   </div>
-                  <Badge variant="outline">
-                    {deadline.dueDate.toLocaleDateString("it-IT")}
-                  </Badge>
-                </div>
-              ))
-            )}
-          </div>
-        </Card>
-      </div>
-        </>
+                ))
+              )}
+            </div>
+          </Card>
+        </div>
       )}
     </div>
   );

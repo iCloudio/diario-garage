@@ -1,0 +1,129 @@
+"use client";
+
+import { useState, useTransition } from "react";
+import { toast } from "sonner";
+import { CalendarClock, Euro } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+
+export type DeadlineInput = {
+  type: "BOLLO" | "REVISIONE" | "ASSICURAZIONE";
+  dueDate?: string;
+  amount?: number | null;
+};
+
+const TYPES: Array<{ type: DeadlineInput["type"]; label: string }> = [
+  { type: "ASSICURAZIONE", label: "Assicurazione" },
+  { type: "BOLLO", label: "Bollo" },
+  { type: "REVISIONE", label: "Revisione" },
+];
+
+type FormState = Record<DeadlineInput["type"], { dueDate: string; amount: string }>;
+
+function buildInitialState(deadlines: DeadlineInput[]): FormState {
+  return TYPES.reduce<FormState>((acc, item) => {
+    const match = deadlines.find((d) => d.type === item.type);
+    acc[item.type] = {
+      dueDate: match?.dueDate ?? "",
+      amount: match?.amount != null ? String(match.amount) : "",
+    };
+    return acc;
+  }, {} as FormState);
+}
+
+export function VehicleDeadlinesForm({
+  vehicleId,
+  deadlines,
+}: {
+  vehicleId: string;
+  deadlines: DeadlineInput[];
+}) {
+  const [pending, startTransition] = useTransition();
+  const [form, setForm] = useState<FormState>(() => buildInitialState(deadlines));
+
+  function updateField(type: DeadlineInput["type"], field: "dueDate" | "amount", value: string) {
+    setForm((prev) => ({
+      ...prev,
+      [type]: { ...prev[type], [field]: value },
+    }));
+  }
+
+  function onSubmit(event: React.FormEvent) {
+    event.preventDefault();
+
+    startTransition(async () => {
+      const payload = TYPES.map(({ type }) => ({
+        type,
+        dueDate: form[type].dueDate,
+        amount: form[type].amount === "" ? null : Number(form[type].amount),
+      }));
+
+      const response = await fetch("/api/deadlines", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ vehicleId, deadlines: payload }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => null);
+        toast.error(data?.error ?? "Salvataggio non riuscito.");
+        return;
+      }
+
+      toast.success("Scadenze salvate.");
+    });
+  }
+
+  return (
+    <Card className="border-white/10 bg-black/40 p-6">
+      <div className="flex items-center gap-2 text-sm text-zinc-300">
+        <CalendarClock className="h-4 w-4" />
+        <p className="font-medium text-white">Scadenze principali</p>
+      </div>
+      <p className="mt-2 text-xs text-zinc-400">
+        Inserisci scadenza e prezzo (facoltativo). Puoi aggiornare quando vuoi.
+      </p>
+
+      <form className="mt-6 space-y-4" onSubmit={onSubmit}>
+        {TYPES.map((item) => (
+          <div key={item.type} className="grid gap-3 md:grid-cols-[1.2fr_1fr_1fr]">
+            <div className="flex items-center text-sm text-zinc-300">
+              <span className="font-medium text-white">{item.label}</span>
+            </div>
+            <div className="space-y-2">
+              <Label>Scadenza</Label>
+              <Input
+                type="date"
+                value={form[item.type].dueDate}
+                onChange={(event) => updateField(item.type, "dueDate", event.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Prezzo (opzionale)</Label>
+              <div className="relative">
+                <Euro className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-zinc-500" />
+                <Input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  className="pl-9"
+                  value={form[item.type].amount}
+                  onChange={(event) => updateField(item.type, "amount", event.target.value)}
+                  placeholder="0,00"
+                />
+              </div>
+            </div>
+          </div>
+        ))}
+
+        <div className="flex justify-end">
+          <Button type="submit" disabled={pending}>
+            {pending ? "Salvataggio..." : "Salva scadenze"}
+          </Button>
+        </div>
+      </form>
+    </Card>
+  );
+}
