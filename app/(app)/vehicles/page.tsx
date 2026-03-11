@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Bike, Car, Caravan, CalendarClock, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { db } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { Card } from "@/components/ui/card";
@@ -12,69 +12,62 @@ const DEADLINE_LABELS = {
   REVISIONE: "Revisione",
 } as const;
 
-const DEADLINE_ORDER = ["ASSICURAZIONE", "BOLLO", "REVISIONE"] as const;
 const VEHICLE_LABELS = {
   AUTO: "Auto",
   MOTO: "Moto",
   CAMPER: "Camper",
 } as const;
 
-type StatusTone = "muted" | "success" | "warning" | "danger";
+const FUEL_LABELS = {
+  BENZINA: "Benzina",
+  DIESEL: "Diesel",
+  GPL: "GPL",
+  METANO: "Metano",
+  ELETTRICO: "Elettrico",
+  IBRIDO_BENZINA: "Ibrido benzina",
+  IBRIDO_DIESEL: "Ibrido diesel",
+} as const;
 
-function getVehicleIcon(type: keyof typeof VEHICLE_LABELS) {
-  switch (type) {
-    case "MOTO":
-      return Bike;
-    case "CAMPER":
-      return Caravan;
-    default:
-      return Car;
-  }
-}
-
-function formatDeadlineStatus(
-  dueDate: Date | null | undefined,
-  now: Date,
-): { value: string; tone: StatusTone } {
-  if (!dueDate) {
-    return { value: "Da inserire", tone: "muted" };
-  }
-
-  const diffMs = dueDate.getTime() - now.getTime();
-  const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
-
-  if (diffDays <= 0) {
-    return { value: "Scaduta", tone: "danger" };
-  }
+function getDeadlineChipClass(dueDate: Date, now: Date) {
+  const dueDay = new Date(dueDate.getFullYear(), dueDate.getMonth(), dueDate.getDate());
+  const nowDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const diffDays = Math.ceil(
+    (dueDay.getTime() - nowDay.getTime()) / (1000 * 60 * 60 * 24),
+  );
 
   if (diffDays <= 30) {
-    return { value: `Tra ${diffDays} giorni`, tone: "danger" };
+    return "border-rose-500/30 bg-rose-500/15 text-rose-700 dark:text-rose-300";
   }
 
   if (diffDays <= 90) {
-    const diffMonths = Math.round(diffDays / 30);
-    return { value: `Tra ${diffMonths} mesi`, tone: "warning" };
+    return "border-amber-500/30 bg-amber-500/15 text-amber-700 dark:text-amber-300";
   }
 
-  const formattedMonth = new Intl.DateTimeFormat("it-IT", {
-    month: "long",
-    year: "numeric",
-  }).format(dueDate);
-
-  return { value: `Fino a ${formattedMonth}`, tone: "success" };
+  return "border-emerald-500/30 bg-emerald-500/15 text-emerald-700 dark:text-emerald-300";
 }
 
-function getStatusChipClass(tone: StatusTone) {
-  switch (tone) {
-    case "success":
-      return "border-emerald-500/30 bg-emerald-500/15 text-emerald-700 dark:text-emerald-300";
-    case "warning":
-      return "border-amber-500/30 bg-amber-500/15 text-amber-700 dark:text-amber-300";
-    case "danger":
-      return "border-rose-500/30 bg-rose-500/15 text-rose-700 dark:text-rose-300";
-    default:
-      return "border-border/80 bg-muted/40 text-muted-foreground";
-  }
+function getDeadlineChipLabel(dueDate: Date, now: Date) {
+  const dueDay = new Date(dueDate.getFullYear(), dueDate.getMonth(), dueDate.getDate());
+  const nowDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const diffDays = Math.ceil(
+    (dueDay.getTime() - nowDay.getTime()) / (1000 * 60 * 60 * 24),
+  );
+
+  if (diffDays <= 0) return "Scaduto";
+  if (diffDays <= 30) return `Tra ${diffDays} ${diffDays === 1 ? "giorno" : "giorni"}`;
+
+  const diffMonths = Math.ceil(diffDays / 30);
+  return `Tra ${diffMonths} ${diffMonths === 1 ? "mese" : "mesi"}`;
+}
+
+function getDeadlineChipAnimationClass(dueDate: Date, now: Date) {
+  const dueDay = new Date(dueDate.getFullYear(), dueDate.getMonth(), dueDate.getDate());
+  const nowDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const diffDays = Math.ceil(
+    (dueDay.getTime() - nowDay.getTime()) / (1000 * 60 * 60 * 24),
+  );
+
+  return diffDays <= 0 ? "deadline-chip-alert" : "";
 }
 
 export default async function VehiclesPage() {
@@ -86,6 +79,16 @@ export default async function VehiclesPage() {
         where: { deletedAt: null },
         orderBy: { dueDate: "asc" },
       },
+      expenses: {
+        where: { deletedAt: null },
+        orderBy: { date: "desc" },
+        take: 1,
+      },
+      refuels: {
+        where: { deletedAt: null },
+        orderBy: { date: "desc" },
+        take: 1,
+      },
     },
     orderBy: { createdAt: "desc" },
   });
@@ -94,30 +97,6 @@ export default async function VehiclesPage() {
 
   return (
     <div className="space-y-6">
-      <Card className="border-border/80 bg-card/90 p-6">
-        <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
-          <div className="max-w-2xl">
-            <p className="text-xs uppercase tracking-[0.3em] text-primary/80">
-              Garage
-            </p>
-            <h1 className="mt-3 text-3xl font-semibold tracking-tight">
-              Veicoli sotto controllo, senza caos visivo.
-            </h1>
-            <p className="mt-3 text-sm leading-6 text-muted-foreground">
-              Ogni card ti mostra solo cio&apos; che serve: identita&apos; del veicolo,
-              stato delle scadenze e il prossimo punto da controllare.
-            </p>
-          </div>
-
-          <Button asChild>
-            <Link href="/vehicles/new">
-              <Plus className="mr-2 h-4 w-4" />
-              Aggiungi veicolo
-            </Link>
-          </Button>
-        </div>
-      </Card>
-
       {vehicles.length === 0 ? (
         <Card className="border-dashed border-border/80 bg-card/75 p-8">
           <div className="max-w-xl">
@@ -138,113 +117,134 @@ export default async function VehiclesPage() {
       ) : (
         <div className="grid auto-rows-fr gap-4 md:grid-cols-2 xl:grid-cols-3">
           {vehicles.map((item) => {
-            const deadlinesByType = new Map(
-              item.deadlines.map((deadline) => [deadline.type, deadline]),
-            );
-            const VehicleIcon = getVehicleIcon(item.type ?? "AUTO");
-            const nextDeadline = item.deadlines.find((deadline) => deadline.dueDate >= now) ?? null;
-            const urgentCount = item.deadlines.filter((deadline) => {
-              const diffDays = Math.ceil(
-                (deadline.dueDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24),
-              );
+            const latestRefuel = item.refuels[0] ?? null;
+            const lastRefuelData = (() => {
+              if (!latestRefuel) return null;
 
-              return diffDays >= 0 && diffDays <= 30;
-            }).length;
+              const refuelDay = new Date(
+                latestRefuel.date.getFullYear(),
+                latestRefuel.date.getMonth(),
+                latestRefuel.date.getDate(),
+              );
+              const nowDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+              const diffDays = Math.max(
+                0,
+                Math.ceil((nowDay.getTime() - refuelDay.getTime()) / (1000 * 60 * 60 * 24)),
+              );
+              const fuelLabel = FUEL_LABELS[latestRefuel.fuelType] ?? latestRefuel.fuelType;
+              const amountLabel = `${new Intl.NumberFormat("it-IT", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              }).format(latestRefuel.amountEur)} EUR`;
+              const daysLabel =
+                diffDays === 0
+                  ? "oggi"
+                  : `${diffDays} ${diffDays === 1 ? "giorno" : "giorni"} fa`;
+
+              return { fuelLabel, amountLabel, daysLabel };
+            })();
 
             return (
               <Link key={item.id} className="block" href={`/vehicles/${item.id}`}>
                 <Card className="h-full border-border/80 bg-card/90 p-6 transition hover:border-primary/35 hover:bg-card hover:shadow-lg">
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <p className="text-sm text-muted-foreground">
-                          {VEHICLE_LABELS[item.type ?? "AUTO"]}
-                        </p>
-                        {item.status === "VENDUTO" && (
-                          <Badge variant="secondary" className="text-xs">
-                            Venduto
-                          </Badge>
-                        )}
-                        {item.status === "ROTTAMATO" && (
-                          <Badge variant="outline" className="text-xs">
-                            Rottamato
-                          </Badge>
-                        )}
-                      </div>
-                      <h2 className="mt-2 text-2xl font-semibold tracking-tight">
-                        {item.plate}
-                      </h2>
-                      <p className="mt-1 text-sm text-muted-foreground">
-                        {item.make ?? "Marca"} {item.model ?? ""}
-                        {item.year ? ` · ${item.year}` : ""}
+                  <div className="-mx-6 -mt-6 mb-5 grid grid-cols-3 items-center border-b border-border/70 px-6 py-3 text-sm text-muted-foreground">
+                    <div className="text-left">{item.year ?? ""}</div>
+                    <div className="text-center">{VEHICLE_LABELS[item.type ?? "AUTO"]}</div>
+                    <div className="text-right">
+                      {item.odometerKm
+                        ? `${new Intl.NumberFormat("it-IT").format(item.odometerKm)} km`
+                        : ""}
+                    </div>
+                  </div>
+
+                  <div className="text-center">
+                    <div className="flex flex-wrap items-center justify-center gap-2">
+                      {item.status !== "ATTIVO" ? (
+                        <Badge variant={item.status === "VENDUTO" ? "secondary" : "outline"} className="text-xs">
+                          {item.status === "VENDUTO" ? "Venduto" : "Rottamato"}
+                        </Badge>
+                      ) : null}
+                    </div>
+                    <h2 className="mt-2 text-2xl font-semibold tracking-tight">
+                      {item.plate}
+                    </h2>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      {item.make ?? "Marca"} {item.model ?? ""}
+                    </p>
+                  </div>
+
+                  <div className="mt-5">
+                    <div className="flex items-center gap-3">
+                      <p className="shrink-0 text-xs uppercase tracking-[0.22em] text-muted-foreground">
+                        Scadenze
                       </p>
+                      <div className="h-px flex-1 bg-border/70" />
                     </div>
-
-                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-border/80 bg-background/70">
-                      <VehicleIcon className="h-6 w-6 text-muted-foreground" />
-                    </div>
-                  </div>
-
-                  <div className="mt-5 rounded-2xl border border-border/80 bg-background/65 p-4">
-                    <div className="flex items-center justify-between gap-3">
-                      <div>
-                        <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">
-                          Prossima scadenza
-                        </p>
-                        <p className="mt-2 text-sm font-medium text-foreground">
-                          {nextDeadline
-                            ? DEADLINE_LABELS[nextDeadline.type]
-                            : "Nessuna scadenza inserita"}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {nextDeadline
-                            ? nextDeadline.dueDate.toLocaleDateString("it-IT")
-                            : "Aggiungi bollo, assicurazione o revisione"}
-                        </p>
-                      </div>
-
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-                        <CalendarClock className="h-4 w-4 text-primary" />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="mt-5 space-y-2 text-xs">
-                    {DEADLINE_ORDER.map((type) => {
-                      const deadline = deadlinesByType.get(type);
-                      const status = formatDeadlineStatus(deadline?.dueDate, now);
-
-                      return (
-                        <div key={type} className="flex items-center justify-between gap-3">
-                          <span className="text-muted-foreground">
-                            {DEADLINE_LABELS[type]}
-                          </span>
-                          <span
-                            className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-medium ${getStatusChipClass(
-                              status.tone,
-                            )}`}
+                    <div className="mt-3 space-y-2">
+                      {item.deadlines.length === 0 ? (
+                        <p className="text-sm text-muted-foreground">Nessuna scadenza</p>
+                      ) : (
+                        item.deadlines.map((deadline) => (
+                          <div
+                            key={deadline.id}
+                            className="flex items-center justify-between gap-3 text-sm"
                           >
-                            {status.value}
-                          </span>
-                        </div>
-                      );
-                    })}
+                            <span className="font-medium text-foreground">
+                              {DEADLINE_LABELS[deadline.type]}
+                            </span>
+                            <span
+                              className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-medium ${getDeadlineChipClass(
+                                deadline.dueDate,
+                                now,
+                              )} ${getDeadlineChipAnimationClass(deadline.dueDate, now)}`}
+                            >
+                              {getDeadlineChipLabel(deadline.dueDate, now)}
+                            </span>
+                          </div>
+                        ))
+                      )}
+                    </div>
                   </div>
 
-                  <div className="mt-5 flex items-center justify-between border-t border-border/70 pt-4 text-xs">
-                    <span className="text-muted-foreground">
-                      {item.deadlines.length > 0
-                        ? `${item.deadlines.length} scadenze monitorate`
-                        : "Configurazione da completare"}
-                    </span>
-                    <span className={urgentCount > 0 ? "font-medium text-amber-600 dark:text-amber-300" : "text-muted-foreground"}>
-                      {urgentCount > 0 ? `${urgentCount} urgenti` : "Tutto sotto controllo"}
-                    </span>
+                  <div className="mt-5 flex items-center justify-between text-sm">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3">
+                        <p className="shrink-0 text-xs uppercase tracking-[0.22em] text-muted-foreground">
+                          Carburante
+                        </p>
+                        <div className="h-px flex-1 bg-border/70" />
+                      </div>
+                      <div className="mt-3">
+                        {lastRefuelData ? (
+                          <div className="grid grid-cols-3 gap-3 text-sm">
+                            <p className="text-left text-foreground">{lastRefuelData.fuelLabel}</p>
+                            <p className="text-center text-foreground">{lastRefuelData.amountLabel}</p>
+                            <p className="text-right text-foreground">{lastRefuelData.daysLabel}</p>
+                          </div>
+                        ) : (
+                          <p className="italic text-muted-foreground">Nessun rifornimento</p>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </Card>
               </Link>
             );
           })}
+
+          <Link className="block" href="/vehicles/new">
+            <Card className="flex h-full min-h-64 flex-col items-center justify-center gap-4 border-dashed border-border/80 bg-card/60 p-6 text-center transition hover:border-primary/35 hover:bg-card/80">
+              <div className="flex h-14 w-14 items-center justify-center rounded-full border border-border/80 bg-background/70">
+                <Plus className="h-6 w-6 text-muted-foreground" />
+              </div>
+              <div>
+                <p className="text-base font-medium text-foreground">Aggiungi veicolo</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Crea una nuova scheda veicolo.
+                </p>
+              </div>
+            </Card>
+          </Link>
         </div>
       )}
     </div>

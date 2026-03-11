@@ -56,18 +56,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Dati veicolo non validi." }, { status: 400 });
   }
 
-  const existing = await db.vehicle.findFirst({
-    where: { userId: session.userId, deletedAt: null },
-    select: { id: true },
-  });
-
-  if (existing) {
-    return NextResponse.json(
-      { error: "In questa versione puoi gestire un solo veicolo." },
-      { status: 409 }
-    );
-  }
-
   const { plate, make, model, odometerKm, type, fuelType } = parsed.data;
   const created = await db.vehicle.create({
     data: {

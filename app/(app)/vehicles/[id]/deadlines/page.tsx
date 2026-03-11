@@ -30,9 +30,22 @@ export default async function VehicleDeadlinesPage({
 
   return (
     <div className="space-y-6">
+      <div>
+        <p className="text-xs uppercase tracking-[0.24em] text-primary/80">
+          Scadenze
+        </p>
+        <h2 className="mt-2 text-2xl font-semibold tracking-tight">
+          Gestisci bollo, assicurazione e revisione
+        </h2>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Qui aggiorni tutte le scadenze importanti senza dover cercare tra altre
+          informazioni del veicolo.
+        </p>
+      </div>
+
       <VehicleDeadlinesForm vehicleId={vehicle.id} deadlines={deadlines} />
 
-      <Card className="border-border bg-card p-6">
+      <Card className="border-border/80 bg-card/90 p-6">
         <p className="text-sm text-muted-foreground">Scadenze salvate</p>
         <div className="mt-3 flex flex-wrap gap-2 text-sm text-muted-foreground">
           {vehicle.deadlines.length === 0 ? (

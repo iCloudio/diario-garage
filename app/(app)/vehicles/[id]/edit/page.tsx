@@ -21,12 +21,14 @@ export default async function VehicleEditPage({
   return (
     <div className="space-y-6">
       <div>
-        <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
-          Veicolo
+        <p className="text-xs uppercase tracking-[0.24em] text-primary/80">
+          Dettagli
         </p>
-        <h2 className="mt-2 text-2xl font-semibold">Modifica dati veicolo</h2>
+        <h2 className="mt-2 text-2xl font-semibold tracking-tight">
+          Modifica dati veicolo
+        </h2>
         <p className="mt-2 text-sm text-muted-foreground">
-          Aggiorna targa, modello e chilometraggio.
+          Aggiorna anagrafica, chilometraggio, alimentazione e stato del veicolo.
         </p>
       </div>
 

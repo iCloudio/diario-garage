@@ -104,8 +104,16 @@ export function VehicleEditForm({
   }
 
   return (
-    <Card className="border-border bg-card p-6">
+    <Card className="border-border/80 bg-card/90 p-6">
       <form className="space-y-6" onSubmit={onSubmit}>
+        <div>
+          <p className="text-sm font-medium text-foreground">Dati principali</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Targa e tipologia identificano il veicolo. Marca, modello e alimentazione
+            servono solo a completare la scheda.
+          </p>
+        </div>
+
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="plate">Targa</Label>
@@ -118,7 +126,7 @@ export function VehicleEditForm({
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="odometerKm">Km attuali</Label>
+            <Label htmlFor="odometerKm">Km attuali (facoltativi)</Label>
             <Input
               id="odometerKm"
               value={odometerKm}
@@ -143,7 +151,7 @@ export function VehicleEditForm({
             </Select>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="make">Marca</Label>
+            <Label htmlFor="make">Marca (facoltativa)</Label>
             <Input
               id="make"
               value={make}
@@ -152,7 +160,7 @@ export function VehicleEditForm({
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="model">Modello</Label>
+            <Label htmlFor="model">Modello (facoltativo)</Label>
             <Input
               id="model"
               value={model}
@@ -161,7 +169,7 @@ export function VehicleEditForm({
             />
           </div>
           <div className="space-y-2">
-            <Label>Alimentazione</Label>
+            <Label>Alimentazione (facoltativa)</Label>
             <Select value={fuelType || undefined} onValueChange={setFuelType}>
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Seleziona alimentazione" />
@@ -214,12 +222,11 @@ export function VehicleEditForm({
           </div>
         </div>
 
-        {/* Sezione Stato Veicolo */}
         <div className="space-y-4 border-t border-border pt-6">
           <div>
-            <Label className="text-base font-semibold">Stato veicolo</Label>
-            <p className="text-xs text-muted-foreground mt-1">
-              Indica se il veicolo è attivo, venduto o rottamato
+            <Label className="text-base font-semibold">Stato amministrativo</Label>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Usa questa sezione solo per chiudere o aggiornare lo stato del veicolo.
             </p>
           </div>
 

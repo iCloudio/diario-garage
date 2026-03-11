@@ -128,8 +128,16 @@ export function RefuelForm({ vehicleId, currentOdometer, vehicleFuelType }: Refu
 
   return (
     <form onSubmit={handleSubmit}>
-      <Card className="border-border bg-card p-6">
+      <Card className="border-border/80 bg-card/90 p-6">
         <div className="space-y-4">
+          <div className="rounded-2xl border border-border/80 bg-background/70 p-4">
+            <p className="text-sm font-medium text-foreground">Campi richiesti</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Per registrare un rifornimento servono data, importo, chilometraggio
+              e tipo di carburante.
+            </p>
+          </div>
+
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="date">Data rifornimento</Label>
@@ -281,15 +289,24 @@ export function RefuelForm({ vehicleId, currentOdometer, vehicleFuelType }: Refu
             </p>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="notes">Note (opzionale)</Label>
-            <Textarea
-              id="notes"
-              name="notes"
-              placeholder="es. Stazione X, autostrada..."
-              rows={2}
-            />
-          </div>
+          <details className="rounded-2xl border border-border/80 bg-background/55 p-4">
+            <summary className="cursor-pointer list-none text-sm font-medium text-foreground">
+              Aggiungi note facoltative
+            </summary>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Usa le note solo se vuoi ricordare stazione di servizio o altri dettagli.
+            </p>
+
+            <div className="mt-4 space-y-2">
+              <Label htmlFor="notes">Note (opzionali)</Label>
+              <Textarea
+                id="notes"
+                name="notes"
+                placeholder="es. Stazione X, autostrada..."
+                rows={2}
+              />
+            </div>
+          </details>
         </div>
 
         <div className="mt-6 flex gap-3">

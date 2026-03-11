@@ -20,7 +20,7 @@ const groups = [
   {
     title: "Info",
     items: [
-      { label: "Piani", href: "/pricing" },
+      { label: "Stato account", href: "/pricing" },
     ],
   },
 ];

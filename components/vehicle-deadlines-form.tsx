@@ -77,13 +77,14 @@ export function VehicleDeadlinesForm({
   }
 
   return (
-    <Card className="border-border bg-card p-6">
+    <Card className="border-border/80 bg-card/90 p-6">
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
         <CalendarClock className="h-4 w-4" />
         <p className="font-medium text-foreground">Scadenze principali</p>
       </div>
       <p className="mt-2 text-xs text-muted-foreground">
-        Inserisci scadenza e prezzo (facoltativo). Puoi aggiornare quando vuoi.
+        Inserisci prima la data di scadenza. Il prezzo e&apos; facoltativo e puoi
+        aggiungerlo anche in un secondo momento.
       </p>
 
       <form className="mt-6 space-y-4" onSubmit={onSubmit}>

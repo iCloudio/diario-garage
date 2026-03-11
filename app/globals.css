@@ -138,4 +138,18 @@
   .dark .app-dots-background {
     background-image: radial-gradient(rgb(255 255 255 / 0.08) 1px, transparent 1px);
   }
+
+  @keyframes soft-pulse {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.55;
+    }
+  }
+
+  .deadline-chip-alert {
+    animation: soft-pulse 1.4s ease-in-out infinite;
+  }
 }

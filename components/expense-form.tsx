@@ -78,8 +78,15 @@ export function ExpenseForm({ vehicleId, currentOdometer }: ExpenseFormProps) {
 
   return (
     <form onSubmit={handleSubmit}>
-      <Card className="border-border bg-card p-6">
+      <Card className="border-border/80 bg-card/90 p-6">
         <div className="space-y-4">
+          <div className="rounded-2xl border border-border/80 bg-background/70 p-4">
+            <p className="text-sm font-medium text-foreground">Campi richiesti</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Per salvare una spesa bastano data, importo e categoria.
+            </p>
+          </div>
+
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="date">Data</Label>
@@ -132,36 +139,47 @@ export function ExpenseForm({ vehicleId, currentOdometer }: ExpenseFormProps) {
             </Select>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="description">Descrizione</Label>
-            <Input
-              id="description"
-              name="description"
-              placeholder="es. Tagliando 60.000 km"
-            />
-          </div>
+          <details className="rounded-2xl border border-border/80 bg-background/55 p-4">
+            <summary className="cursor-pointer list-none text-sm font-medium text-foreground">
+              Aggiungi dettagli facoltativi
+            </summary>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Descrizione, chilometraggio e note servono solo se vuoi uno storico piu preciso.
+            </p>
 
-          <div className="space-y-2">
-            <Label htmlFor="odometerKm">Chilometraggio (opzionale)</Label>
-            <Input
-              id="odometerKm"
-              name="odometerKm"
-              type="number"
-              min="0"
-              defaultValue={currentOdometer}
-              placeholder="es. 60120"
-            />
-          </div>
+            <div className="mt-4 space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="description">Descrizione (facoltativa)</Label>
+                <Input
+                  id="description"
+                  name="description"
+                  placeholder="es. Tagliando 60.000 km"
+                />
+              </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="notes">Note (opzionale)</Label>
-            <Textarea
-              id="notes"
-              name="notes"
-              placeholder="es. Officina X, sostituiti filtri..."
-              rows={3}
-            />
-          </div>
+              <div className="space-y-2">
+                <Label htmlFor="odometerKm">Chilometraggio (opzionale)</Label>
+                <Input
+                  id="odometerKm"
+                  name="odometerKm"
+                  type="number"
+                  min="0"
+                  defaultValue={currentOdometer}
+                  placeholder="es. 60120"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="notes">Note (opzionali)</Label>
+                <Textarea
+                  id="notes"
+                  name="notes"
+                  placeholder="es. Officina X, sostituiti filtri..."
+                  rows={3}
+                />
+              </div>
+            </div>
+          </details>
         </div>
 
         <div className="mt-6 flex gap-3">

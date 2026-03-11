@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { User, Bell, CreditCard, BadgePercent, Map } from "lucide-react";
+import { User, Bell, Map } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { CurrencySettingsForm } from "@/components/currency-settings-form";
@@ -9,8 +9,6 @@ import { db } from "@/lib/db";
 const items = [
   { label: "Profilo", href: "/settings/profile", icon: User },
   { label: "Notifiche", href: "/settings/notifications", icon: Bell },
-  { label: "Piano e fatturazione", href: "/settings/billing", icon: CreditCard },
-  { label: "Piani", href: "/pricing", icon: BadgePercent },
   { label: "Sitemap", href: "/sitemap", icon: Map },
 ];
 
@@ -25,7 +23,7 @@ export default async function SettingsPage() {
     <div className="space-y-6">
       <div>
         <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Impostazioni</p>
-        <h2 className="mt-2 text-2xl font-semibold">Preferenze e piano</h2>
+        <h2 className="mt-2 text-2xl font-semibold">Preferenze</h2>
         <p className="mt-2 text-sm text-muted-foreground">
           Gestisci profilo e notifiche.
         </p>

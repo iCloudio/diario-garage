@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 const items = [
   { href: "", label: "Panoramica" },
   { href: "deadlines", label: "Scadenze" },
-  { href: "expenses", label: "Spese" },
+  { href: "expenses", label: "Movimenti" },
   { href: "edit", label: "Dettagli" },
 ];
 
