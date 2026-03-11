@@ -5,7 +5,6 @@ const groups = [
   {
     title: "Core",
     items: [
-      { label: "Dashboard", href: "/dashboard" },
       { label: "Veicoli", href: "/vehicles" },
       { label: "Guidatori", href: "/drivers" },
       { label: "Impostazioni", href: "/settings" },

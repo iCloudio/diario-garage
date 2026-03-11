@@ -58,7 +58,7 @@ export default function PricingPage() {
         <div className="mb-10 text-center">
           <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Piani</p>
           <h1 className="mt-3 text-3xl font-semibold">
-            Un piano chiaro per ogni garage.
+            Un piano chiaro per ogni libretto.
           </h1>
           <p className="mt-3 text-sm text-muted-foreground">
             Parti gratis. Passa a Family quando gestisci piu veicoli o guidatori.

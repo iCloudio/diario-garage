@@ -33,7 +33,7 @@ export default function RegisterPage() {
       }
 
       toast.success("Account creato!");
-      router.push("/dashboard");
+      router.push("/vehicles");
     });
   }
 
@@ -41,7 +41,7 @@ export default function RegisterPage() {
     <Card className="border-border bg-card p-6 shadow-xl backdrop-blur">
       <h2 className="text-xl font-semibold text-foreground">Crea il tuo accesso</h2>
       <p className="mt-2 text-sm text-muted-foreground">
-        Il tuo garage sempre in regola, a partire da qui.
+        Crea il tuo libretto digitale e inizia subito.
       </p>
       <form className="mt-6 space-y-4" onSubmit={onSubmit}>
         <div className="space-y-2">

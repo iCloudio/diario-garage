@@ -10,8 +10,9 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "DiarioGarage",
-  description: "Gestione veicoli e scadenze essenziali.",
+  title: "Libretto Digitale",
+  description:
+    "Registra le manutenzioni, monitora i costi e ricevi avvisi per ogni scadenza. Tutto in un unico posto.",
 };
 
 export default function RootLayout({

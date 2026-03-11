@@ -10,7 +10,7 @@ export default function BillingPage() {
         <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Piano</p>
         <h2 className="mt-2 text-2xl font-semibold">Piano attuale</h2>
         <p className="mt-2 text-sm text-muted-foreground">
-          Scegli il piano adatto al tuo garage.
+          Scegli il piano adatto al tuo libretto digitale.
         </p>
       </div>
 

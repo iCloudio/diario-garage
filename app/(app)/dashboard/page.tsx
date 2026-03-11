@@ -76,10 +76,12 @@ export default async function DashboardPage() {
             Dashboard
           </p>
           <h2 className="mt-2 text-2xl font-semibold">
-            Il tuo garage sempre in regola.
+            <span className="block">Libretto digitale</span>
+            <span className="block">Più ordine, meno sorprese.</span>
           </h2>
           <p className="mt-2 text-sm text-muted-foreground">
-            Non trascurare la tua auto: manutenzione e scadenze sotto controllo.
+            Registra le manutenzioni, monitora i costi e ricevi avvisi per ogni
+            scadenza. Tutto in un unico posto.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">

@@ -3,7 +3,6 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -33,7 +32,7 @@ export default function LoginPage() {
       }
 
       toast.success("Bentornato!");
-      router.push("/dashboard");
+      router.push("/vehicles");
     });
   }
 
@@ -42,7 +41,7 @@ export default function LoginPage() {
       <Card className="border-border bg-card p-6 shadow-xl backdrop-blur">
         <h2 className="text-xl font-semibold text-foreground">Bentornato</h2>
         <p className="mt-2 text-sm text-muted-foreground">
-          Il tuo garage sempre in regola, in pochi secondi.
+          Accedi al tuo libretto digitale in pochi secondi.
         </p>
         <form className="mt-6 space-y-4" onSubmit={onSubmit}>
           <div className="space-y-2">
@@ -81,23 +80,6 @@ export default function LoginPage() {
         </div>
       </Card>
 
-      <div className="text-center">
-        <a
-          href="https://fulmi.net"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center justify-center gap-2 text-[9px] uppercase tracking-[0.2em] text-muted-foreground transition hover:opacity-80"
-        >
-          <span>Sviluppato da</span>
-          <Image
-            src="/fulminetLogo.png"
-            alt="Fulminet"
-            width={64}
-            height={14}
-            className="inline-block"
-          />
-        </a>
-      </div>
     </div>
   );
 }
