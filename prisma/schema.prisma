@@ -51,6 +51,7 @@ model User {
   email        String     @unique
   passwordHash String
   name         String?
+  currency     String     @default("EUR")
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
   deletedAt    DateTime?

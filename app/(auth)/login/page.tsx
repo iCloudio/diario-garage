@@ -38,8 +38,11 @@ export default function LoginPage() {
 
   return (
     <div className="space-y-4">
-      <Card className="border-border bg-card p-6 shadow-xl backdrop-blur">
-        <h2 className="text-xl font-semibold text-foreground">Bentornato</h2>
+      <Card className="border-border/80 bg-card/88 p-6 shadow-2xl backdrop-blur">
+        <p className="text-xs uppercase tracking-[0.26em] text-primary/75">Accesso</p>
+        <h2 className="mt-3 text-2xl font-semibold tracking-tight text-foreground">
+          Bentornato
+        </h2>
         <p className="mt-2 text-sm text-muted-foreground">
           Accedi al tuo libretto digitale in pochi secondi.
         </p>
@@ -71,15 +74,14 @@ export default function LoginPage() {
           </Button>
         </form>
         <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground">
-          <Link className="hover:text-foreground" href="/forgot-password">
+          <Link className="transition hover:text-foreground" href="/forgot-password">
             Password dimenticata?
           </Link>
-          <Link className="hover:text-foreground" href="/register">
+          <Link className="transition hover:text-foreground" href="/register">
             Crea account
           </Link>
         </div>
       </Card>
-
     </div>
   );
 }

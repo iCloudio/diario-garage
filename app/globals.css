@@ -127,3 +127,15 @@
     @apply font-sans;
   }
 }
+
+@layer components {
+  .app-dots-background {
+    background-image: radial-gradient(rgb(128 128 128 / 0.18) 1px, transparent 1px);
+    background-size: 26px 26px;
+    background-position: 0 0;
+  }
+
+  .dark .app-dots-background {
+    background-image: radial-gradient(rgb(255 255 255 / 0.08) 1px, transparent 1px);
+  }
+}

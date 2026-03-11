@@ -6,6 +6,7 @@ import { db } from "@/lib/db";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { QuickAddFab } from "@/components/quick-add-fab";
+import { VehicleLocalNav } from "@/components/vehicle-local-nav";
 
 export default async function VehicleLayout({
   children,
@@ -32,21 +33,23 @@ export default async function VehicleLayout({
 
   return (
     <div className="space-y-6">
-      <Card className="border-border bg-card p-6">
-        <div className="flex flex-col gap-4">
-          {/* Header principale */}
+      <Card className="border-border/80 bg-card/90 p-6">
+        <div className="flex flex-col gap-5">
           <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
             <div>
               <div className="flex items-center gap-2">
                 <Link
-                  className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground"
+                  className="flex items-center gap-2 text-xs text-muted-foreground transition hover:text-foreground"
                   href="/vehicles"
                 >
                   <Car className="h-3.5 w-3.5" />
                   <span>Torna ai veicoli</span>
                 </Link>
               </div>
-              <h1 className="mt-2 text-2xl font-semibold">{vehicle.plate}</h1>
+              <p className="mt-4 text-xs uppercase tracking-[0.24em] text-primary/80">
+                Veicolo
+              </p>
+              <h1 className="mt-2 text-3xl font-semibold tracking-tight">{vehicle.plate}</h1>
               <p className="mt-1 text-sm text-muted-foreground">
                 {vehicle.make ?? "Marca"} {vehicle.model ?? ""} {vehicle.year ? `· ${vehicle.year}` : ""}
               </p>
@@ -61,7 +64,6 @@ export default async function VehicleLayout({
               </div>
             </div>
 
-            {/* Bottoni azioni */}
             <div className="flex flex-wrap gap-2">
               <Button asChild size="sm">
                 <Link href={`/vehicles/${vehicle.id}/refuels/new`}>
@@ -89,6 +91,8 @@ export default async function VehicleLayout({
               </Button>
             </div>
           </div>
+
+          <VehicleLocalNav vehicleId={vehicle.id} />
         </div>
       </Card>
 

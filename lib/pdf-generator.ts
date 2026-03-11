@@ -35,6 +35,12 @@ interface Expense {
   odometerKm?: number | null;
 }
 
+type PdfDocument = jsPDF & {
+  lastAutoTable?: {
+    finalY: number;
+  };
+};
+
 const FUEL_LABELS: Record<string, string> = {
   BENZINA: "Benzina",
   DIESEL: "Diesel",
@@ -63,7 +69,7 @@ export function generateVehiclePDF(
   refuels: Refuel[],
   expenses: Expense[]
 ) {
-  const doc = new jsPDF();
+  const doc = new jsPDF() as PdfDocument;
   let yPos = 20;
 
   // Titolo
@@ -122,7 +128,7 @@ export function generateVehiclePDF(
       headStyles: { fillColor: [66, 66, 66] },
     });
 
-    yPos = (doc as any).lastAutoTable.finalY + 10;
+    yPos = (doc.lastAutoTable?.finalY ?? yPos) + 10;
   }
 
   // Rifornimenti
@@ -152,7 +158,7 @@ export function generateVehiclePDF(
       headStyles: { fillColor: [66, 66, 66] },
     });
 
-    yPos = (doc as any).lastAutoTable.finalY + 10;
+    yPos = (doc.lastAutoTable?.finalY ?? yPos) + 10;
   }
 
   // Spese
@@ -182,7 +188,7 @@ export function generateVehiclePDF(
       headStyles: { fillColor: [66, 66, 66] },
     });
 
-    yPos = (doc as any).lastAutoTable.finalY + 10;
+    yPos = (doc.lastAutoTable?.finalY ?? yPos) + 10;
   }
 
   // Riepilogo totali

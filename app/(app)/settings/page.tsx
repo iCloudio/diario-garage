@@ -2,6 +2,9 @@ import Link from "next/link";
 import { User, Bell, CreditCard, BadgePercent, Map } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { CurrencySettingsForm } from "@/components/currency-settings-form";
+import { requireUser } from "@/lib/auth";
+import { db } from "@/lib/db";
 
 const items = [
   { label: "Profilo", href: "/settings/profile", icon: User },
@@ -11,7 +14,13 @@ const items = [
   { label: "Sitemap", href: "/sitemap", icon: Map },
 ];
 
-export default function SettingsPage() {
+export default async function SettingsPage() {
+  const user = await requireUser();
+  const profile = await db.user.findUnique({
+    where: { id: user.id },
+    select: { currency: true },
+  });
+
   return (
     <div className="space-y-6">
       <div>
@@ -47,6 +56,10 @@ export default function SettingsPage() {
         <div className="mt-4">
           <ThemeToggle />
         </div>
+      </Card>
+
+      <Card className="border-border bg-card p-6">
+        <CurrencySettingsForm initialCurrency={profile?.currency ?? "EUR"} />
       </Card>
     </div>
   );

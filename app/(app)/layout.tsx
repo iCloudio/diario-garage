@@ -1,13 +1,15 @@
-import Link from "next/link";
-import { Car, Settings, Users } from "lucide-react";
 import { requireUser } from "@/lib/auth";
 import { LogoutButton } from "@/components/logout-button";
+import { AppHeaderNav } from "@/components/app-header-nav";
+import { AppMobileNav } from "@/components/app-mobile-nav";
 
 const navItems = [
-  { href: "/vehicles", label: "Veicoli", icon: Car },
-  { href: "/drivers", label: "Guidatori", icon: Users },
-  { href: "/settings", label: "Impostazioni", icon: Settings },
+  { href: "/vehicles", label: "Veicoli", icon: "car" as const },
+  { href: "/drivers", label: "Guidatori", icon: "users" as const },
+  { href: "/settings", label: "Impostazioni", icon: "settings" as const },
 ];
+
+const headerNavItems = navItems.map(({ href, label }) => ({ href, label }));
 
 export default async function AppLayout({
   children,
@@ -17,30 +19,20 @@ export default async function AppLayout({
   const user = await requireUser();
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <header className="sticky top-0 z-20 border-b border-border bg-background/80 backdrop-blur">
+    <div className="app-dots-background relative min-h-screen overflow-x-clip bg-background text-foreground">
+      <header className="sticky top-0 z-20 border-b border-border/80 border-t-2 border-t-primary bg-background/80 backdrop-blur">
         <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-5 py-4 md:px-8 lg:px-10">
           <div className="min-w-0">
-            <p className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
+            <p className="text-[10px] uppercase tracking-[0.32em] text-primary/80">
               Libretto digitale
             </p>
             <p className="text-xs text-muted-foreground">Più ordine, meno sorprese.</p>
           </div>
 
-          <nav className="hidden items-center gap-8 text-sm text-muted-foreground md:flex">
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                className="transition hover:text-foreground"
-                href={item.href}
-              >
-                {item.label}
-              </Link>
-            ))}
-          </nav>
+          <AppHeaderNav items={headerNavItems} />
 
           <div className="flex items-center gap-3">
-            <span className="hidden text-xs text-muted-foreground lg:block">
+            <span className="hidden rounded-full border border-border/80 bg-card/80 px-3 py-1 text-xs text-muted-foreground lg:block">
               Ciao{user.name ? `, ${user.name}` : ""}
             </span>
             <LogoutButton />
@@ -48,20 +40,11 @@ export default async function AppLayout({
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-7xl px-5 pb-16 pt-8 md:px-8 lg:px-10">
+      <main className="relative mx-auto w-full max-w-7xl px-5 pb-20 pt-8 md:px-8 lg:px-10">
         {children}
       </main>
 
-      <nav className="fixed inset-x-0 bottom-0 z-10 border-t border-border bg-card/95 backdrop-blur md:hidden">
-        <div className="flex items-center justify-around py-2 text-[11px] text-muted-foreground">
-          {navItems.map((item) => (
-            <Link key={item.href} className="flex flex-col items-center gap-1 px-3 py-2" href={item.href}>
-              <item.icon className="h-4 w-4" />
-              {item.label}
-            </Link>
-          ))}
-        </div>
-      </nav>
+      <AppMobileNav items={navItems} />
     </div>
   );
 }

@@ -38,8 +38,11 @@ export default function RegisterPage() {
   }
 
   return (
-    <Card className="border-border bg-card p-6 shadow-xl backdrop-blur">
-      <h2 className="text-xl font-semibold text-foreground">Crea il tuo accesso</h2>
+    <Card className="border-border/80 bg-card/88 p-6 shadow-2xl backdrop-blur">
+      <p className="text-xs uppercase tracking-[0.26em] text-primary/75">Registrazione</p>
+      <h2 className="mt-3 text-2xl font-semibold tracking-tight text-foreground">
+        Crea il tuo accesso
+      </h2>
       <p className="mt-2 text-sm text-muted-foreground">
         Crea il tuo libretto digitale e inizia subito.
       </p>
@@ -82,7 +85,7 @@ export default function RegisterPage() {
       </form>
       <div className="mt-4 text-xs text-muted-foreground">
         Hai già un account?{" "}
-        <Link className="hover:text-foreground" href="/login">
+        <Link className="transition hover:text-foreground" href="/login">
           Accedi
         </Link>
       </div>

@@ -1,222 +1,189 @@
-"use client";
+import { requireUser } from "@/lib/auth";
+import { db } from "@/lib/db";
+import { VehicleExpensesChart } from "@/components/vehicle-expenses-chart";
 
-import { useMemo, useState } from "react";
-import {
-  CartesianGrid,
-  Cell,
-  Line,
-  LineChart,
-  Pie,
-  PieChart,
-  ResponsiveContainer,
-  XAxis,
-  YAxis,
-} from "recharts";
-import { Card } from "@/components/ui/card";
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+const CATEGORY_COLORS = {
+  Carburante: "#7c3aed",
+  Manutenzione: "#8b5cf6",
+  Assicurazione: "#a78bfa",
+  Bollo: "#c4b5fd",
+} as const;
 
-const CATEGORIES = [
-  { key: "fuel", label: "Carburante", color: "hsl(var(--primary))" },
-  { key: "maintenance", label: "Manutenzione", color: "hsl(var(--accent))" },
-  { key: "insurance", label: "Assicurazione", color: "hsl(var(--ring))" },
-  { key: "tax", label: "Bollo", color: "hsl(var(--muted-foreground))" },
-] as const;
+const MONTHS = ["Gen", "Feb", "Mar", "Apr", "Mag", "Giu", "Lug", "Ago", "Set", "Ott", "Nov", "Dic"];
 
-const EXPENSES = [
-  { year: 2025, month: "Gen", fuel: 110, maintenance: 80, insurance: 0, tax: 0 },
-  { year: 2025, month: "Feb", fuel: 95, maintenance: 0, insurance: 0, tax: 0 },
-  { year: 2025, month: "Mar", fuel: 130, maintenance: 0, insurance: 120, tax: 0 },
-  { year: 2025, month: "Apr", fuel: 105, maintenance: 50, insurance: 0, tax: 0 },
-  { year: 2025, month: "Mag", fuel: 140, maintenance: 0, insurance: 0, tax: 0 },
-  { year: 2025, month: "Giu", fuel: 125, maintenance: 0, insurance: 0, tax: 90 },
-  { year: 2025, month: "Lug", fuel: 150, maintenance: 120, insurance: 0, tax: 0 },
-  { year: 2025, month: "Ago", fuel: 135, maintenance: 0, insurance: 0, tax: 0 },
-  { year: 2025, month: "Set", fuel: 160, maintenance: 0, insurance: 0, tax: 0 },
-  { year: 2025, month: "Ott", fuel: 120, maintenance: 220, insurance: 0, tax: 0 },
-  { year: 2025, month: "Nov", fuel: 115, maintenance: 0, insurance: 0, tax: 0 },
-  { year: 2025, month: "Dic", fuel: 140, maintenance: 0, insurance: 140, tax: 0 },
-  { year: 2026, month: "Gen", fuel: 130, maintenance: 0, insurance: 0, tax: 0 },
-  { year: 2026, month: "Feb", fuel: 120, maintenance: 90, insurance: 0, tax: 0 },
-  { year: 2026, month: "Mar", fuel: 150, maintenance: 0, insurance: 0, tax: 0 },
-  { year: 2026, month: "Apr", fuel: 135, maintenance: 0, insurance: 110, tax: 0 },
-];
+type DatasetRow = {
+  year: number;
+  monthIndex: number;
+  fuel: number;
+  maintenance: number;
+  insurance: number;
+  tax: number;
+};
 
-const CATEGORY_OPTIONS = [
-  { value: "total", label: "Totale" },
-  { value: "fuel", label: "Carburante" },
-  { value: "maintenance", label: "Manutenzione" },
-  { value: "insurance", label: "Assicurazione" },
-  { value: "tax", label: "Bollo" },
-];
-
-const currencyFormatter = new Intl.NumberFormat("it-IT", {
-  style: "currency",
-  currency: "EUR",
-  maximumFractionDigits: 0,
-});
-
-function sumRow(row: (typeof EXPENSES)[number]) {
-  return CATEGORIES.reduce((acc, category) => acc + row[category.key], 0);
+function createEmptyYear(year: number): DatasetRow[] {
+  return Array.from({ length: 12 }, (_, monthIndex) => ({
+    year,
+    monthIndex,
+    fuel: 0,
+    maintenance: 0,
+    insurance: 0,
+    tax: 0,
+  }));
 }
 
-export default function VehicleExpensesPage() {
-  const years = Array.from(new Set(EXPENSES.map((item) => item.year)));
-  const [year, setYear] = useState(`${years[0] ?? new Date().getFullYear()}`);
-  const [category, setCategory] = useState("total");
+export default async function VehicleExpensesPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const user = await requireUser();
+  const { id } = await params;
 
-  const filtered = useMemo(
-    () => EXPENSES.filter((item) => `${item.year}` === year),
-    [year]
-  );
+  const [profile, vehicle] = await Promise.all([
+    db.user.findUnique({
+      where: { id: user.id },
+      select: { currency: true },
+    }),
+    db.vehicle.findFirst({
+      where: { id, userId: user.id, deletedAt: null },
+      select: { id: true },
+    }),
+  ]);
 
-  const monthlyData = useMemo(() => {
-    return filtered.map((item) => {
-      const total = category === "total" ? sumRow(item) : item[category as keyof typeof item];
+  if (!vehicle) {
+    return null;
+  }
+
+  const [expenses, refuels] = await Promise.all([
+    db.expense.findMany({
+      where: { vehicleId: vehicle.id, deletedAt: null },
+      select: { date: true, category: true, amountEur: true },
+      orderBy: { date: "asc" },
+    }),
+    db.refuel.findMany({
+      where: { vehicleId: vehicle.id, deletedAt: null },
+      select: { date: true, amountEur: true },
+      orderBy: { date: "asc" },
+    }),
+  ]);
+
+  const yearsSet = new Set<number>();
+  expenses.forEach((item) => yearsSet.add(item.date.getFullYear()));
+  refuels.forEach((item) => yearsSet.add(item.date.getFullYear()));
+  if (yearsSet.size === 0) {
+    yearsSet.add(new Date().getFullYear());
+  }
+
+  const years = Array.from(yearsSet).sort((a, b) => b - a);
+  const yearMap = new Map<number, DatasetRow[]>(years.map((year) => [year, createEmptyYear(year)]));
+
+  for (const expense of expenses) {
+    const rows = yearMap.get(expense.date.getFullYear());
+    if (!rows) continue;
+    const row = rows[expense.date.getMonth()];
+    if (!row) continue;
+
+    if (expense.category === "MANUTENZIONE") row.maintenance += expense.amountEur;
+    if (expense.category === "ASSICURAZIONE") row.insurance += expense.amountEur;
+    if (expense.category === "BOLLO") row.tax += expense.amountEur;
+  }
+
+  for (const refuel of refuels) {
+    const rows = yearMap.get(refuel.date.getFullYear());
+    if (!rows) continue;
+    const row = rows[refuel.date.getMonth()];
+    if (!row) continue;
+    row.fuel += refuel.amountEur;
+  }
+
+  const historicalRows = Array.from(yearMap.entries())
+    .sort((a, b) => a[0] - b[0])
+    .flatMap(([, rows]) => rows);
+
+  const datasets = [
+    {
+      key: "all",
+      label: "Tutto lo storico",
+      monthlyData: historicalRows.map((row) => ({
+        month: `${MONTHS[row.monthIndex]} ${String(row.year).slice(-2)}`,
+        total: row.fuel + row.maintenance + row.insurance + row.tax,
+        fuel: row.fuel,
+      })),
+      pieData: [
+        {
+          name: "Carburante",
+          value: historicalRows.reduce((sum, row) => sum + row.fuel, 0),
+          color: CATEGORY_COLORS.Carburante,
+        },
+        {
+          name: "Manutenzione",
+          value: historicalRows.reduce((sum, row) => sum + row.maintenance, 0),
+          color: CATEGORY_COLORS.Manutenzione,
+        },
+        {
+          name: "Assicurazione",
+          value: historicalRows.reduce((sum, row) => sum + row.insurance, 0),
+          color: CATEGORY_COLORS.Assicurazione,
+        },
+        {
+          name: "Bollo",
+          value: historicalRows.reduce((sum, row) => sum + row.tax, 0),
+          color: CATEGORY_COLORS.Bollo,
+        },
+      ].filter((item) => item.value > 0),
+    },
+    ...years.map((year) => {
+      const rows = yearMap.get(year) ?? [];
       return {
-        month: item.month,
-        total,
-        fuel: item.fuel,
+        key: `${year}`,
+        label: `${year}`,
+        monthlyData: rows.map((row) => ({
+          month: MONTHS[row.monthIndex],
+          total: row.fuel + row.maintenance + row.insurance + row.tax,
+          fuel: row.fuel,
+        })),
+        pieData: [
+          {
+            name: "Carburante",
+            value: rows.reduce((sum, row) => sum + row.fuel, 0),
+            color: CATEGORY_COLORS.Carburante,
+          },
+          {
+            name: "Manutenzione",
+            value: rows.reduce((sum, row) => sum + row.maintenance, 0),
+            color: CATEGORY_COLORS.Manutenzione,
+          },
+          {
+            name: "Assicurazione",
+            value: rows.reduce((sum, row) => sum + row.insurance, 0),
+            color: CATEGORY_COLORS.Assicurazione,
+          },
+          {
+            name: "Bollo",
+            value: rows.reduce((sum, row) => sum + row.tax, 0),
+            color: CATEGORY_COLORS.Bollo,
+          },
+        ].filter((item) => item.value > 0),
       };
-    });
-  }, [filtered, category]);
-
-  const pieData = useMemo(() => {
-    return CATEGORIES.map((categoryItem) => ({
-      name: categoryItem.label,
-      value: filtered.reduce((acc, item) => acc + item[categoryItem.key], 0),
-      color: categoryItem.color,
-    }));
-  }, [filtered]);
+    }),
+  ];
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div>
-          <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
-            Grafici spese
-          </p>
-          <h2 className="mt-2 text-2xl font-semibold">Andamento spese</h2>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Filtra anno e categoria per vedere l&apos;impatto sul budget.
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-3">
-          <div className="space-y-1">
-            <p className="text-xs text-muted-foreground">Anno</p>
-            <Select value={year} onValueChange={setYear}>
-              <SelectTrigger className="w-32">
-                <SelectValue placeholder="Anno" />
-              </SelectTrigger>
-              <SelectContent>
-                {years.map((value) => (
-                  <SelectItem key={value} value={`${value}`}>
-                    {value}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-1">
-            <p className="text-xs text-muted-foreground">Categoria</p>
-            <Select value={category} onValueChange={setCategory}>
-              <SelectTrigger className="w-44">
-                <SelectValue placeholder="Categoria" />
-              </SelectTrigger>
-              <SelectContent>
-                {CATEGORY_OPTIONS.map((item) => (
-                  <SelectItem key={item.value} value={item.value}>
-                    {item.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
+      <div>
+        <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
+          Grafici spese
+        </p>
+        <h2 className="mt-2 text-2xl font-semibold">Andamento spese</h2>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Leggi il totale per anno o apri tutto lo storico in una vista unica.
+        </p>
       </div>
 
-      <div className="grid gap-4 xl:grid-cols-[2fr_1fr]">
-        <Card className="border-border bg-card p-6">
-          <div className="mb-4">
-            <p className="text-sm font-medium">Spese mensili</p>
-            <p className="text-xs text-muted-foreground">
-              Linee per totale e trend carburante.
-            </p>
-          </div>
-          <ChartContainer>
-            <ResponsiveContainer>
-              <LineChart data={monthlyData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                <XAxis
-                  dataKey="month"
-                  tickLine={false}
-                  axisLine={false}
-                  tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
-                />
-                <YAxis
-                  tickLine={false}
-                  axisLine={false}
-                  tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
-                />
-                <ChartTooltip content={<ChartTooltipContent formatter={currencyFormatter.format} />} />
-                <Line
-                  type="monotone"
-                  dataKey="total"
-                  name="Totale"
-                  stroke="hsl(var(--primary))"
-                  strokeWidth={2}
-                  dot={false}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="fuel"
-                  name="Carburante"
-                  stroke="hsl(var(--primary))"
-                  strokeWidth={2}
-                  dot={false}
-                  strokeDasharray="6 6"
-                  strokeOpacity={0.45}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </ChartContainer>
-        </Card>
-
-        <Card className="border-border bg-card p-6">
-          <div className="mb-4">
-            <p className="text-sm font-medium">Breakdown categorie</p>
-            <p className="text-xs text-muted-foreground">Distribuzione annuale.</p>
-          </div>
-          <ChartContainer className="h-64">
-            <ResponsiveContainer>
-              <PieChart>
-                <ChartTooltip content={<ChartTooltipContent formatter={currencyFormatter.format} />} />
-                <Pie data={pieData} dataKey="value" nameKey="name" innerRadius={55} outerRadius={85}>
-                  {pieData.map((entry) => (
-                    <Cell key={entry.name} fill={entry.color} />
-                  ))}
-                </Pie>
-              </PieChart>
-            </ResponsiveContainer>
-          </ChartContainer>
-          <div className="mt-4 space-y-2 text-xs text-muted-foreground">
-            {pieData.map((entry) => (
-              <div key={entry.name} className="flex items-center justify-between">
-                <span>{entry.name}</span>
-                <span className="font-medium text-foreground">
-                  {currencyFormatter.format(entry.value)}
-                </span>
-              </div>
-            ))}
-          </div>
-        </Card>
-      </div>
+      <VehicleExpensesChart
+        currency={profile?.currency ?? "EUR"}
+        datasets={datasets}
+      />
     </div>
   );
 }
