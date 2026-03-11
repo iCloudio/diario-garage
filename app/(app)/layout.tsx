@@ -15,7 +15,7 @@ export default async function AppLayout({
   const user = await requireUser();
 
   return (
-    <div className="app-dots-background relative min-h-screen overflow-x-clip bg-background text-foreground">
+    <div className="app-dots-background app-shell-background relative min-h-screen overflow-x-clip bg-background text-foreground">
       <header className="sticky top-0 z-20 border-b border-border/80 border-t-2 border-t-primary bg-background/80 backdrop-blur">
         <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-5 py-4 md:px-8 lg:px-10">
           <div className="min-w-0">

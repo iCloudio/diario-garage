@@ -5,7 +5,12 @@ import { requireUser } from "@/lib/auth";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { DeadlineStatusChip } from "@/components/deadline-status-chip";
 import { formatCurrency } from "@/lib/currency";
+import {
+  getRegionalFuelBenchmarksForRegion,
+  mapVehicleFuelTypeToRegionalFuel,
+} from "@/lib/fuel-prices";
 import {
   formatLicenseExpiryLabel,
   getLicenseExpiryAnimationClass,
@@ -34,54 +39,12 @@ const FUEL_LABELS = {
   IBRIDO_DIESEL: "Ibrido diesel",
 } as const;
 
-function getDeadlineChipClass(dueDate: Date, now: Date) {
-  const dueDay = new Date(dueDate.getFullYear(), dueDate.getMonth(), dueDate.getDate());
-  const nowDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const diffDays = Math.ceil(
-    (dueDay.getTime() - nowDay.getTime()) / (1000 * 60 * 60 * 24),
-  );
-
-  if (diffDays <= 30) {
-    return "border-rose-500/30 bg-rose-500/15 text-rose-700 dark:text-rose-300";
-  }
-
-  if (diffDays <= 90) {
-    return "border-amber-500/30 bg-amber-500/15 text-amber-700 dark:text-amber-300";
-  }
-
-  return "border-emerald-500/30 bg-emerald-500/15 text-emerald-700 dark:text-emerald-300";
-}
-
-function getDeadlineChipLabel(dueDate: Date, now: Date) {
-  const dueDay = new Date(dueDate.getFullYear(), dueDate.getMonth(), dueDate.getDate());
-  const nowDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const diffDays = Math.ceil(
-    (dueDay.getTime() - nowDay.getTime()) / (1000 * 60 * 60 * 24),
-  );
-
-  if (diffDays <= 0) return "Scaduto";
-  if (diffDays <= 30) return `Tra ${diffDays} ${diffDays === 1 ? "giorno" : "giorni"}`;
-
-  const diffMonths = Math.ceil(diffDays / 30);
-  return `Tra ${diffMonths} ${diffMonths === 1 ? "mese" : "mesi"}`;
-}
-
-function getDeadlineChipAnimationClass(dueDate: Date, now: Date) {
-  const dueDay = new Date(dueDate.getFullYear(), dueDate.getMonth(), dueDate.getDate());
-  const nowDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const diffDays = Math.ceil(
-    (dueDay.getTime() - nowDay.getTime()) / (1000 * 60 * 60 * 24),
-  );
-
-  return diffDays <= 0 ? "deadline-chip-alert" : "";
-}
-
 export default async function VehiclesPage() {
   const user = await requireUser();
   const [profile, vehicles] = await Promise.all([
     db.user.findUnique({
       where: { id: user.id },
-      select: { currency: true },
+      select: { currency: true, fuelPriceRegion: true },
     }),
     db.vehicle.findMany({
       where: { userId: user.id, deletedAt: null },
@@ -113,6 +76,9 @@ export default async function VehiclesPage() {
       orderBy: { createdAt: "desc" },
     }),
   ]);
+  const regionalBenchmarks = await getRegionalFuelBenchmarksForRegion(
+    profile?.fuelPriceRegion,
+  );
 
   const now = new Date();
   const currency = profile?.currency ?? "EUR";
@@ -140,6 +106,11 @@ export default async function VehiclesPage() {
         <div className="grid auto-rows-fr gap-4 md:grid-cols-2 xl:grid-cols-3">
           {vehicles.map((item) => {
             const latestRefuel = item.refuels[0] ?? null;
+            const mappedRegionalFuel = mapVehicleFuelTypeToRegionalFuel(item.fuelType);
+            const regionalBenchmark =
+              mappedRegionalFuel != null
+                ? regionalBenchmarks.benchmarks.get(mappedRegionalFuel)
+                : null;
             const lastRefuelData = (() => {
               if (!latestRefuel) return null;
 
@@ -211,14 +182,7 @@ export default async function VehiclesPage() {
                             <span className="font-medium text-foreground">
                               {DEADLINE_LABELS[deadline.type]}
                             </span>
-                            <span
-                              className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-medium ${getDeadlineChipClass(
-                                deadline.dueDate,
-                                now,
-                              )} ${getDeadlineChipAnimationClass(deadline.dueDate, now)}`}
-                            >
-                              {getDeadlineChipLabel(deadline.dueDate, now)}
-                            </span>
+                            <DeadlineStatusChip dueDate={deadline.dueDate} now={now} />
                           </div>
                         ))
                       )}
@@ -235,13 +199,43 @@ export default async function VehiclesPage() {
                       </div>
                       <div className="mt-3">
                         {lastRefuelData ? (
-                          <div className="grid grid-cols-3 gap-3 text-sm">
-                            <p className="text-left text-foreground">{lastRefuelData.fuelLabel}</p>
-                            <p className="text-center text-foreground">{lastRefuelData.amountLabel}</p>
-                            <p className="text-right text-foreground">{lastRefuelData.daysLabel}</p>
+                          <div className="space-y-2">
+                            <div className="grid grid-cols-3 gap-3 text-sm">
+                              <p className="text-left text-foreground">{lastRefuelData.fuelLabel}</p>
+                              <p className="text-center text-foreground">{lastRefuelData.amountLabel}</p>
+                              <p className="text-right text-foreground">{lastRefuelData.daysLabel}</p>
+                            </div>
+                            {profile?.fuelPriceRegion && regionalBenchmark?.averagePrice != null ? (
+                              <p className="text-xs text-muted-foreground">
+                                Media {profile.fuelPriceRegion}:{" "}
+                                <span className="font-medium text-foreground">
+                                  {new Intl.NumberFormat("it-IT", {
+                                    style: "currency",
+                                    currency: "EUR",
+                                    minimumFractionDigits: 3,
+                                    maximumFractionDigits: 3,
+                                  }).format(regionalBenchmark.averagePrice)}
+                                </span>
+                              </p>
+                            ) : null}
                           </div>
                         ) : (
-                          <p className="italic text-muted-foreground">Nessun rifornimento</p>
+                          <div className="space-y-2">
+                            <p className="italic text-muted-foreground">Nessun rifornimento</p>
+                            {profile?.fuelPriceRegion && regionalBenchmark?.averagePrice != null ? (
+                              <p className="text-xs text-muted-foreground">
+                                Media {profile.fuelPriceRegion}:{" "}
+                                <span className="font-medium text-foreground">
+                                  {new Intl.NumberFormat("it-IT", {
+                                    style: "currency",
+                                    currency: "EUR",
+                                    minimumFractionDigits: 3,
+                                    maximumFractionDigits: 3,
+                                  }).format(regionalBenchmark.averagePrice)}
+                                </span>
+                              </p>
+                            ) : null}
+                          </div>
                         )}
                       </div>
                     </div>

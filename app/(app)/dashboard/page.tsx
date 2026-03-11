@@ -12,7 +12,9 @@ import { requireUser } from "@/lib/auth";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { RegionalFuelPricesTable } from "@/components/regional-fuel-prices-table";
 import { formatCurrency } from "@/lib/currency";
+import { getRegionalFuelPriceTable } from "@/lib/fuel-prices";
 
 const DEADLINE_LABELS = {
   ASSICURAZIONE: "Assicurazione",
@@ -35,11 +37,11 @@ export default async function DashboardPage() {
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
   const nextMonthStart = new Date(now.getFullYear(), now.getMonth() + 1, 1);
 
-  const [profile, vehicleCount, primaryVehicle, dueSoonCount, upcoming, monthExpenses, monthRefuels, latestExpense, latestRefuel] =
+  const [profile, vehicleCount, primaryVehicle, dueSoonCount, upcoming, monthExpenses, monthRefuels, latestExpense, latestRefuel, regionalFuelTable] =
     await Promise.all([
       db.user.findUnique({
         where: { id: user.id },
-        select: { currency: true },
+        select: { currency: true, fuelPriceRegion: true },
       }),
       db.vehicle.count({
         where: { userId: user.id, deletedAt: null },
@@ -103,6 +105,7 @@ export default async function DashboardPage() {
         },
         orderBy: { date: "desc" },
       }),
+      getRegionalFuelPriceTable(),
     ]);
 
   const nextVehicleDeadline = primaryVehicle
@@ -345,6 +348,13 @@ export default async function DashboardPage() {
               </div>
             </Card>
           </div>
+
+          <RegionalFuelPricesTable
+            snapshotDate={regionalFuelTable.snapshotDate}
+            sourceUrl={regionalFuelTable.sourceUrl}
+            selectedRegion={profile?.fuelPriceRegion ?? null}
+            rows={regionalFuelTable.regions}
+          />
         </>
       )}
     </div>

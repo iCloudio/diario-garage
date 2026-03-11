@@ -31,9 +31,18 @@ const EXPENSE_CATEGORIES = [
 interface ExpenseFormProps {
   vehicleId: string;
   currentOdometer?: number;
+  embedded?: boolean;
+  onSuccess?: () => void;
+  onCancel?: () => void;
 }
 
-export function ExpenseForm({ vehicleId, currentOdometer }: ExpenseFormProps) {
+export function ExpenseForm({
+  vehicleId,
+  currentOdometer,
+  embedded = false,
+  onSuccess,
+  onCancel,
+}: ExpenseFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -66,8 +75,12 @@ export function ExpenseForm({ vehicleId, currentOdometer }: ExpenseFormProps) {
       }
 
       toast.success("Spesa registrata con successo!");
-      router.push(`/vehicles/${vehicleId}/expenses`);
       router.refresh();
+      if (onSuccess) {
+        onSuccess();
+      } else {
+        router.push(`/vehicles/${vehicleId}/expenses`);
+      }
     } catch (error) {
       toast.error("Errore durante il salvataggio della spesa");
       console.error(error);
@@ -76,9 +89,8 @@ export function ExpenseForm({ vehicleId, currentOdometer }: ExpenseFormProps) {
     }
   };
 
-  return (
-    <form onSubmit={handleSubmit}>
-      <Card className="border-border/80 bg-card/90 p-6">
+  const content = (
+    <>
         <div className="space-y-4">
           <div className="rounded-2xl border border-border/80 bg-background/70 p-4">
             <p className="text-sm font-medium text-foreground">Campi richiesti</p>
@@ -186,16 +198,34 @@ export function ExpenseForm({ vehicleId, currentOdometer }: ExpenseFormProps) {
           <Button type="submit" disabled={isSubmitting}>
             {isSubmitting ? "Salvataggio..." : "Salva spesa"}
           </Button>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => router.back()}
-            disabled={isSubmitting}
-          >
-            Annulla
-          </Button>
+          {embedded ? (
+            onCancel ? (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onCancel}
+                disabled={isSubmitting}
+              >
+                Annulla
+              </Button>
+            ) : null
+          ) : (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => router.back()}
+              disabled={isSubmitting}
+            >
+              Annulla
+            </Button>
+          )}
         </div>
-      </Card>
+    </>
+  );
+
+  return (
+    <form onSubmit={handleSubmit}>
+      {embedded ? content : <Card className="border-border/80 bg-card/90 p-6">{content}</Card>}
     </form>
   );
 }

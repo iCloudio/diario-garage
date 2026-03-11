@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { CalendarClock, Euro } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -36,10 +37,15 @@ function buildInitialState(deadlines: DeadlineInput[]): FormState {
 export function VehicleDeadlinesForm({
   vehicleId,
   deadlines,
+  embedded = false,
+  onSuccess,
 }: {
   vehicleId: string;
   deadlines: DeadlineInput[];
+  embedded?: boolean;
+  onSuccess?: () => void;
 }) {
+  const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [form, setForm] = useState<FormState>(() => buildInitialState(deadlines));
 
@@ -72,12 +78,14 @@ export function VehicleDeadlinesForm({
         return;
       }
 
+      router.refresh();
       toast.success("Scadenze salvate.");
+      onSuccess?.();
     });
   }
 
-  return (
-    <Card className="border-border/80 bg-card/90 p-6">
+  const content = (
+    <>
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
         <CalendarClock className="h-4 w-4" />
         <p className="font-medium text-foreground">Scadenze principali</p>
@@ -125,6 +133,12 @@ export function VehicleDeadlinesForm({
           </Button>
         </div>
       </form>
-    </Card>
+    </>
+  );
+
+  return embedded ? (
+    content
+  ) : (
+    <Card className="border-border/80 bg-card/90 p-6">{content}</Card>
   );
 }

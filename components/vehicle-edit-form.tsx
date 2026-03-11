@@ -25,9 +25,12 @@ type VehicleEditFormProps = {
   initialType?: "AUTO" | "MOTO" | "CAMPER";
   initialFuelType?: "BENZINA" | "DIESEL" | "GPL" | "METANO" | "ELETTRICO" | "IBRIDO_BENZINA" | "IBRIDO_DIESEL" | null;
   initialStatus?: "ATTIVO" | "VENDUTO" | "ROTTAMATO";
-  initialSoldDate?: Date | null;
+  initialSoldDate?: string | null;
   initialSoldPrice?: number | null;
   initialSoldNotes?: string | null;
+  embedded?: boolean;
+  onSuccess?: () => void;
+  onCancel?: () => void;
 };
 
 export function VehicleEditForm({
@@ -42,6 +45,9 @@ export function VehicleEditForm({
   initialSoldDate,
   initialSoldPrice,
   initialSoldNotes,
+  embedded = false,
+  onSuccess,
+  onCancel,
 }: VehicleEditFormProps) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -55,7 +61,7 @@ export function VehicleEditForm({
   const [fuelType, setFuelType] = useState(initialFuelType ?? "");
   const [status, setStatus] = useState(initialStatus);
   const [soldDate, setSoldDate] = useState(
-    initialSoldDate ? initialSoldDate.toISOString().split("T")[0] : ""
+    initialSoldDate ? initialSoldDate.slice(0, 10) : ""
   );
   const [soldPrice, setSoldPrice] = useState(initialSoldPrice?.toString() ?? "");
   const [soldNotes, setSoldNotes] = useState(initialSoldNotes ?? "");
@@ -98,13 +104,16 @@ export function VehicleEditForm({
       }
 
       toast.success("Veicolo aggiornato.");
-      router.push(`/vehicles/${vehicleId}`);
       router.refresh();
+      if (onSuccess) {
+        onSuccess();
+      } else {
+        router.push(`/vehicles/${vehicleId}`);
+      }
     });
   }
 
-  return (
-    <Card className="border-border/80 bg-card/90 p-6">
+  const content = (
       <form className="space-y-6" onSubmit={onSubmit}>
         <div>
           <p className="text-sm font-medium text-foreground">Dati principali</p>
@@ -296,12 +305,22 @@ export function VehicleEditForm({
           )}
         </div>
 
-        <div className="flex justify-end">
+        <div className="flex justify-end gap-3">
+          {embedded && onCancel ? (
+            <Button type="button" variant="outline" onClick={onCancel} disabled={pending}>
+              Annulla
+            </Button>
+          ) : null}
           <Button type="submit" disabled={pending}>
             {pending ? "Salvataggio..." : "Salva modifiche"}
           </Button>
         </div>
       </form>
-    </Card>
+  );
+
+  return embedded ? (
+    content
+  ) : (
+    <Card className="border-border/80 bg-card/90 p-6">{content}</Card>
   );
 }

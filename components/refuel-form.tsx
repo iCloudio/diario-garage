@@ -33,9 +33,19 @@ interface RefuelFormProps {
   vehicleId: string;
   currentOdometer: number;
   vehicleFuelType?: FuelType | null;
+  embedded?: boolean;
+  onSuccess?: () => void;
+  onCancel?: () => void;
 }
 
-export function RefuelForm({ vehicleId, currentOdometer, vehicleFuelType }: RefuelFormProps) {
+export function RefuelForm({
+  vehicleId,
+  currentOdometer,
+  vehicleFuelType,
+  embedded = false,
+  onSuccess,
+  onCancel,
+}: RefuelFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedFuelType, setSelectedFuelType] = useState<FuelType>(vehicleFuelType || "BENZINA");
@@ -116,8 +126,12 @@ export function RefuelForm({ vehicleId, currentOdometer, vehicleFuelType }: Refu
       }
 
       toast.success("Rifornimento registrato con successo!");
-      router.push(`/vehicles/${vehicleId}/expenses`);
       router.refresh();
+      if (onSuccess) {
+        onSuccess();
+      } else {
+        router.push(`/vehicles/${vehicleId}/expenses`);
+      }
     } catch (error) {
       toast.error("Errore durante il salvataggio del rifornimento");
       console.error(error);
@@ -126,9 +140,8 @@ export function RefuelForm({ vehicleId, currentOdometer, vehicleFuelType }: Refu
     }
   };
 
-  return (
-    <form onSubmit={handleSubmit}>
-      <Card className="border-border/80 bg-card/90 p-6">
+  const content = (
+    <>
         <div className="space-y-4">
           <div className="rounded-2xl border border-border/80 bg-background/70 p-4">
             <p className="text-sm font-medium text-foreground">Campi richiesti</p>
@@ -313,16 +326,34 @@ export function RefuelForm({ vehicleId, currentOdometer, vehicleFuelType }: Refu
           <Button type="submit" disabled={isSubmitting}>
             {isSubmitting ? "Salvataggio..." : "Salva rifornimento"}
           </Button>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => router.back()}
-            disabled={isSubmitting}
-          >
-            Annulla
-          </Button>
+          {embedded ? (
+            onCancel ? (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onCancel}
+                disabled={isSubmitting}
+              >
+                Annulla
+              </Button>
+            ) : null
+          ) : (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => router.back()}
+              disabled={isSubmitting}
+            >
+              Annulla
+            </Button>
+          )}
         </div>
-      </Card>
+    </>
+  );
+
+  return (
+    <form onSubmit={handleSubmit}>
+      {embedded ? content : <Card className="border-border/80 bg-card/90 p-6">{content}</Card>}
     </form>
   );
 }

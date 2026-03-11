@@ -39,12 +39,14 @@ type VehicleDriversSectionProps = {
   vehicleId: string;
   drivers: DriverItem[];
   availableDrivers: DriverItem[];
+  embedded?: boolean;
 };
 
 export function VehicleDriversSection({
   vehicleId,
   drivers,
   availableDrivers,
+  embedded = false,
 }: VehicleDriversSectionProps) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -164,9 +166,15 @@ export function VehicleDriversSection({
     });
   }
 
-  return (
+  const content = (
     <>
-      <Card className="border-border/80 bg-card/90 p-6">
+      <div
+        className={
+          embedded
+            ? "rounded-2xl border border-border/70 bg-background/55 p-5"
+            : "border-border/80 bg-card/90 p-6"
+        }
+      >
         <div className="flex items-center gap-3">
           <p className="shrink-0 text-xs uppercase tracking-[0.22em] text-muted-foreground">
             Guidatori
@@ -228,7 +236,7 @@ export function VehicleDriversSection({
             })
           )}
         </div>
-      </Card>
+      </div>
 
       <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
         <DialogContent>
@@ -342,4 +350,6 @@ export function VehicleDriversSection({
       </Dialog>
     </>
   );
+
+  return embedded ? content : <Card className="border-border/80 bg-card/90 p-6">{content}</Card>;
 }
