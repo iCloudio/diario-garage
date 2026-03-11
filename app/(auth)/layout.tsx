@@ -14,40 +14,23 @@ export default async function AuthLayout({
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <div className="mx-auto flex min-h-screen max-w-xl flex-col justify-center gap-8 px-6 py-12">
+    <div className="relative min-h-screen bg-background text-foreground">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(600px_circle_at_top_left,rgba(124,58,237,0.18),transparent_60%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(500px_circle_at_bottom_right,rgba(99,102,241,0.14),transparent_55%)]" />
+      <div className="relative mx-auto flex min-h-screen max-w-xl flex-col justify-center gap-8 px-6 py-12">
         <div>
           <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
             DiarioGarage
           </p>
           <h1 className="mt-4 text-3xl font-semibold text-foreground">
-            Il tuo garage sempre in regola.
+            La gestione del tuo veicolo, semplice e precisa.
           </h1>
           <p className="mt-3 text-sm text-muted-foreground">
-            Non trascurare la tua auto: scadenze e manutenzione sotto controllo.
+            Un solo posto per scadenze, manutenzione e spese del tuo veicolo.
           </p>
         </div>
 
-        <div className="grid gap-3 text-sm text-muted-foreground">
-          <div className="flex items-center gap-3 rounded-lg border border-border bg-card px-4 py-3">
-            <CalendarCheck className="h-4 w-4 text-foreground" />
-            <span>Scadenze chiare e sempre aggiornate.</span>
-          </div>
-          <div className="flex items-center gap-3 rounded-lg border border-border bg-card px-4 py-3">
-            <Wrench className="h-4 w-4 text-foreground" />
-            <span>Storico manutenzioni essenziale e pulito.</span>
-          </div>
-          <div className="flex items-center gap-3 rounded-lg border border-border bg-card px-4 py-3">
-            <Car className="h-4 w-4 text-foreground" />
-            <span>Gestisci il tuo veicolo senza confusione.</span>
-          </div>
-        </div>
-
         {children}
-
-        <div className="text-xs text-muted-foreground">
-          I piani e la sitemap sono disponibili nelle impostazioni.
-        </div>
       </div>
     </div>
   );

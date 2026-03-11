@@ -38,66 +38,66 @@ export default function LoginPage() {
   }
 
   return (
-    <Card className="border-border bg-card p-6 shadow-xl backdrop-blur">
-      <h2 className="text-xl font-semibold text-foreground">Bentornato</h2>
-      <p className="mt-2 text-sm text-muted-foreground">
-        Il tuo garage sempre in regola, in pochi secondi.
-      </p>
-      <form className="mt-6 space-y-4" onSubmit={onSubmit}>
-        <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
-          <Input
-            id="email"
-            type="email"
-            placeholder="tuo@email.it"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            required
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="password">Password</Label>
-          <Input
-            id="password"
-            type="password"
-            placeholder="••••••••"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            required
-          />
-        </div>
-        <Button className="w-full" type="submit" disabled={pending}>
-          {pending ? "Accesso..." : "Entra"}
-        </Button>
-      </form>
-      <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground">
-        <Link className="hover:text-foreground" href="/forgot-password">
-          Password dimenticata?
-        </Link>
-        <Link className="hover:text-foreground" href="/register">
-          Crea account
-        </Link>
-      </div>
-
-      <div className="mt-6 border-t border-border pt-4 text-center">
-        <p className="mb-2 text-[10px] uppercase tracking-wider text-muted-foreground">
-          Sviluppato da
+    <div className="space-y-4">
+      <Card className="border-border bg-card p-6 shadow-xl backdrop-blur">
+        <h2 className="text-xl font-semibold text-foreground">Bentornato</h2>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Il tuo garage sempre in regola, in pochi secondi.
         </p>
+        <form className="mt-6 space-y-4" onSubmit={onSubmit}>
+          <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              placeholder="tuo@email.it"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="password">Password</Label>
+            <Input
+              id="password"
+              type="password"
+              placeholder="••••••••"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              required
+            />
+          </div>
+          <Button className="w-full" type="submit" disabled={pending}>
+            {pending ? "Accesso..." : "Entra"}
+          </Button>
+        </form>
+        <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground">
+          <Link className="hover:text-foreground" href="/forgot-password">
+            Password dimenticata?
+          </Link>
+          <Link className="hover:text-foreground" href="/register">
+            Crea account
+          </Link>
+        </div>
+      </Card>
+
+      <div className="text-center">
         <a
           href="https://fulmi.net"
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-block transition hover:opacity-80"
+          className="inline-flex items-center justify-center gap-2 text-[9px] uppercase tracking-[0.2em] text-muted-foreground transition hover:opacity-80"
         >
+          <span>Sviluppato da</span>
           <Image
             src="/fulminetLogo.png"
             alt="Fulminet"
-            width={120}
-            height={30}
-            className="mx-auto"
+            width={64}
+            height={14}
+            className="inline-block"
           />
         </a>
       </div>
-    </Card>
+    </div>
   );
 }

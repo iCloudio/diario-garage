@@ -60,21 +60,19 @@ export default async function AppLayout({
               </div>
 
               <div className="border-t border-border pt-3 text-center">
-                <p className="mb-2 text-[10px] uppercase tracking-wider text-muted-foreground">
-                  Sviluppato da
-                </p>
                 <a
                   href="https://fulmi.net"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-block transition hover:opacity-80"
+                  className="inline-flex items-center justify-center gap-2 text-[9px] uppercase tracking-[0.2em] text-muted-foreground transition hover:opacity-80"
                 >
+                  <span>Sviluppato da</span>
                   <Image
                     src="/fulminetLogo.png"
                     alt="Fulminet"
-                    width={120}
-                    height={30}
-                    className="mx-auto"
+                    width={64}
+                    height={14}
+                    className="inline-block"
                   />
                 </a>
               </div>
