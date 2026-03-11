@@ -1,12 +1,14 @@
 import { Card } from "@/components/ui/card";
 import { TrendingUp, TrendingDown, CalendarDays, DollarSign } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { formatCurrency } from "@/lib/currency";
 
 interface VehicleSaleAnalysisProps {
   soldPrice: number;
   soldDate: Date;
   soldNotes?: string | null;
   totalExpenses: number;
+  currency: string;
   purchaseDate: Date; // createdAt del veicolo come proxy
   odometerKm?: number | null;
 }
@@ -16,6 +18,7 @@ export function VehicleSaleAnalysis({
   soldDate,
   soldNotes,
   totalExpenses,
+  currency,
   purchaseDate,
   odometerKm,
 }: VehicleSaleAnalysisProps) {
@@ -48,13 +51,13 @@ export function VehicleSaleAnalysis({
           <div className="rounded-lg border border-border bg-muted/30 p-4">
             <p className="text-xs text-muted-foreground">Prezzo di vendita</p>
             <p className="mt-2 text-2xl font-semibold text-green-600 dark:text-green-400">
-              +€{soldPrice.toFixed(2)}
+              +{formatCurrency(soldPrice, currency)}
             </p>
           </div>
           <div className="rounded-lg border border-border bg-muted/30 p-4">
             <p className="text-xs text-muted-foreground">Spese totali</p>
             <p className="mt-2 text-2xl font-semibold text-red-600 dark:text-red-400">
-              -€{totalExpenses.toFixed(2)}
+              -{formatCurrency(totalExpenses, currency)}
             </p>
           </div>
           <div className="rounded-lg border border-border bg-muted/30 p-4">
@@ -66,7 +69,7 @@ export function VehicleSaleAnalysis({
                 <TrendingDown className="h-5 w-5 text-red-600 dark:text-red-400" />
               )}
               <p className={`text-2xl font-semibold ${isProfit ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}>
-                {isProfit ? "+" : ""}€{netResult.toFixed(2)}
+                {isProfit ? "+" : ""}{formatCurrency(netResult, currency)}
               </p>
             </div>
           </div>
@@ -89,13 +92,13 @@ export function VehicleSaleAnalysis({
 
           <div className="flex items-center justify-between rounded-lg border border-border bg-card px-4 py-3">
             <span className="text-muted-foreground">Costo medio/mese</span>
-            <span className="font-medium">€{avgMonthlyCost.toFixed(2)}</span>
+            <span className="font-medium">{formatCurrency(avgMonthlyCost, currency)}</span>
           </div>
 
           {costPerKm !== null && (
             <div className="flex items-center justify-between rounded-lg border border-border bg-card px-4 py-3">
               <span className="text-muted-foreground">Costo per km</span>
-              <span className="font-medium">€{costPerKm.toFixed(2)}</span>
+              <span className="font-medium">{formatCurrency(costPerKm, currency)}</span>
             </div>
           )}
 

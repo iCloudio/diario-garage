@@ -5,6 +5,12 @@ import { requireUser } from "@/lib/auth";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { formatCurrency } from "@/lib/currency";
+import {
+  formatLicenseExpiryLabel,
+  getLicenseExpiryAnimationClass,
+  getLicenseExpiryClass,
+} from "@/lib/license-status";
 
 const DEADLINE_LABELS = {
   ASSICURAZIONE: "Assicurazione",
@@ -72,28 +78,44 @@ function getDeadlineChipAnimationClass(dueDate: Date, now: Date) {
 
 export default async function VehiclesPage() {
   const user = await requireUser();
-  const vehicles = await db.vehicle.findMany({
-    where: { userId: user.id, deletedAt: null },
-    include: {
-      deadlines: {
-        where: { deletedAt: null },
-        orderBy: { dueDate: "asc" },
+  const [profile, vehicles] = await Promise.all([
+    db.user.findUnique({
+      where: { id: user.id },
+      select: { currency: true },
+    }),
+    db.vehicle.findMany({
+      where: { userId: user.id, deletedAt: null },
+      include: {
+        deadlines: {
+          where: { deletedAt: null },
+          orderBy: { dueDate: "asc" },
+        },
+        refuels: {
+          where: { deletedAt: null },
+          orderBy: { date: "desc" },
+          take: 1,
+        },
+        drivers: {
+          orderBy: {
+            driver: { name: "asc" },
+          },
+          include: {
+            driver: {
+              select: {
+                id: true,
+                name: true,
+                licenseExpiry: true,
+              },
+            },
+          },
+        },
       },
-      expenses: {
-        where: { deletedAt: null },
-        orderBy: { date: "desc" },
-        take: 1,
-      },
-      refuels: {
-        where: { deletedAt: null },
-        orderBy: { date: "desc" },
-        take: 1,
-      },
-    },
-    orderBy: { createdAt: "desc" },
-  });
+      orderBy: { createdAt: "desc" },
+    }),
+  ]);
 
   const now = new Date();
+  const currency = profile?.currency ?? "EUR";
 
   return (
     <div className="space-y-6">
@@ -132,10 +154,7 @@ export default async function VehiclesPage() {
                 Math.ceil((nowDay.getTime() - refuelDay.getTime()) / (1000 * 60 * 60 * 24)),
               );
               const fuelLabel = FUEL_LABELS[latestRefuel.fuelType] ?? latestRefuel.fuelType;
-              const amountLabel = `${new Intl.NumberFormat("it-IT", {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              }).format(latestRefuel.amountEur)} EUR`;
+              const amountLabel = formatCurrency(latestRefuel.amountEur, currency);
               const daysLabel =
                 diffDays === 0
                   ? "oggi"
@@ -225,6 +244,37 @@ export default async function VehiclesPage() {
                           <p className="italic text-muted-foreground">Nessun rifornimento</p>
                         )}
                       </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-5">
+                    <div className="flex items-center gap-3">
+                      <p className="shrink-0 text-xs uppercase tracking-[0.22em] text-muted-foreground">
+                        Guidatori
+                      </p>
+                      <div className="h-px flex-1 bg-border/70" />
+                    </div>
+                    <div className="mt-3 space-y-2">
+                      {item.drivers.length === 0 ? (
+                        <p className="text-sm text-muted-foreground">Nessun guidatore</p>
+                      ) : (
+                        item.drivers.map(({ driver }) => (
+                          <div
+                            key={driver.id}
+                            className="flex items-center justify-between gap-3 text-sm"
+                          >
+                            <span className="font-medium text-foreground">{driver.name}</span>
+                            <span
+                              className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-medium ${getLicenseExpiryClass(
+                                driver.licenseExpiry,
+                                now,
+                              )} ${getLicenseExpiryAnimationClass(driver.licenseExpiry, now)}`}
+                            >
+                              {formatLicenseExpiryLabel(driver.licenseExpiry)}
+                            </span>
+                          </div>
+                        ))
+                      )}
                     </div>
                   </div>
                 </Card>

@@ -12,20 +12,13 @@ import { requireUser } from "@/lib/auth";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { formatCurrency } from "@/lib/currency";
 
 const DEADLINE_LABELS = {
   ASSICURAZIONE: "Assicurazione",
   BOLLO: "Bollo",
   REVISIONE: "Revisione",
 } as const;
-
-function formatCurrency(value: number) {
-  return new Intl.NumberFormat("it-IT", {
-    style: "currency",
-    currency: "EUR",
-    maximumFractionDigits: 0,
-  }).format(value);
-}
 
 function formatShortDate(date: Date) {
   return new Intl.DateTimeFormat("it-IT", {
@@ -42,8 +35,12 @@ export default async function DashboardPage() {
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
   const nextMonthStart = new Date(now.getFullYear(), now.getMonth() + 1, 1);
 
-  const [vehicleCount, primaryVehicle, dueSoonCount, upcoming, monthExpenses, monthRefuels, latestExpense, latestRefuel] =
+  const [profile, vehicleCount, primaryVehicle, dueSoonCount, upcoming, monthExpenses, monthRefuels, latestExpense, latestRefuel] =
     await Promise.all([
+      db.user.findUnique({
+        where: { id: user.id },
+        select: { currency: true },
+      }),
       db.vehicle.count({
         where: { userId: user.id, deletedAt: null },
       }),
@@ -124,6 +121,7 @@ export default async function DashboardPage() {
     : "/vehicles/new";
   const monthSpent =
     (monthExpenses._sum.amountEur ?? 0) + (monthRefuels._sum.amountEur ?? 0);
+  const currency = profile?.currency ?? "EUR";
   const latestActivity = [latestExpense, latestRefuel]
     .filter((entry): entry is NonNullable<typeof entry> => Boolean(entry))
     .sort((a, b) => b.date.getTime() - a.date.getTime())[0] ?? null;
@@ -203,7 +201,7 @@ export default async function DashboardPage() {
                 <CircleDollarSign className="h-4 w-4 text-muted-foreground" />
               </div>
               <p className="mt-3 text-3xl font-semibold">
-                {monthSpent > 0 ? formatCurrency(monthSpent) : "Nessun dato"}
+                {monthSpent > 0 ? formatCurrency(monthSpent, currency, { maximumFractionDigits: 0 }) : "Nessun dato"}
               </p>
               <p className="mt-2 text-xs text-muted-foreground">
                 Somma di spese e rifornimenti registrati questo mese.

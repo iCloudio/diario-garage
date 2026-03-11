@@ -2,18 +2,17 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Car, Settings, Users } from "lucide-react";
+import { Car, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type NavItem = {
   href: string;
   label: string;
-  icon: "car" | "users" | "settings";
+  icon: "car" | "settings";
 };
 
 const iconMap = {
   car: Car,
-  users: Users,
   settings: Settings,
 } as const;
 
@@ -22,7 +21,10 @@ export function AppMobileNav({ items }: { items: NavItem[] }) {
 
   return (
     <nav className="fixed inset-x-0 bottom-0 z-10 border-t border-border/80 bg-card/95 backdrop-blur md:hidden">
-      <div className="grid grid-cols-3 gap-1 px-2 py-2 text-[11px] text-muted-foreground">
+      <div
+        className="grid gap-1 px-2 py-2 text-[11px] text-muted-foreground"
+        style={{ gridTemplateColumns: `repeat(${items.length}, minmax(0, 1fr))` }}
+      >
         {items.map((item) => {
           const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
           const Icon = iconMap[item.icon];

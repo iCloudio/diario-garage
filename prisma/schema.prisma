@@ -57,6 +57,7 @@ model User {
   deletedAt    DateTime?
   sessions     Session[]
   vehicles     Vehicle[]
+  drivers      Driver[]
 }
 
 model Session {
@@ -91,6 +92,7 @@ model Vehicle {
   deadlines  Deadline[]
   refuels    Refuel[]
   expenses   Expense[]
+  drivers    VehicleDriver[]
 
   @@index([userId])
   @@index([plate])
@@ -154,4 +156,35 @@ model Expense {
   @@index([vehicleId])
   @@index([date])
   @@index([category])
+}
+
+model Driver {
+  id              String          @id @default(cuid())
+  userId          String
+  name            String
+  licenseExpiry   DateTime
+  phone           String?
+  notes           String?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  deletedAt       DateTime?
+  user            User            @relation(fields: [userId], references: [id])
+  vehicles        VehicleDriver[]
+
+  @@index([userId])
+  @@index([licenseExpiry])
+  @@index([name])
+}
+
+model VehicleDriver {
+  id        String   @id @default(cuid())
+  vehicleId String
+  driverId  String
+  createdAt DateTime @default(now())
+  vehicle   Vehicle  @relation(fields: [vehicleId], references: [id])
+  driver    Driver   @relation(fields: [driverId], references: [id])
+
+  @@unique([vehicleId, driverId])
+  @@index([vehicleId])
+  @@index([driverId])
 }

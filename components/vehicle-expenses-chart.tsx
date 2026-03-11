@@ -15,6 +15,7 @@ import {
 import { Card } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { cn } from "@/lib/utils";
+import { getCurrencySymbol } from "@/lib/currency";
 
 type ExpensePoint = {
   month: string;
@@ -44,8 +45,7 @@ export function VehicleExpensesChart({
 }: VehicleExpensesChartProps) {
   const [selectedKey, setSelectedKey] = useState(datasets[0]?.key ?? "all");
   const selected = datasets.find((item) => item.key === selectedKey) ?? datasets[0];
-  const currencySymbol =
-    currency === "USD" ? "$" : currency === "GBP" ? "GBP" : currency === "CHF" ? "CHF" : "EUR";
+  const currencySymbol = getCurrencySymbol(currency);
 
   const currencyFormatter = new Intl.NumberFormat("it-IT", {
     style: "currency",
