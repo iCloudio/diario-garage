@@ -4,14 +4,6 @@ import { requireUser } from "@/lib/auth";
 import { VehicleSaleAnalysis } from "@/components/vehicle-sale-analysis";
 import { VehicleOverviewHub } from "@/components/vehicle-overview-hub";
 import { formatCurrency } from "@/lib/currency";
-import { getRegionalFuelBenchmark } from "@/lib/fuel-prices";
-
-const CATEGORY_COLORS = {
-  Carburante: "#7c3aed",
-  Manutenzione: "#8b5cf6",
-  Assicurazione: "#a78bfa",
-  Bollo: "#c4b5fd",
-} as const;
 
 const MONTHS = ["Gen", "Feb", "Mar", "Apr", "Mag", "Giu", "Lug", "Ago", "Set", "Ott", "Nov", "Dic"];
 
@@ -134,10 +126,6 @@ export default async function VehicleOverviewPage({
   }
 
   const currency = profile?.currency ?? "EUR";
-  const fuelBenchmark = await getRegionalFuelBenchmark(
-    profile?.fuelPriceRegion,
-    vehicle.fuelType,
-  );
 
   const deadlinesWithStatus = (["ASSICURAZIONE", "BOLLO", "REVISIONE"] as const).map((type) => {
     const deadline = vehicle.deadlines.find((item) => item.type === type) ?? null;
@@ -285,24 +273,24 @@ export default async function VehicleOverviewPage({
       })),
       pieData: [
         {
+          key: "carburante",
           name: "Carburante",
           value: historicalRows.reduce((sum, row) => sum + row.fuel, 0),
-          color: CATEGORY_COLORS.Carburante,
         },
         {
+          key: "manutenzione",
           name: "Manutenzione",
           value: historicalRows.reduce((sum, row) => sum + row.maintenance, 0),
-          color: CATEGORY_COLORS.Manutenzione,
         },
         {
+          key: "assicurazione",
           name: "Assicurazione",
           value: historicalRows.reduce((sum, row) => sum + row.insurance, 0),
-          color: CATEGORY_COLORS.Assicurazione,
         },
         {
+          key: "bollo",
           name: "Bollo",
           value: historicalRows.reduce((sum, row) => sum + row.tax, 0),
-          color: CATEGORY_COLORS.Bollo,
         },
       ].filter((item) => item.value > 0),
     },
@@ -318,24 +306,24 @@ export default async function VehicleOverviewPage({
         })),
         pieData: [
           {
+            key: "carburante",
             name: "Carburante",
             value: rows.reduce((sum, row) => sum + row.fuel, 0),
-            color: CATEGORY_COLORS.Carburante,
           },
           {
+            key: "manutenzione",
             name: "Manutenzione",
             value: rows.reduce((sum, row) => sum + row.maintenance, 0),
-            color: CATEGORY_COLORS.Manutenzione,
           },
           {
+            key: "assicurazione",
             name: "Assicurazione",
             value: rows.reduce((sum, row) => sum + row.insurance, 0),
-            color: CATEGORY_COLORS.Assicurazione,
           },
           {
+            key: "bollo",
             name: "Bollo",
             value: rows.reduce((sum, row) => sum + row.tax, 0),
-            color: CATEGORY_COLORS.Bollo,
           },
         ].filter((item) => item.value > 0),
       };
@@ -398,75 +386,6 @@ export default async function VehicleOverviewPage({
           initialSoldNotes: vehicle.soldNotes,
         }}
       />
-
-      {profile?.fuelPriceRegion ? (
-        <div className="rounded-3xl border border-border/80 bg-card/90 p-6">
-          <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-            <div>
-              <p className="text-sm font-medium text-foreground">
-                Prezzo medio regionale
-              </p>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Riferimento ufficiale MIMIT per {profile.fuelPriceRegion}.
-              </p>
-            </div>
-            {fuelBenchmark?.snapshotDate ? (
-              <p className="text-xs text-muted-foreground">
-                Aggiornato il {fuelBenchmark.snapshotDate.toLocaleDateString("it-IT")}
-              </p>
-            ) : null}
-          </div>
-
-          <div className="mt-4">
-            {fuelBenchmark?.averagePrice != null ? (
-              <div className="grid gap-3 md:grid-cols-3">
-                <div className="rounded-2xl border border-border/70 bg-background/55 p-4">
-                  <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">
-                    Carburante
-                  </p>
-                  <p className="mt-2 text-base font-medium text-foreground">
-                    {fuelBenchmark.fuelType === "GASOLIO"
-                      ? "Gasolio"
-                      : fuelBenchmark.fuelType === "BENZINA"
-                        ? "Benzina"
-                        : fuelBenchmark.fuelType}
-                  </p>
-                </div>
-                <div className="rounded-2xl border border-border/70 bg-background/55 p-4">
-                  <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">
-                    Media regionale
-                  </p>
-                  <p className="mt-2 text-base font-medium text-foreground">
-                    {new Intl.NumberFormat("it-IT", {
-                      style: "currency",
-                      currency: "EUR",
-                      minimumFractionDigits: 3,
-                      maximumFractionDigits: 3,
-                    }).format(fuelBenchmark.averagePrice)}
-                  </p>
-                </div>
-                <div className="rounded-2xl border border-border/70 bg-background/55 p-4">
-                  <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">
-                    Fonte
-                  </p>
-                  <a
-                    className="mt-2 inline-flex text-base font-medium text-foreground transition hover:text-primary"
-                    href={fuelBenchmark.sourceUrl}
-                    rel="noreferrer"
-                    target="_blank"
-                  >
-                    MIMIT
-                  </a>
-                </div>
-              </div>
-            ) : (
-              <p className="text-sm text-muted-foreground">
-                Nessun benchmark disponibile per il carburante di questo veicolo.
-              </p>
-            )}
-          </div>
-        </div>
-      ) : null}
 
       {vehicle.status === "VENDUTO" && vehicle.soldPrice && vehicle.soldDate ? (
         <VehicleSaleAnalysis

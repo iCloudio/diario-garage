@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { Plus } from "lucide-react";
 import { db } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { Card } from "@/components/ui/card";
@@ -7,10 +6,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DeadlineStatusChip } from "@/components/deadline-status-chip";
 import { formatCurrency } from "@/lib/currency";
-import {
-  getRegionalFuelBenchmarksForRegion,
-  mapVehicleFuelTypeToRegionalFuel,
-} from "@/lib/fuel-prices";
+import { FuelPriceRegionDialog } from "@/components/fuel-price-region-dialog";
+import { VehicleInlineCreateCard } from "@/components/vehicle-inline-create-card";
+import { getRegionalFuelPriceTable } from "@/lib/fuel-prices";
 import {
   formatLicenseExpiryLabel,
   getLicenseExpiryAnimationClass,
@@ -41,7 +39,7 @@ const FUEL_LABELS = {
 
 export default async function VehiclesPage() {
   const user = await requireUser();
-  const [profile, vehicles] = await Promise.all([
+  const [profile, vehicles, regionalFuelTable] = await Promise.all([
     db.user.findUnique({
       where: { id: user.id },
       select: { currency: true, fuelPriceRegion: true },
@@ -75,16 +73,21 @@ export default async function VehiclesPage() {
       },
       orderBy: { createdAt: "desc" },
     }),
+    getRegionalFuelPriceTable(),
   ]);
-  const regionalBenchmarks = await getRegionalFuelBenchmarksForRegion(
-    profile?.fuelPriceRegion,
-  );
 
   const now = new Date();
   const currency = profile?.currency ?? "EUR";
 
   return (
     <div className="space-y-6">
+      <FuelPriceRegionDialog
+        initialRegion={profile?.fuelPriceRegion ?? null}
+        rows={regionalFuelTable.regions}
+        snapshotDate={regionalFuelTable.snapshotDate}
+        sourceUrl={regionalFuelTable.sourceUrl}
+      />
+
       {vehicles.length === 0 ? (
         <Card className="border-dashed border-border/80 bg-card/75 p-8">
           <div className="max-w-xl">
@@ -106,11 +109,6 @@ export default async function VehiclesPage() {
         <div className="grid auto-rows-fr gap-4 md:grid-cols-2 xl:grid-cols-3">
           {vehicles.map((item) => {
             const latestRefuel = item.refuels[0] ?? null;
-            const mappedRegionalFuel = mapVehicleFuelTypeToRegionalFuel(item.fuelType);
-            const regionalBenchmark =
-              mappedRegionalFuel != null
-                ? regionalBenchmarks.benchmarks.get(mappedRegionalFuel)
-                : null;
             const lastRefuelData = (() => {
               if (!latestRefuel) return null;
 
@@ -158,9 +156,11 @@ export default async function VehiclesPage() {
                     <h2 className="mt-2 text-2xl font-semibold tracking-tight">
                       {item.plate}
                     </h2>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      {item.make ?? "Marca"} {item.model ?? ""}
-                    </p>
+                    {item.make || item.model ? (
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        {[item.make, item.model].filter(Boolean).join(" ")}
+                      </p>
+                    ) : null}
                   </div>
 
                   <div className="mt-5">
@@ -172,7 +172,7 @@ export default async function VehiclesPage() {
                     </div>
                     <div className="mt-3 space-y-2">
                       {item.deadlines.length === 0 ? (
-                        <p className="text-sm text-muted-foreground">Nessuna scadenza</p>
+                        <p className="text-sm italic text-muted-foreground">Nessuna scadenza</p>
                       ) : (
                         item.deadlines.map((deadline) => (
                           <div
@@ -199,43 +199,13 @@ export default async function VehiclesPage() {
                       </div>
                       <div className="mt-3">
                         {lastRefuelData ? (
-                          <div className="space-y-2">
-                            <div className="grid grid-cols-3 gap-3 text-sm">
-                              <p className="text-left text-foreground">{lastRefuelData.fuelLabel}</p>
-                              <p className="text-center text-foreground">{lastRefuelData.amountLabel}</p>
-                              <p className="text-right text-foreground">{lastRefuelData.daysLabel}</p>
-                            </div>
-                            {profile?.fuelPriceRegion && regionalBenchmark?.averagePrice != null ? (
-                              <p className="text-xs text-muted-foreground">
-                                Media {profile.fuelPriceRegion}:{" "}
-                                <span className="font-medium text-foreground">
-                                  {new Intl.NumberFormat("it-IT", {
-                                    style: "currency",
-                                    currency: "EUR",
-                                    minimumFractionDigits: 3,
-                                    maximumFractionDigits: 3,
-                                  }).format(regionalBenchmark.averagePrice)}
-                                </span>
-                              </p>
-                            ) : null}
+                          <div className="grid grid-cols-3 gap-3 text-sm">
+                            <p className="text-left text-foreground">{lastRefuelData.fuelLabel}</p>
+                            <p className="text-center text-foreground">{lastRefuelData.amountLabel}</p>
+                            <p className="text-right text-foreground">{lastRefuelData.daysLabel}</p>
                           </div>
                         ) : (
-                          <div className="space-y-2">
-                            <p className="italic text-muted-foreground">Nessun rifornimento</p>
-                            {profile?.fuelPriceRegion && regionalBenchmark?.averagePrice != null ? (
-                              <p className="text-xs text-muted-foreground">
-                                Media {profile.fuelPriceRegion}:{" "}
-                                <span className="font-medium text-foreground">
-                                  {new Intl.NumberFormat("it-IT", {
-                                    style: "currency",
-                                    currency: "EUR",
-                                    minimumFractionDigits: 3,
-                                    maximumFractionDigits: 3,
-                                  }).format(regionalBenchmark.averagePrice)}
-                                </span>
-                              </p>
-                            ) : null}
-                          </div>
+                          <p className="italic text-muted-foreground">Nessun rifornimento</p>
                         )}
                       </div>
                     </div>
@@ -250,7 +220,7 @@ export default async function VehiclesPage() {
                     </div>
                     <div className="mt-3 space-y-2">
                       {item.drivers.length === 0 ? (
-                        <p className="text-sm text-muted-foreground">Nessun guidatore</p>
+                        <p className="text-sm italic text-muted-foreground">Nessun guidatore</p>
                       ) : (
                         item.drivers.map(({ driver }) => (
                           <div
@@ -271,24 +241,12 @@ export default async function VehiclesPage() {
                       )}
                     </div>
                   </div>
-                </Card>
-              </Link>
-            );
+              </Card>
+            </Link>
+          );
           })}
 
-          <Link className="block" href="/vehicles/new">
-            <Card className="flex h-full min-h-64 flex-col items-center justify-center gap-4 border-dashed border-border/80 bg-card/60 p-6 text-center transition hover:border-primary/35 hover:bg-card/80">
-              <div className="flex h-14 w-14 items-center justify-center rounded-full border border-border/80 bg-background/70">
-                <Plus className="h-6 w-6 text-muted-foreground" />
-              </div>
-              <div>
-                <p className="text-base font-medium text-foreground">Aggiungi veicolo</p>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Crea una nuova scheda veicolo.
-                </p>
-              </div>
-            </Card>
-          </Link>
+          <VehicleInlineCreateCard />
         </div>
       )}
     </div>
