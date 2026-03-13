@@ -118,7 +118,7 @@ function getPayloadConfigFromPayload(
   payload: Record<string, unknown>,
   key: string,
 ) {
-  const payloadData = payload?.payload;
+  const payloadData = payload?.payload as Record<string, unknown> | undefined;
   const configKey =
     typeof payload[key] === "string"
       ? payload[key]

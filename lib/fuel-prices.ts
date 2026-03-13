@@ -238,7 +238,17 @@ export async function ensureRegionalFuelPrices() {
 export async function getRegionalFuelPriceTable() {
   const activeSnapshotDate = await ensureRegionalFuelPrices();
   if (!activeSnapshotDate) {
-    return { snapshotDate: null, regions: [] as Array<Record<string, string | null>> };
+    return {
+      snapshotDate: null,
+      sourceUrl: MIMIT_REGIONS_URL,
+      regions: [] as Array<{
+        region: string;
+        BENZINA: string | null;
+        GASOLIO: string | null;
+        GPL: string | null;
+        METANO: string | null;
+      }>,
+    };
   }
 
   const snapshots = await db.fuelPriceSnapshot.findMany({

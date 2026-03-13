@@ -14,28 +14,8 @@ import {
   getLicenseExpiryAnimationClass,
   getLicenseExpiryClass,
 } from "@/lib/license-status";
-
-const DEADLINE_LABELS = {
-  ASSICURAZIONE: "Assicurazione",
-  BOLLO: "Bollo",
-  REVISIONE: "Revisione",
-} as const;
-
-const VEHICLE_LABELS = {
-  AUTO: "Auto",
-  MOTO: "Moto",
-  CAMPER: "Camper",
-} as const;
-
-const FUEL_LABELS = {
-  BENZINA: "Benzina",
-  DIESEL: "Diesel",
-  GPL: "GPL",
-  METANO: "Metano",
-  ELETTRICO: "Elettrico",
-  IBRIDO_BENZINA: "Ibrido benzina",
-  IBRIDO_DIESEL: "Ibrido diesel",
-} as const;
+import { DEADLINE_LABELS, VEHICLE_LABELS, FUEL_LABELS } from "@/lib/constants/labels";
+import { calculateDaysAgo, formatDaysAgoLabel } from "@/lib/services/expense-service";
 
 export default async function VehiclesPage() {
   const user = await requireUser();
@@ -118,22 +98,10 @@ export default async function VehiclesPage() {
             const lastRefuelData = (() => {
               if (!latestRefuel) return null;
 
-              const refuelDay = new Date(
-                latestRefuel.date.getFullYear(),
-                latestRefuel.date.getMonth(),
-                latestRefuel.date.getDate(),
-              );
-              const nowDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-              const diffDays = Math.max(
-                0,
-                Math.ceil((nowDay.getTime() - refuelDay.getTime()) / (1000 * 60 * 60 * 24)),
-              );
+              const diffDays = calculateDaysAgo(latestRefuel.date, now);
               const fuelLabel = FUEL_LABELS[latestRefuel.fuelType] ?? latestRefuel.fuelType;
               const amountLabel = formatCurrency(latestRefuel.amountEur, currency);
-              const daysLabel =
-                diffDays === 0
-                  ? "oggi"
-                  : `${diffDays} ${diffDays === 1 ? "giorno" : "giorni"} fa`;
+              const daysLabel = formatDaysAgoLabel(diffDays);
 
               return { fuelLabel, amountLabel, daysLabel };
             })();
