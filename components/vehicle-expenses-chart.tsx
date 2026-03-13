@@ -8,12 +8,17 @@ import {
   LineChart,
   Pie,
   PieChart,
-  ResponsiveContainer,
   XAxis,
   YAxis,
 } from "recharts";
-import { Card } from "@/components/ui/card";
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import {
+  type ChartConfig,
+  ChartContainer,
+  ChartLegend,
+  ChartLegendContent,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
 import { cn } from "@/lib/utils";
 import { getCurrencySymbol } from "@/lib/currency";
 
@@ -24,9 +29,9 @@ type ExpensePoint = {
 };
 
 type PiePoint = {
+  key: string;
   name: string;
   value: number;
-  color: string;
 };
 
 type VehicleExpensesChartProps = {
@@ -52,6 +57,38 @@ export function VehicleExpensesChart({
     currency,
     maximumFractionDigits: 0,
   });
+  const lineChartConfig = {
+    total: {
+      label: selected.label,
+      color: "hsl(var(--chart-1))",
+    },
+    fuel: {
+      label: "Carburante",
+      color: "hsl(var(--chart-2))",
+    },
+  } satisfies ChartConfig;
+  const pieChartConfig = {
+    carburante: {
+      label: "Carburante",
+      color: "hsl(var(--chart-1))",
+    },
+    manutenzione: {
+      label: "Manutenzione",
+      color: "hsl(var(--chart-2))",
+    },
+    assicurazione: {
+      label: "Assicurazione",
+      color: "hsl(var(--chart-3))",
+    },
+    bollo: {
+      label: "Bollo",
+      color: "hsl(var(--chart-4))",
+    },
+  } satisfies ChartConfig;
+  const selectedPieData = selected.pieData.map((entry) => ({
+    ...entry,
+    fill: `var(--color-${entry.key})`,
+  }));
 
   return (
     <div className="space-y-6">
@@ -72,7 +109,7 @@ export function VehicleExpensesChart({
       </div>
 
       <div className="grid gap-4 xl:grid-cols-[2fr_1fr]">
-        <Card className="border-border bg-card p-6">
+        <div className="rounded-2xl bg-background/45 p-5">
           <div className="mb-4">
             <p className="text-sm font-medium">Spese mensili</p>
             <p className="text-xs text-muted-foreground">
@@ -81,109 +118,105 @@ export function VehicleExpensesChart({
                 : `${selected.label} mese per mese.`}
             </p>
           </div>
-          <ChartContainer>
-            <ResponsiveContainer>
-              <LineChart
-                data={selected.monthlyData}
-                margin={{ top: 8, right: 8, left: -16, bottom: 0 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                <XAxis
-                  dataKey="month"
-                  tickLine={false}
-                  axisLine={false}
-                  tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
-                />
-                <YAxis
-                  width={42}
-                  tickLine={false}
-                  axisLine={false}
-                  tickFormatter={(value: number) => `${currencySymbol} ${value}`}
-                  tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
-                />
-                <ChartTooltip
-                  content={<ChartTooltipContent formatter={currencyFormatter.format} />}
-                  cursor={{ stroke: "hsl(var(--border))", strokeDasharray: "4 4" }}
-                />
+          <ChartContainer config={lineChartConfig}>
+            <LineChart
+              accessibilityLayer
+              data={selected.monthlyData}
+              margin={{ top: 8, right: 8, left: -16, bottom: 0 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" vertical={false} />
+              <XAxis
+                dataKey="month"
+                tickLine={false}
+                axisLine={false}
+                tickMargin={10}
+              />
+              <YAxis
+                width={42}
+                tickLine={false}
+                axisLine={false}
+                tickFormatter={(value: number) => `${currencySymbol} ${value}`}
+              />
+              <ChartTooltip
+                content={<ChartTooltipContent formatter={currencyFormatter.format} indicator="line" />}
+                cursor={{ stroke: "hsl(var(--border))", strokeDasharray: "4 4" }}
+              />
+              <ChartLegend content={<ChartLegendContent />} />
+              <Line
+                type="monotone"
+                dataKey="total"
+                stroke="var(--color-total)"
+                strokeWidth={3}
+                dot={false}
+                activeDot={{ r: 4, fill: "var(--color-total)" }}
+                strokeLinecap="round"
+              />
+              {selected.key === "all" ? (
                 <Line
                   type="monotone"
-                  dataKey="total"
-                  name={selected.label}
-                  stroke="#7c3aed"
-                  strokeWidth={3}
-                  dot={{ r: 0 }}
-                  activeDot={{ r: 4, fill: "#7c3aed" }}
+                  dataKey="fuel"
+                  stroke="var(--color-fuel)"
+                  strokeWidth={2}
+                  dot={false}
+                  activeDot={{ r: 4, fill: "var(--color-fuel)" }}
+                  strokeDasharray="6 6"
                   strokeLinecap="round"
                 />
-                {selected.key === "all" ? (
-                  <Line
-                    type="monotone"
-                    dataKey="fuel"
-                    name="Carburante"
-                    stroke="#a78bfa"
-                    strokeWidth={2}
-                    dot={{ r: 0 }}
-                    activeDot={{ r: 4, fill: "#a78bfa" }}
-                    strokeDasharray="6 6"
-                    strokeLinecap="round"
-                  />
-                ) : null}
-              </LineChart>
-            </ResponsiveContainer>
+              ) : null}
+            </LineChart>
           </ChartContainer>
-          <div className="mt-4 flex flex-wrap gap-4 text-xs">
-            <span className="inline-flex items-center gap-2 text-muted-foreground">
-              <span className="h-2.5 w-2.5 rounded-full bg-[#7c3aed]" />
-              {selected.label}
-            </span>
-            {selected.key === "all" ? (
-              <span className="inline-flex items-center gap-2 text-muted-foreground">
-                <span className="h-2.5 w-2.5 rounded-full bg-[#a78bfa]" />
-                Carburante
-              </span>
-            ) : null}
-          </div>
-        </Card>
+        </div>
 
-        <Card className="border-border bg-card p-6">
+        <div className="rounded-2xl bg-background/45 p-5">
           <div className="mb-4">
             <p className="text-sm font-medium">Breakdown categorie</p>
             <p className="text-xs text-muted-foreground">
               Distribuzione per {selected.label.toLowerCase()}.
             </p>
           </div>
-          <ChartContainer className="h-64">
-            {selected.pieData.length === 0 ? (
-              <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-                Nessun dato disponibile.
-              </div>
-            ) : (
-              <ResponsiveContainer>
-                <PieChart>
-                  <ChartTooltip content={<ChartTooltipContent formatter={currencyFormatter.format} />} />
-                  <Pie
-                    data={selected.pieData}
-                    dataKey="value"
-                    nameKey="name"
-                    innerRadius={58}
-                    outerRadius={84}
-                    paddingAngle={3}
-                  >
-                    {selected.pieData.map((entry) => (
-                      <Cell key={entry.name} fill={entry.color} />
-                    ))}
-                  </Pie>
-                </PieChart>
-              </ResponsiveContainer>
-            )}
-          </ChartContainer>
+          {selectedPieData.length === 0 ? (
+            <div className="flex h-64 items-center justify-center text-sm text-muted-foreground">
+              Nessun dato disponibile.
+            </div>
+          ) : (
+            <ChartContainer className="h-64" config={pieChartConfig}>
+              <PieChart accessibilityLayer>
+                <ChartTooltip
+                  content={
+                    <ChartTooltipContent
+                      formatter={currencyFormatter.format}
+                      hideLabel
+                      nameKey="key"
+                    />
+                  }
+                />
+                <ChartLegend content={<ChartLegendContent nameKey="key" />} />
+                <Pie
+                  data={selectedPieData}
+                  dataKey="value"
+                  nameKey="name"
+                  innerRadius={58}
+                  outerRadius={84}
+                  paddingAngle={3}
+                >
+                  {selectedPieData.map((entry) => (
+                    <Cell
+                      key={entry.key}
+                      fill={entry.fill}
+                      name={entry.name}
+                    />
+                  ))}
+                </Pie>
+              </PieChart>
+            </ChartContainer>
+          )}
           <div className="mt-4 space-y-2 text-xs">
-            {selected.pieData.map((entry) => (
+            {selectedPieData.map((entry) => (
               <div key={entry.name} className="flex items-center justify-between gap-3">
                 <span className="inline-flex items-center gap-2 text-muted-foreground">
                   <span
                     className="h-2.5 w-2.5 rounded-full"
-                    style={{ backgroundColor: entry.color }}
+                    style={{ backgroundColor: entry.fill }}
                   />
                   {entry.name}
                 </span>
@@ -193,7 +226,7 @@ export function VehicleExpensesChart({
               </div>
             ))}
           </div>
-        </Card>
+        </div>
       </div>
     </div>
   );

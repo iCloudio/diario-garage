@@ -34,6 +34,12 @@ export default async function VehicleLayout({
         .toLowerCase()
         .replace(/^\w/, (char) => char.toUpperCase())
     : null;
+  const vehiclePowerLabel =
+    vehicle.powerKw != null
+      ? `${vehicle.powerKw.toLocaleString("it-IT", {
+          maximumFractionDigits: 0,
+        })} kW · ${Math.round(vehicle.powerKw * 1.35962).toLocaleString("it-IT")} CV`
+      : null;
   const vehicleStatusLabel =
     vehicle.status === "VENDUTO"
       ? "Venduto"
@@ -41,8 +47,14 @@ export default async function VehicleLayout({
         ? "Rottamato"
         : "Attivo";
   const vehicleIdentity = [vehicle.make, vehicle.model].filter(Boolean).join(" ");
+  const firstRegistrationLabel = vehicle.firstRegistrationDate
+    ? new Intl.DateTimeFormat("it-IT", {
+        month: "2-digit",
+        year: "numeric",
+      }).format(vehicle.firstRegistrationDate)
+    : null;
   const hasMissingProfileData =
-    !vehicle.make || !vehicle.model || !vehicle.year || !formattedKm || !vehicle.fuelType;
+    !vehicle.make || !vehicle.model || !vehicle.firstRegistrationDate || !formattedKm || !vehicle.fuelType;
 
   return (
     <div className="space-y-6">
@@ -88,9 +100,11 @@ export default async function VehicleLayout({
             <div className="mt-4 flex flex-wrap gap-2">
               <Badge
                 variant="outline"
-                className={vehicle.year ? "" : "text-muted-foreground"}
+                className={firstRegistrationLabel ? "" : "text-muted-foreground"}
               >
-                {vehicle.year ? `Anno ${vehicle.year}` : "Anno non inserito"}
+                {firstRegistrationLabel
+                  ? `Immatr. ${firstRegistrationLabel}`
+                  : "Immatricolazione non inserita"}
               </Badge>
               <Badge variant="outline">{vehicleTypeLabel}</Badge>
               <Badge
@@ -104,6 +118,12 @@ export default async function VehicleLayout({
                 className={vehicleFuelLabel ? "" : "text-muted-foreground"}
               >
                 {vehicleFuelLabel ?? "Alimentazione non inserita"}
+              </Badge>
+              <Badge
+                variant="outline"
+                className={vehiclePowerLabel ? "" : "text-muted-foreground"}
+              >
+                {vehiclePowerLabel ?? "Potenza non inserita"}
               </Badge>
             </div>
           </div>

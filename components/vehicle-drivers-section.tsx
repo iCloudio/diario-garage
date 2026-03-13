@@ -5,7 +5,6 @@ import { toast } from "sonner";
 import { Plus, Pencil, Unlink } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -171,15 +170,19 @@ export function VehicleDriversSection({
       <div
         className={
           embedded
-            ? "rounded-2xl border border-border/70 bg-background/55 p-5"
-            : "border-border/80 bg-card/90 p-6"
+            ? "rounded-3xl border border-border/80 bg-card/90 p-5"
+            : "rounded-3xl border border-border/80 bg-card/90 p-6"
         }
       >
-        <div className="flex items-center gap-3">
-          <p className="shrink-0 text-xs uppercase tracking-[0.22em] text-muted-foreground">
-            Guidatori
-          </p>
-          <div className="h-px flex-1 bg-border/70" />
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">
+              Guidatori
+            </p>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Persone associate al veicolo e scadenza patente.
+            </p>
+          </div>
           <Button size="sm" variant="ghost" onClick={() => setIsAddOpen(true)}>
             <Plus className="mr-2 h-4 w-4" />
             Aggiungi
@@ -188,7 +191,7 @@ export function VehicleDriversSection({
 
         <div className="mt-4 space-y-3">
           {drivers.length === 0 ? (
-            <p className="text-sm text-muted-foreground">Nessun guidatore associato</p>
+            <p className="text-sm italic text-muted-foreground">Nessun guidatore</p>
           ) : (
             drivers.map((driver) => {
               const licenseExpiry = new Date(driver.licenseExpiry);
@@ -196,7 +199,7 @@ export function VehicleDriversSection({
               return (
                 <div
                   key={driver.id}
-                  className="flex flex-col gap-3 rounded-2xl border border-border/70 bg-background/55 p-4 md:flex-row md:items-center md:justify-between"
+                  className="flex flex-col gap-3 py-3 first:pt-0 last:pb-0 md:flex-row md:items-center md:justify-between"
                 >
                   <div>
                     <p className="font-medium text-foreground">{driver.name}</p>
@@ -351,5 +354,5 @@ export function VehicleDriversSection({
     </>
   );
 
-  return embedded ? content : <Card className="border-border/80 bg-card/90 p-6">{content}</Card>;
+  return content;
 }

@@ -43,7 +43,7 @@ export async function GET(
         plate: vehicle.plate,
         make: vehicle.make,
         model: vehicle.model,
-        year: vehicle.year,
+        firstRegistrationDate: vehicle.firstRegistrationDate,
         fuelType: vehicle.fuelType,
         odometerKm: vehicle.odometerKm,
         status: vehicle.status,

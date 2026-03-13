@@ -24,9 +24,19 @@ export default function NewVehiclePage() {
   const [plate, setPlate] = useState("");
   const [make, setMake] = useState("");
   const [model, setModel] = useState("");
+  const [modelDetail, setModelDetail] = useState("");
+  const [firstRegistrationDate, setFirstRegistrationDate] = useState("");
   const [odometerKm, setOdometerKm] = useState("");
   const [type, setType] = useState("AUTO");
   const [fuelType, setFuelType] = useState("");
+  const [plateLookupCacheId, setPlateLookupCacheId] = useState<string | null>(null);
+  const [insuranceSummary, setInsuranceSummary] = useState<{
+    company?: string;
+    expiresAt?: string;
+    present?: boolean;
+    suspended?: boolean;
+  } | null>(null);
+
   async function handleLookup() {
     if (!plate.trim()) {
       toast.error("Inserisci una targa.");
@@ -52,8 +62,22 @@ export default function NewVehiclePage() {
       return;
     }
 
+    setPlateLookupCacheId(payload.cacheId ?? null);
     setMake(payload.data.make ?? "");
     setModel(payload.data.model ?? "");
+    setModelDetail(payload.data.modelDetail ?? "");
+    setFirstRegistrationDate(
+      payload.data.firstRegistrationDate
+        ? payload.data.firstRegistrationDate.slice(0, 10)
+        : "",
+    );
+    if (payload.data.fuelType) {
+      setFuelType(payload.data.fuelType);
+    }
+    if (payload.data.type) {
+      setType(payload.data.type);
+    }
+    setInsuranceSummary(payload.data.insurance ?? null);
     toast.success("Dati recuperati.");
   }
 
@@ -73,9 +97,12 @@ export default function NewVehiclePage() {
           plate,
           make,
           model,
+          modelDetail,
+          firstRegistrationDate: firstRegistrationDate || null,
           odometerKm: safeKm,
           type,
           fuelType: fuelType || null,
+          plateLookupCacheId,
         }),
       });
 
@@ -99,7 +126,7 @@ export default function NewVehiclePage() {
         </p>
         <h2 className="mt-2 text-2xl font-semibold tracking-tight">Nuovo veicolo</h2>
         <p className="mt-2 text-sm text-muted-foreground">
-          Parti dal minimo indispensabile. Marca, modello, km e alimentazione
+          Parti dal minimo indispensabile. Marca, modello, immatricolazione, km e alimentazione
           possono essere completati anche dopo.
         </p>
       </div>
@@ -119,7 +146,11 @@ export default function NewVehiclePage() {
               <Input
                 id="plate"
                 value={plate}
-                onChange={(event) => setPlate(event.target.value)}
+                onChange={(event) => {
+                  setPlate(event.target.value);
+                  setPlateLookupCacheId(null);
+                  setInsuranceSummary(null);
+                }}
                 placeholder="AB123CD"
                 required
               />
@@ -131,6 +162,21 @@ export default function NewVehiclePage() {
               </Button>
             </div>
           </div>
+
+          {insuranceSummary?.expiresAt ? (
+            <p className="text-sm text-muted-foreground">
+              Assicurazione trovata
+              {insuranceSummary.company ? `: ${insuranceSummary.company}` : ""}.
+              {" "}Scadenza{" "}
+              {new Date(insuranceSummary.expiresAt).toLocaleDateString("it-IT")}
+              {insuranceSummary.suspended ? " · polizza sospesa" : ""}.
+              Verrà salvata come scadenza assicurazione.
+            </p>
+          ) : insuranceSummary?.present === false ? (
+            <p className="text-sm italic text-muted-foreground">
+              Nessuna copertura RCA attiva trovata per questa targa.
+            </p>
+          ) : null}
 
           <div className="space-y-2">
             <Label>Tipologia</Label>
@@ -151,7 +197,7 @@ export default function NewVehiclePage() {
               Aggiungi ora i dati facoltativi
             </summary>
             <p className="mt-2 text-sm text-muted-foreground">
-              Marca, modello, km e alimentazione possono anche essere compilati dopo.
+              Marca, modello, dettaglio modello, immatricolazione, km e alimentazione possono anche essere compilati dopo.
             </p>
 
             <div className="mt-4 grid gap-4 md:grid-cols-2">
@@ -171,6 +217,24 @@ export default function NewVehiclePage() {
                   value={model}
                   onChange={(event) => setModel(event.target.value)}
                   placeholder="Panda"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="modelDetail">Dettaglio modello (facoltativo)</Label>
+                <Input
+                  id="modelDetail"
+                  value={modelDetail}
+                  onChange={(event) => setModelDetail(event.target.value)}
+                  placeholder="Golf 1.9 TDI 5P Sportline"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="firstRegistrationDate">Prima immatricolazione (facoltativa)</Label>
+                <Input
+                  id="firstRegistrationDate"
+                  value={firstRegistrationDate}
+                  onChange={(event) => setFirstRegistrationDate(event.target.value)}
+                  type="date"
                 />
               </div>
               <div className="space-y-2">

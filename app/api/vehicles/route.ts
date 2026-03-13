@@ -1,14 +1,22 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 import { db } from "@/lib/db";
+import {
+  buildInsuranceDeadlineFromLookup,
+  buildVehicleDataFromLookup,
+  getPlateLookupCacheById,
+} from "@/lib/plate-lookup";
 
 const schema = z.object({
   plate: z.string().min(5).max(10),
   make: z.string().max(60).optional().or(z.literal("")),
   model: z.string().max(60).optional().or(z.literal("")),
+  modelDetail: z.string().max(160).optional().or(z.literal("")),
+  firstRegistrationDate: z.string().optional().or(z.literal("")),
   odometerKm: z.coerce.number().int().nonnegative().optional(),
   type: z.enum(["AUTO", "MOTO", "CAMPER"]).optional(),
   fuelType: z.enum(["BENZINA", "DIESEL", "GPL", "METANO", "ELETTRICO", "IBRIDO_BENZINA", "IBRIDO_DIESEL"]).nullable().optional(),
+  plateLookupCacheId: z.string().min(1).optional(),
 });
 
 export async function GET(request: NextRequest) {
@@ -56,17 +64,84 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Dati veicolo non validi." }, { status: 400 });
   }
 
-  const { plate, make, model, odometerKm, type, fuelType } = parsed.data;
-  const created = await db.vehicle.create({
-    data: {
-      userId: session.userId,
-      plate: plate.replace(/\s+/g, "").toUpperCase(),
-      make: make?.trim() || null,
-      model: model?.trim() || null,
-      odometerKm: odometerKm ?? null,
-      type: type ?? "AUTO",
-      fuelType: fuelType ?? null,
-    },
+  const {
+    plate,
+    make,
+    model,
+    modelDetail,
+    firstRegistrationDate,
+    odometerKm,
+    type,
+    fuelType,
+    plateLookupCacheId,
+  } = parsed.data;
+  const normalizedPlate = plate.replace(/\s+/g, "").toUpperCase();
+  const plateLookupCache = plateLookupCacheId
+    ? await getPlateLookupCacheById(plateLookupCacheId)
+    : null;
+
+  if (plateLookupCache && plateLookupCache.plate !== normalizedPlate) {
+    return NextResponse.json(
+      { error: "I dati lookup non corrispondono alla targa inserita." },
+      { status: 400 },
+    );
+  }
+
+  const insuranceDeadline = plateLookupCache
+    ? buildInsuranceDeadlineFromLookup(plateLookupCache)
+    : null;
+  const lookupVehicleData = plateLookupCache
+    ? buildVehicleDataFromLookup(plateLookupCache)
+    : null;
+  const parsedFirstRegistrationDate = firstRegistrationDate?.trim()
+    ? new Date(firstRegistrationDate)
+    : null;
+  const safeFirstRegistrationDate =
+    parsedFirstRegistrationDate && !Number.isNaN(parsedFirstRegistrationDate.getTime())
+      ? parsedFirstRegistrationDate
+      : null;
+
+  const created = await db.$transaction(async (tx) => {
+    const vehicle = await tx.vehicle.create({
+      data: {
+        userId: session.userId,
+        plate: normalizedPlate,
+        make: make?.trim() || lookupVehicleData?.make || null,
+        model: model?.trim() || lookupVehicleData?.model || null,
+        modelDetail: modelDetail?.trim() || lookupVehicleData?.modelDetail || null,
+        firstRegistrationDate:
+          safeFirstRegistrationDate ?? lookupVehicleData?.firstRegistrationDate ?? null,
+        odometerKm: odometerKm ?? null,
+        type: type ?? lookupVehicleData?.type ?? "AUTO",
+        fuelType: fuelType ?? lookupVehicleData?.fuelType ?? null,
+        powerKw: lookupVehicleData?.powerKw ?? null,
+        powerHp: lookupVehicleData?.powerHp ?? null,
+        cubicCapacity: lookupVehicleData?.cubicCapacity ?? null,
+        alarmSystemType: lookupVehicleData?.alarmSystemType ?? null,
+        listPriceAmount: lookupVehicleData?.listPriceAmount ?? null,
+        listPriceCurrency: lookupVehicleData?.listPriceCurrency ?? null,
+        environmentalClass: lookupVehicleData?.environmentalClass ?? null,
+        insuranceCompany: lookupVehicleData?.insuranceCompany ?? null,
+        insurancePolicyNumber: lookupVehicleData?.insurancePolicyNumber ?? null,
+        insurancePresent: lookupVehicleData?.insurancePresent ?? null,
+        insuranceSuspended: lookupVehicleData?.insuranceSuspended ?? null,
+        insuranceCompartmentExpiry:
+          lookupVehicleData?.insuranceCompartmentExpiry ?? null,
+      },
+    });
+
+    if (insuranceDeadline) {
+      await tx.deadline.create({
+        data: {
+          vehicleId: vehicle.id,
+          type: "ASSICURAZIONE",
+          dueDate: insuranceDeadline.dueDate,
+          notes: insuranceDeadline.notes,
+        },
+      });
+    }
+
+    return vehicle;
   });
 
   return NextResponse.json({ vehicle: created });

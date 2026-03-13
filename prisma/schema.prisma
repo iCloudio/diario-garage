@@ -90,10 +90,23 @@ model Vehicle {
   plate      String
   make       String?
   model      String?
+  modelDetail String?
   odometerKm Int?
   type       VehicleType    @default(AUTO)
   fuelType   FuelType?
-  year       Int?
+  firstRegistrationDate DateTime?
+  powerKw    Float?
+  powerHp    Float?
+  cubicCapacity Int?
+  alarmSystemType String?
+  listPriceAmount Float?
+  listPriceCurrency String?
+  environmentalClass String?
+  insuranceCompany String?
+  insurancePolicyNumber String?
+  insurancePresent Boolean?
+  insuranceSuspended Boolean?
+  insuranceCompartmentExpiry DateTime?
   status     VehicleStatus  @default(ATTIVO)
   soldDate   DateTime?
   soldPrice  Float?
@@ -217,4 +230,51 @@ model FuelPriceSnapshot {
   @@index([snapshotDate])
   @@index([region])
   @@index([fuelType])
+}
+
+model PlateLookupCache {
+  id                                 String   @id @default(cuid())
+  plate                              String   @unique
+  provider                           String   @default("TUTTOTARGHE")
+  sourceJobId                        String?
+  requestedTypes                     Json?
+  rawResult                          Json?
+  detailsData                        Json?
+  rcaData                            Json?
+  theftData                          Json?
+  environmentalData                  Json?
+  newlylicensedData                  Json?
+  inspectionsData                    Json?
+  detailsLicensePlate                String?
+  detailsBrand                       String?
+  detailsModel                       String?
+  detailsModelDetail                 String?
+  detailsBuildYear                   Int?
+  detailsFirstRegistrationDate       DateTime?
+  detailsFuelType                    String?
+  detailsVehicleType                 String?
+  detailsPowerKw                     Float?
+  detailsPowerHp                     Float?
+  detailsCubicCapacity               Int?
+  detailsPriceAmount                 Float?
+  detailsPriceCurrency               String?
+  detailsAlarmSystemType             String?
+  rcaPlate                           String?
+  rcaVehicleTypeDescription          String?
+  rcaInsuranceCompany                String?
+  rcaPolicyNumber                    String?
+  rcaInsurancePresent                Boolean?
+  rcaInsuranceSuspended              Boolean?
+  rcaPolicyExpiry                    DateTime?
+  rcaPolicyCompartmentExpiry         DateTime?
+  environmentalLicensePlate          String?
+  environmentalVehicleType           String?
+  environmentalClass                 String?
+  environmentalVehicleTypeDescription String?
+  fetchedAt                          DateTime @default(now())
+  createdAt                          DateTime @default(now())
+  updatedAt                          DateTime @updatedAt
+
+  @@index([provider])
+  @@index([fetchedAt])
 }

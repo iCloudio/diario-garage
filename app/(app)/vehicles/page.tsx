@@ -109,6 +109,12 @@ export default async function VehiclesPage() {
         <div className="grid auto-rows-fr gap-4 md:grid-cols-2 xl:grid-cols-3">
           {vehicles.map((item) => {
             const latestRefuel = item.refuels[0] ?? null;
+            const firstRegistrationLabel = item.firstRegistrationDate
+              ? new Intl.DateTimeFormat("it-IT", {
+                  month: "2-digit",
+                  year: "numeric",
+                }).format(item.firstRegistrationDate)
+              : "";
             const lastRefuelData = (() => {
               if (!latestRefuel) return null;
 
@@ -136,7 +142,7 @@ export default async function VehiclesPage() {
               <Link key={item.id} className="block" href={`/vehicles/${item.id}`}>
                 <Card className="h-full border-border/80 bg-card/90 p-6 transition hover:border-primary/35 hover:bg-card hover:shadow-lg">
                   <div className="-mx-6 -mt-6 mb-5 grid grid-cols-3 items-center border-b border-border/70 px-6 py-3 text-sm text-muted-foreground">
-                    <div className="text-left">{item.year ?? ""}</div>
+                    <div className="text-left">{firstRegistrationLabel}</div>
                     <div className="text-center">{VEHICLE_LABELS[item.type ?? "AUTO"]}</div>
                     <div className="text-right">
                       {item.odometerKm

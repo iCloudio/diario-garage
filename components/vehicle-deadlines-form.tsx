@@ -38,16 +38,21 @@ export function VehicleDeadlinesForm({
   vehicleId,
   deadlines,
   embedded = false,
+  mode = "manage",
   onSuccess,
+  onCancel,
 }: {
   vehicleId: string;
   deadlines: DeadlineInput[];
   embedded?: boolean;
+  mode?: "setup" | "manage";
   onSuccess?: () => void;
+  onCancel?: () => void;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [form, setForm] = useState<FormState>(() => buildInitialState(deadlines));
+  const showInlineAmounts = mode === "manage";
 
   function updateField(type: DeadlineInput["type"], field: "dueDate" | "amount", value: string) {
     setForm((prev) => ({
@@ -88,16 +93,26 @@ export function VehicleDeadlinesForm({
     <>
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
         <CalendarClock className="h-4 w-4" />
-        <p className="font-medium text-foreground">Scadenze principali</p>
+        <p className="font-medium text-foreground">
+          {mode === "setup" ? "Imposta le scadenze principali" : "Scadenze principali"}
+        </p>
       </div>
       <p className="mt-2 text-xs text-muted-foreground">
-        Inserisci prima la data di scadenza. Il prezzo e&apos; facoltativo e puoi
-        aggiungerlo anche in un secondo momento.
+        {mode === "setup"
+          ? "Parti dalle date di assicurazione, bollo e revisione. Gli importi sono facoltativi e puoi aggiungerli anche dopo."
+          : "Inserisci prima la data di scadenza. Il prezzo e&apos; facoltativo e puoi aggiungerlo anche in un secondo momento."}
       </p>
 
       <form className="mt-6 space-y-4" onSubmit={onSubmit}>
         {TYPES.map((item) => (
-          <div key={item.type} className="grid gap-3 md:grid-cols-[1.2fr_1fr_1fr]">
+          <div
+            key={item.type}
+            className={
+              showInlineAmounts
+                ? "grid gap-3 md:grid-cols-[1.2fr_1fr_1fr]"
+                : "grid gap-3 md:grid-cols-[1.2fr_1fr]"
+            }
+          >
             <div className="flex items-center text-sm text-muted-foreground">
               <span className="font-medium text-foreground">{item.label}</span>
             </div>
@@ -109,27 +124,66 @@ export function VehicleDeadlinesForm({
                 onChange={(event) => updateField(item.type, "dueDate", event.target.value)}
               />
             </div>
-            <div className="space-y-2">
-              <Label>Prezzo (opzionale)</Label>
-              <div className="relative">
-                <Euro className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  className="pl-9"
-                  value={form[item.type].amount}
-                  onChange={(event) => updateField(item.type, "amount", event.target.value)}
-                  placeholder="0,00"
-                />
+            {showInlineAmounts ? (
+              <div className="space-y-2">
+                <Label>Prezzo (opzionale)</Label>
+                <div className="relative">
+                  <Euro className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    className="pl-9"
+                    value={form[item.type].amount}
+                    onChange={(event) => updateField(item.type, "amount", event.target.value)}
+                    placeholder="0,00"
+                  />
+                </div>
               </div>
-            </div>
+            ) : null}
           </div>
         ))}
 
-        <div className="flex justify-end">
+        {!showInlineAmounts ? (
+          <details className="rounded-2xl border border-border/80 bg-background/55 p-4">
+            <summary className="cursor-pointer list-none text-sm font-medium text-foreground">
+              Aggiungi anche gli importi opzionali
+            </summary>
+
+            <div className="mt-4 grid gap-4 md:grid-cols-3">
+              {TYPES.map((item) => (
+                <div key={`${item.type}-amount`} className="space-y-2">
+                  <Label>{item.label}</Label>
+                  <div className="relative">
+                    <Euro className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      className="pl-9"
+                      value={form[item.type].amount}
+                      onChange={(event) => updateField(item.type, "amount", event.target.value)}
+                      placeholder="0,00"
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </details>
+        ) : null}
+
+        <div className="flex justify-end gap-2">
+          {onCancel ? (
+            <Button type="button" variant="ghost" onClick={onCancel} disabled={pending}>
+              {mode === "setup" ? "Più tardi" : "Annulla"}
+            </Button>
+          ) : null}
           <Button type="submit" disabled={pending}>
-            {pending ? "Salvataggio..." : "Salva scadenze"}
+            {pending
+              ? "Salvataggio..."
+              : mode === "setup"
+                ? "Salva e continua"
+                : "Salva scadenze"}
           </Button>
         </div>
       </form>

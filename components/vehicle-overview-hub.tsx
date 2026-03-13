@@ -3,7 +3,6 @@
 import { useMemo, useState } from "react";
 import { CalendarClock, CircleDollarSign, Fuel, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { DeadlineStatusChip } from "@/components/deadline-status-chip";
 import { VehicleDeadlinesForm, type DeadlineInput } from "@/components/vehicle-deadlines-form";
 import { VehicleDriversSection } from "@/components/vehicle-drivers-section";
@@ -11,6 +10,7 @@ import { RefuelForm } from "@/components/refuel-form";
 import { ExpenseForm } from "@/components/expense-form";
 import { VehicleEditForm } from "@/components/vehicle-edit-form";
 import { VehicleExpensesChart } from "@/components/vehicle-expenses-chart";
+import { VehicleDangerZone } from "@/components/vehicle-danger-zone";
 import { ResponsiveOverlay } from "@/components/responsive-overlay";
 import { getDeadlinePriority } from "@/lib/deadline-status";
 
@@ -47,6 +47,8 @@ type VehicleEditData = {
   initialPlate: string;
   initialMake?: string | null;
   initialModel?: string | null;
+  initialModelDetail?: string | null;
+  initialFirstRegistrationDate?: string | null;
   initialOdometerKm?: number | null;
   initialType?: "AUTO" | "MOTO" | "CAMPER";
   initialFuelType?:
@@ -62,6 +64,18 @@ type VehicleEditData = {
   initialSoldDate?: string | null;
   initialSoldPrice?: number | null;
   initialSoldNotes?: string | null;
+  initialPowerKw?: number | null;
+  initialPowerHp?: number | null;
+  initialCubicCapacity?: number | null;
+  initialAlarmSystemType?: string | null;
+  initialEnvironmentalClass?: string | null;
+  initialListPriceAmount?: number | null;
+  initialListPriceCurrency?: string | null;
+  initialInsuranceCompany?: string | null;
+  initialInsurancePolicyNumber?: string | null;
+  initialInsurancePresent?: boolean | null;
+  initialInsuranceSuspended?: boolean | null;
+  initialInsuranceCompartmentExpiry?: string | null;
 };
 
 type ChartDataset = {
@@ -73,16 +87,15 @@ type ChartDataset = {
     fuel: number;
   }>;
   pieData: Array<{
+    key: string;
     name: string;
     value: number;
-    color: string;
   }>;
 };
 
-type HistoryFilter = "Tutto" | "Spesa" | "Rifornimento" | "Scadenza";
-
 type VehicleOverviewHubProps = {
   vehicleId: string;
+  vehiclePlate: string;
   currency: string;
   deadlineRows: DeadlineRow[];
   deadlineInputs: DeadlineInput[];
@@ -105,10 +118,10 @@ type VehicleOverviewHubProps = {
   vehicleEditData: VehicleEditData;
 };
 
-const HISTORY_FILTERS: HistoryFilter[] = ["Tutto", "Spesa", "Rifornimento", "Scadenza"];
 const INITIAL_VISIBLE_ACTIVITIES = 12;
 export function VehicleOverviewHub({
   vehicleId,
+  vehiclePlate,
   currency,
   deadlineRows,
   deadlineInputs,
@@ -126,7 +139,6 @@ export function VehicleOverviewHub({
   const [isRefuelOpen, setIsRefuelOpen] = useState(false);
   const [isExpenseOpen, setIsExpenseOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
-  const [historyFilter, setHistoryFilter] = useState<HistoryFilter>("Tutto");
   const [visibleActivities, setVisibleActivities] = useState(INITIAL_VISIBLE_ACTIVITIES);
 
   const sortedDeadlines = useMemo(
@@ -146,21 +158,89 @@ export function VehicleOverviewHub({
     (item) => item.diffDays != null && item.diffDays <= 30,
   );
   const missingDeadlines = sortedDeadlines.filter((item) => item.diffDays == null);
+  const isDeadlineSetupPending = missingDeadlines.length === sortedDeadlines.length;
 
-  const filteredActivities = useMemo(() => {
-    if (historyFilter === "Tutto") return activities;
-    return activities.filter((entry) => entry.kind === historyFilter);
-  }, [activities, historyFilter]);
-
-  const visibleHistoryEntries = filteredActivities.slice(0, visibleActivities);
-  const canShowMoreHistory = filteredActivities.length > visibleActivities;
+  const visibleHistoryEntries = activities.slice(0, visibleActivities);
+  const canShowMoreHistory = activities.length > visibleActivities;
 
   const detailRows = [
+    {
+      label: "Prima immatricolazione",
+      value: vehicleEditData.initialFirstRegistrationDate
+        ? new Date(vehicleEditData.initialFirstRegistrationDate).toLocaleDateString("it-IT")
+        : "Non specificata",
+    },
     {
       label: "Alimentazione",
       value: vehicleEditData.initialFuelType
         ? vehicleEditData.initialFuelType.replaceAll("_", " ").toLowerCase()
         : "Non specificata",
+    },
+    {
+      label: "Dettaglio modello",
+      value: vehicleEditData.initialModelDetail?.trim() || "Non specificato",
+    },
+    {
+      label: "Potenza",
+      value:
+        vehicleEditData.initialPowerKw != null
+          ? `${vehicleEditData.initialPowerKw.toLocaleString("it-IT", {
+              maximumFractionDigits: 1,
+            })} kW${vehicleEditData.initialPowerHp != null ? ` · ${vehicleEditData.initialPowerHp.toLocaleString("it-IT", {
+              maximumFractionDigits: 1,
+            })} CV` : ""}`
+          : "Non specificata",
+    },
+    {
+      label: "Cilindrata",
+      value:
+        vehicleEditData.initialCubicCapacity != null
+          ? `${new Intl.NumberFormat("it-IT").format(vehicleEditData.initialCubicCapacity)} cc`
+          : "Non specificata",
+    },
+    {
+      label: "Classe ambientale",
+      value: vehicleEditData.initialEnvironmentalClass?.trim() || "Non specificata",
+    },
+    {
+      label: "Antifurto",
+      value: vehicleEditData.initialAlarmSystemType?.trim() || "Non specificato",
+    },
+    {
+      label: "Listino",
+      value:
+        vehicleEditData.initialListPriceAmount != null &&
+        vehicleEditData.initialListPriceCurrency
+          ? new Intl.NumberFormat("it-IT", {
+              style: "currency",
+              currency: vehicleEditData.initialListPriceCurrency,
+            }).format(vehicleEditData.initialListPriceAmount)
+          : "Non disponibile",
+    },
+    {
+      label: "Compagnia RCA",
+      value: vehicleEditData.initialInsuranceCompany?.trim() || "Non disponibile",
+    },
+    {
+      label: "Polizza RCA",
+      value: vehicleEditData.initialInsurancePolicyNumber?.trim() || "Non disponibile",
+    },
+    {
+      label: "Stato RCA",
+      value:
+        vehicleEditData.initialInsurancePresent == null
+          ? "Non disponibile"
+          : vehicleEditData.initialInsurancePresent
+            ? vehicleEditData.initialInsuranceSuspended
+              ? "Attiva ma sospesa"
+              : "Attiva"
+            : "Non presente",
+    },
+    {
+      label: "Scadenza comparto RCA",
+      value: vehicleEditData.initialInsuranceCompartmentExpiry
+        ? new Date(vehicleEditData.initialInsuranceCompartmentExpiry).toLocaleDateString("it-IT")
+        : "Non disponibile",
     },
     {
       label: "Stato amministrativo",
@@ -186,46 +266,33 @@ export function VehicleOverviewHub({
 
   return (
     <>
-      <Card className="border-border/80 bg-card/90 p-6">
-        <div className="flex items-center gap-3">
-          <p className="shrink-0 text-xs uppercase tracking-[0.22em] text-muted-foreground">
-            Gestione veicolo
-          </p>
-          <div className="h-px flex-1 bg-border/70" />
-        </div>
-
-        <div className="mt-5 grid gap-4 xl:grid-cols-3">
-          <div className="rounded-2xl border border-border/70 bg-background/55 p-5">
-            <div className="flex items-center gap-3">
-              <p className="shrink-0 text-xs uppercase tracking-[0.22em] text-muted-foreground">
-                Scadenze
-              </p>
-              <div className="h-px flex-1 bg-border/70" />
+      <div className="space-y-6">
+        <div className="grid gap-4 xl:grid-cols-3">
+          <section className="rounded-3xl border border-border/80 bg-card/90 p-5">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">
+                  Scadenze
+                </p>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  {urgentDeadlines.length > 0
+                    ? urgentDeadlines.length === 1
+                      ? "Una scadenza richiede attenzione immediata."
+                      : `${urgentDeadlines.length} scadenze richiedono attenzione immediata.`
+                    : missingDeadlines.length > 0
+                      ? missingDeadlines.length === 1
+                        ? "Manca ancora una scadenza principale."
+                        : `Mancano ancora ${missingDeadlines.length} scadenze principali.`
+                      : "Tutte le scadenze principali risultano registrate."}
+                </p>
+              </div>
               <Button size="sm" variant="ghost" onClick={() => setIsDeadlinesOpen(true)}>
                 <CalendarClock className="mr-2 h-4 w-4" />
-                Modifica
+                {isDeadlineSetupPending ? "Imposta" : "Modifica"}
               </Button>
             </div>
 
-            {urgentDeadlines.length > 0 ? (
-              <p className="mt-3 text-sm text-rose-600 dark:text-rose-300">
-                {urgentDeadlines.length === 1
-                  ? "Una scadenza richiede attenzione immediata."
-                  : `${urgentDeadlines.length} scadenze richiedono attenzione immediata.`}
-              </p>
-            ) : missingDeadlines.length > 0 ? (
-              <p className="mt-3 text-sm text-muted-foreground">
-                {missingDeadlines.length === 1
-                  ? "Manca ancora una scadenza principale."
-                  : `Mancano ancora ${missingDeadlines.length} scadenze principali.`}
-              </p>
-            ) : (
-              <p className="mt-3 text-sm text-emerald-700 dark:text-emerald-300">
-                Tutte le scadenze principali risultano registrate.
-              </p>
-            )}
-
-            <div className="mt-4 space-y-3">
+            <div className="mt-5 space-y-3">
               {sortedDeadlines.map((item) => (
                 <div key={item.type} className="flex items-center justify-between gap-4 text-sm">
                   <div>
@@ -242,7 +309,7 @@ export function VehicleOverviewHub({
                 </div>
               ))}
             </div>
-          </div>
+          </section>
 
           <VehicleDriversSection
             vehicleId={vehicleId}
@@ -251,12 +318,16 @@ export function VehicleOverviewHub({
             embedded
           />
 
-          <div className="rounded-2xl border border-border/70 bg-background/55 p-5">
-            <div className="flex items-center gap-3">
-              <p className="shrink-0 text-xs uppercase tracking-[0.22em] text-muted-foreground">
-                Carburante
-              </p>
-              <div className="h-px flex-1 bg-border/70" />
+          <section className="rounded-3xl border border-border/80 bg-card/90 p-5">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">
+                  Carburante
+                </p>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Ultimo rifornimento registrato e azioni rapide.
+                </p>
+              </div>
               <div className="flex items-center gap-1">
                 <Button size="sm" variant="ghost" onClick={() => setIsRefuelOpen(true)}>
                   <Fuel className="mr-2 h-4 w-4" />
@@ -269,7 +340,7 @@ export function VehicleOverviewHub({
               </div>
             </div>
 
-            <div className="mt-4">
+            <div className="mt-5">
               {latestRefuelSummary ? (
                 <div className="grid grid-cols-3 gap-3 text-sm">
                   <p className="text-left text-foreground">{latestRefuelSummary.fuel}</p>
@@ -280,17 +351,22 @@ export function VehicleOverviewHub({
                 <p className="italic text-muted-foreground">Nessun rifornimento</p>
               )}
             </div>
-          </div>
+          </section>
         </div>
 
-        <div className="my-6 h-px bg-border/70" />
-
-        <div>
-          <div className="flex flex-wrap items-center gap-3">
-            <p className="shrink-0 text-xs uppercase tracking-[0.22em] text-muted-foreground">
-              Storico
-            </p>
-            <div className="h-px min-w-16 flex-1 bg-border/70" />
+        <section
+          id="vehicle-details"
+          className="rounded-3xl border border-border/80 bg-card/90 p-6"
+        >
+          <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+            <div>
+              <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">
+                Storico
+              </p>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Andamento economico e attivita&apos; registrate sul veicolo.
+              </p>
+            </div>
             <p className="text-sm text-muted-foreground">
               Totale registrato:{" "}
               <span className="font-medium text-foreground">{totalRecordedLabel}</span>
@@ -298,43 +374,19 @@ export function VehicleOverviewHub({
           </div>
 
           {chartDatasets.length > 0 ? (
-            <div className="mt-4">
+            <div className="mt-5">
               <VehicleExpensesChart currency={currency} datasets={chartDatasets} />
             </div>
           ) : null}
 
-          <div className="mt-4 flex flex-wrap gap-2">
-            {HISTORY_FILTERS.map((filter) => (
-              <Button
-                key={filter}
-                type="button"
-                size="sm"
-                variant={historyFilter === filter ? "secondary" : "outline"}
-                onClick={() => {
-                  setHistoryFilter(filter);
-                  setVisibleActivities(INITIAL_VISIBLE_ACTIVITIES);
-                }}
-              >
-                {filter}
-              </Button>
-            ))}
-          </div>
-
-          <details className="mt-6 rounded-2xl border border-border/70 bg-background/45 p-5">
-            <summary className="cursor-pointer list-none text-sm font-medium text-foreground">
-              Mostra attivita&apos; registrate
-            </summary>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Se vuoi verificare tutto il dettaglio cronologico, qui trovi l&apos;elenco completo.
-            </p>
-
-            <div className="mt-4 space-y-0">
-              {filteredActivities.length === 0 ? (
-                <div className="rounded-2xl border border-dashed border-border/80 bg-background/60 p-5 text-sm text-muted-foreground">
-                  Nessuna voce presente per il filtro selezionato.
-                </div>
-              ) : (
-                visibleHistoryEntries.map((entry, index) => (
+          <div className="mt-6">
+            {activities.length === 0 ? (
+              <div className="rounded-2xl border border-dashed border-border/80 bg-background/60 p-5 text-sm text-muted-foreground">
+                Nessuna attivita&apos; registrata.
+              </div>
+            ) : (
+              <div className="divide-y divide-border/60">
+                {visibleHistoryEntries.map((entry, index) => (
                   <div key={entry.id} className="flex gap-4 py-4 first:pt-0 last:pb-0">
                     <div className="flex w-5 flex-col items-center">
                       <span className="mt-1 h-2.5 w-2.5 rounded-full bg-primary/70" />
@@ -343,7 +395,7 @@ export function VehicleOverviewHub({
                       ) : null}
                     </div>
 
-                    <div className="flex-1 border-b border-border/60 pb-4 last:border-b-0">
+                    <div className="flex-1">
                       <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                         <div className="min-w-0">
                           <div className="flex items-center gap-2">
@@ -368,42 +420,44 @@ export function VehicleOverviewHub({
                       </div>
                     </div>
                   </div>
-                ))
-              )}
-            </div>
-
-            {canShowMoreHistory ? (
-              <div className="mt-4">
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="ghost"
-                  onClick={() =>
-                    setVisibleActivities((current) => current + INITIAL_VISIBLE_ACTIVITIES)
-                  }
-                >
-                  Mostra altro
-                </Button>
+                ))}
               </div>
-            ) : null}
-          </details>
-        </div>
+            )}
+          </div>
 
-        <div className="my-6 h-px bg-border/70" />
+          {canShowMoreHistory ? (
+            <div className="mt-4">
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                onClick={() =>
+                  setVisibleActivities((current) => current + INITIAL_VISIBLE_ACTIVITIES)
+                }
+              >
+                Mostra altro
+              </Button>
+            </div>
+          ) : null}
+        </section>
 
-        <div>
-          <div className="flex items-center gap-3">
-            <p className="shrink-0 text-xs uppercase tracking-[0.22em] text-muted-foreground">
-              Dettagli veicolo
-            </p>
-            <div className="h-px flex-1 bg-border/70" />
+        <section className="rounded-3xl border border-border/80 bg-card/90 p-6">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">
+                Dettagli veicolo
+              </p>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Dati amministrativi e informazioni di vendita.
+              </p>
+            </div>
             <Button size="sm" variant="ghost" onClick={() => setIsEditOpen(true)}>
               <Pencil className="mr-2 h-4 w-4" />
               Modifica
             </Button>
           </div>
 
-          <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+          <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             {detailRows.map((item) => (
               <div key={item.label}>
                 <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">
@@ -413,21 +467,29 @@ export function VehicleOverviewHub({
               </div>
             ))}
           </div>
-        </div>
-      </Card>
+        </section>
+
+        <VehicleDangerZone vehicleId={vehicleId} vehiclePlate={vehiclePlate} />
+      </div>
 
       <ResponsiveOverlay
         open={isDeadlinesOpen}
         onOpenChange={setIsDeadlinesOpen}
-        title="Gestisci scadenze"
-        description="Aggiorna assicurazione, bollo e revisione senza uscire dalla scheda veicolo."
+        title={isDeadlineSetupPending ? "Imposta scadenze" : "Gestisci scadenze"}
+        description={
+          isDeadlineSetupPending
+            ? "Inserisci le tre scadenze principali per completare il setup del veicolo."
+            : "Aggiorna assicurazione, bollo e revisione senza uscire dalla scheda veicolo."
+        }
         desktopClassName="max-w-3xl"
       >
         <VehicleDeadlinesForm
           vehicleId={vehicleId}
           deadlines={deadlineInputs}
           embedded
+          mode={isDeadlineSetupPending ? "setup" : "manage"}
           onSuccess={() => setIsDeadlinesOpen(false)}
+          onCancel={() => setIsDeadlinesOpen(false)}
         />
       </ResponsiveOverlay>
 

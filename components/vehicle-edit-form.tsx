@@ -21,6 +21,8 @@ type VehicleEditFormProps = {
   initialPlate: string;
   initialMake?: string | null;
   initialModel?: string | null;
+  initialModelDetail?: string | null;
+  initialFirstRegistrationDate?: string | null;
   initialOdometerKm?: number | null;
   initialType?: "AUTO" | "MOTO" | "CAMPER";
   initialFuelType?: "BENZINA" | "DIESEL" | "GPL" | "METANO" | "ELETTRICO" | "IBRIDO_BENZINA" | "IBRIDO_DIESEL" | null;
@@ -38,6 +40,8 @@ export function VehicleEditForm({
   initialPlate,
   initialMake,
   initialModel,
+  initialModelDetail,
+  initialFirstRegistrationDate,
   initialOdometerKm,
   initialType = "AUTO",
   initialFuelType,
@@ -54,6 +58,10 @@ export function VehicleEditForm({
   const [plate, setPlate] = useState(initialPlate);
   const [make, setMake] = useState(initialMake ?? "");
   const [model, setModel] = useState(initialModel ?? "");
+  const [modelDetail, setModelDetail] = useState(initialModelDetail ?? "");
+  const [firstRegistrationDate, setFirstRegistrationDate] = useState(
+    initialFirstRegistrationDate ? initialFirstRegistrationDate.slice(0, 10) : "",
+  );
   const [odometerKm, setOdometerKm] = useState(
     initialOdometerKm?.toString() ?? ""
   );
@@ -87,6 +95,8 @@ export function VehicleEditForm({
           plate,
           make,
           model,
+          modelDetail,
+          firstRegistrationDate: firstRegistrationDate || null,
           odometerKm: safeKm,
           type,
           fuelType: fuelType || null,
@@ -118,7 +128,7 @@ export function VehicleEditForm({
         <div>
           <p className="text-sm font-medium text-foreground">Dati principali</p>
           <p className="mt-1 text-sm text-muted-foreground">
-            Targa e tipologia identificano il veicolo. Marca, modello e alimentazione
+            Targa e tipologia identificano il veicolo. Marca, modello, immatricolazione e alimentazione
             servono solo a completare la scheda.
           </p>
         </div>
@@ -175,6 +185,24 @@ export function VehicleEditForm({
               value={model}
               onChange={(event) => setModel(event.target.value)}
               placeholder="Panda"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="modelDetail">Dettaglio modello (facoltativo)</Label>
+            <Input
+              id="modelDetail"
+              value={modelDetail}
+              onChange={(event) => setModelDetail(event.target.value)}
+              placeholder="Golf 1.9 TDI 5P Sportline"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="firstRegistrationDate">Prima immatricolazione (facoltativa)</Label>
+            <Input
+              id="firstRegistrationDate"
+              value={firstRegistrationDate}
+              onChange={(event) => setFirstRegistrationDate(event.target.value)}
+              type="date"
             />
           </div>
           <div className="space-y-2">

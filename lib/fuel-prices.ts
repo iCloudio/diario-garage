@@ -11,6 +11,13 @@ const FUEL_LABEL_TO_CODE: Record<string, RegionalFuelCode> = {
   Metano: "METANO",
 };
 
+const PREFERRED_SERVICE_BY_FUEL: Record<RegionalFuelCode, "SELF" | "SERVITO"> = {
+  BENZINA: "SELF",
+  GASOLIO: "SELF",
+  GPL: "SERVITO",
+  METANO: "SERVITO",
+};
+
 function decodeHtmlEntities(value: string) {
   return value
     .replace(/&nbsp;/g, " ")
@@ -100,6 +107,12 @@ function parseAveragePrice(value: string) {
 
   const parsed = Number.parseFloat(normalized);
   return Number.isNaN(parsed) ? null : parsed;
+}
+
+function getPreferredServiceTypeForRegionalFuel(
+  fuelType: RegionalFuelCode,
+): "SELF" | "SERVITO" {
+  return PREFERRED_SERVICE_BY_FUEL[fuelType];
 }
 
 async function fetchRegionalFuelRows() {
@@ -255,7 +268,9 @@ export async function getRegionalFuelPriceTable() {
   }
 
   for (const snapshot of snapshots) {
-    if (snapshot.serviceType !== "SELF") continue;
+    if (snapshot.serviceType !== getPreferredServiceTypeForRegionalFuel(snapshot.fuelType)) {
+      continue;
+    }
     const region = regionMap.get(snapshot.region);
     if (!region) continue;
     region[snapshot.fuelType] =
@@ -300,7 +315,7 @@ export async function getRegionalFuelBenchmark(region: string | null | undefined
       snapshotDate,
       region,
       fuelType: regionalFuel,
-      serviceType: "SELF",
+      serviceType: getPreferredServiceTypeForRegionalFuel(regionalFuel),
     },
     select: {
       averagePrice: true,
@@ -355,10 +370,10 @@ export async function getRegionalFuelBenchmarksForRegion(region: string | null |
     where: {
       snapshotDate,
       region,
-      serviceType: "SELF",
     },
     select: {
       fuelType: true,
+      serviceType: true,
       averagePrice: true,
     },
   });
@@ -366,13 +381,18 @@ export async function getRegionalFuelBenchmarksForRegion(region: string | null |
   return {
     snapshotDate,
     benchmarks: new Map(
-      snapshots.map((item) => [
-        item.fuelType,
-        {
-          fuelType: item.fuelType,
-          averagePrice: item.averagePrice,
-        },
-      ]),
+      snapshots
+        .filter(
+          (item) =>
+            item.serviceType === getPreferredServiceTypeForRegionalFuel(item.fuelType),
+        )
+        .map((item) => [
+          item.fuelType,
+          {
+            fuelType: item.fuelType,
+            averagePrice: item.averagePrice,
+          },
+        ]),
     ),
   };
 }

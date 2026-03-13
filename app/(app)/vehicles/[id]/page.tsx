@@ -343,6 +343,7 @@ export default async function VehicleOverviewPage({
     <div className="space-y-6">
       <VehicleOverviewHub
         vehicleId={vehicle.id}
+        vehiclePlate={vehicle.plate}
         currency={currency}
         deadlineRows={deadlinesWithStatus.map((item) => ({
           type: item.type,
@@ -377,6 +378,9 @@ export default async function VehicleOverviewPage({
           initialPlate: vehicle.plate,
           initialMake: vehicle.make,
           initialModel: vehicle.model,
+          initialModelDetail: vehicle.modelDetail,
+          initialFirstRegistrationDate:
+            vehicle.firstRegistrationDate?.toISOString() ?? null,
           initialOdometerKm: vehicle.odometerKm,
           initialType: vehicle.type,
           initialFuelType: vehicle.fuelType,
@@ -384,6 +388,19 @@ export default async function VehicleOverviewPage({
           initialSoldDate: vehicle.soldDate?.toISOString() ?? null,
           initialSoldPrice: vehicle.soldPrice,
           initialSoldNotes: vehicle.soldNotes,
+          initialPowerKw: vehicle.powerKw,
+          initialPowerHp: vehicle.powerHp,
+          initialCubicCapacity: vehicle.cubicCapacity,
+          initialAlarmSystemType: vehicle.alarmSystemType,
+          initialEnvironmentalClass: vehicle.environmentalClass,
+          initialListPriceAmount: vehicle.listPriceAmount,
+          initialListPriceCurrency: vehicle.listPriceCurrency,
+          initialInsuranceCompany: vehicle.insuranceCompany,
+          initialInsurancePolicyNumber: vehicle.insurancePolicyNumber,
+          initialInsurancePresent: vehicle.insurancePresent,
+          initialInsuranceSuspended: vehicle.insuranceSuspended,
+          initialInsuranceCompartmentExpiry:
+            vehicle.insuranceCompartmentExpiry?.toISOString() ?? null,
         }}
       />
 

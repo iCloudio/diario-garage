@@ -7,7 +7,7 @@ interface VehicleData {
   plate: string;
   make?: string | null;
   model?: string | null;
-  year?: number | null;
+  firstRegistrationDate?: Date | null;
   fuelType?: string | null;
   odometerKm?: number | null;
   status: string;
@@ -93,8 +93,14 @@ export function generateVehiclePDF(
     doc.text(`Veicolo: ${vehicle.make || ""} ${vehicle.model || ""}`.trim(), 14, yPos);
     yPos += 5;
   }
-  if (vehicle.year) {
-    doc.text(`Anno: ${vehicle.year}`, 14, yPos);
+  if (vehicle.firstRegistrationDate) {
+    doc.text(
+      `Prima immatricolazione: ${format(vehicle.firstRegistrationDate, "dd/MM/yyyy", {
+        locale: it,
+      })}`,
+      14,
+      yPos,
+    );
     yPos += 5;
   }
   if (vehicle.fuelType) {
