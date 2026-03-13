@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { db } from "./db";
 import type { Session, User } from "@prisma/client";
 
-const SESSION_COOKIE = "dg_session";
+export const SESSION_COOKIE = "dg_session";
 const SESSION_DAYS = 30;
 
 export type SessionUser = Pick<User, "id" | "email" | "name">;

@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 import { db } from "@/lib/db";
+import { getCurrentUser } from "@/lib/auth";
 
 const schema = z.object({
   plate: z.string().min(5).max(10).optional(),
@@ -27,14 +28,9 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const token = request.cookies.get("dg_session")?.value;
-  if (!token) {
+  const user = await getCurrentUser();
+  if (!user) {
     return NextResponse.json({ error: "Non autorizzato." }, { status: 401 });
-  }
-
-  const session = await db.session.findUnique({ where: { id: token } });
-  if (!session || session.expiresAt < new Date()) {
-    return NextResponse.json({ error: "Sessione scaduta." }, { status: 401 });
   }
 
   const body = await request.json().catch(() => null);
@@ -45,7 +41,7 @@ export async function PATCH(
 
   const { id } = await params;
   const vehicle = await db.vehicle.findFirst({
-    where: { id, userId: session.userId, deletedAt: null },
+    where: { id, userId: user.id, deletedAt: null },
   });
 
   if (!vehicle) {
@@ -96,19 +92,14 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const token = request.cookies.get("dg_session")?.value;
-  if (!token) {
+  const user = await getCurrentUser();
+  if (!user) {
     return NextResponse.json({ error: "Non autorizzato." }, { status: 401 });
-  }
-
-  const session = await db.session.findUnique({ where: { id: token } });
-  if (!session || session.expiresAt < new Date()) {
-    return NextResponse.json({ error: "Sessione scaduta." }, { status: 401 });
   }
 
   const { id } = await params;
   const vehicle = await db.vehicle.findFirst({
-    where: { id, userId: session.userId, deletedAt: null },
+    where: { id, userId: user.id, deletedAt: null },
     select: { id: true },
   });
 
@@ -116,21 +107,28 @@ export async function DELETE(
     return NextResponse.json({ error: "Veicolo non trovato." }, { status: 404 });
   }
 
+  const now = new Date();
   await db.$transaction(async (tx) => {
+    // VehicleDriver non ha deletedAt, hard delete della tabella di giunzione
     await tx.vehicleDriver.deleteMany({
       where: { vehicleId: vehicle.id },
     });
-    await tx.deadline.deleteMany({
+    // Soft delete di tutti i dati collegati
+    await tx.deadline.updateMany({
       where: { vehicleId: vehicle.id },
+      data: { deletedAt: now },
     });
-    await tx.refuel.deleteMany({
+    await tx.refuel.updateMany({
       where: { vehicleId: vehicle.id },
+      data: { deletedAt: now },
     });
-    await tx.expense.deleteMany({
+    await tx.expense.updateMany({
       where: { vehicleId: vehicle.id },
+      data: { deletedAt: now },
     });
-    await tx.vehicle.delete({
+    await tx.vehicle.update({
       where: { id: vehicle.id },
+      data: { deletedAt: now },
     });
   });
 

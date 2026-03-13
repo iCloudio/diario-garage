@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 import { db } from "@/lib/db";
+import { getCurrentUser } from "@/lib/auth";
 import {
   buildInsuranceDeadlineFromLookup,
   buildVehicleDataFromLookup,
@@ -19,20 +20,15 @@ const schema = z.object({
   plateLookupCacheId: z.string().min(1).optional(),
 });
 
-export async function GET(request: NextRequest) {
-  const token = request.cookies.get("dg_session")?.value;
-  if (!token) {
+export async function GET() {
+  const user = await getCurrentUser();
+  if (!user) {
     return NextResponse.json({ error: "Non autorizzato." }, { status: 401 });
-  }
-
-  const session = await db.session.findUnique({ where: { id: token } });
-  if (!session || session.expiresAt < new Date()) {
-    return NextResponse.json({ error: "Sessione scaduta." }, { status: 401 });
   }
 
   const vehicles = await db.vehicle.findMany({
     where: {
-      userId: session.userId,
+      userId: user.id,
       deletedAt: null,
     },
     include: {
@@ -48,14 +44,9 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const token = request.cookies.get("dg_session")?.value;
-  if (!token) {
+  const user = await getCurrentUser();
+  if (!user) {
     return NextResponse.json({ error: "Non autorizzato." }, { status: 401 });
-  }
-
-  const session = await db.session.findUnique({ where: { id: token } });
-  if (!session || session.expiresAt < new Date()) {
-    return NextResponse.json({ error: "Sessione scaduta." }, { status: 401 });
   }
 
   const body = await request.json().catch(() => null);
@@ -104,7 +95,7 @@ export async function POST(request: NextRequest) {
   const created = await db.$transaction(async (tx) => {
     const vehicle = await tx.vehicle.create({
       data: {
-        userId: session.userId,
+        userId: user.id,
         plate: normalizedPlate,
         make: make?.trim() || lookupVehicleData?.make || null,
         model: model?.trim() || lookupVehicleData?.model || null,

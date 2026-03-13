@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 import { db } from "@/lib/db";
+import { getCurrentUser } from "@/lib/auth";
 
 const deadlineInputSchema = z.object({
   type: z.enum(["BOLLO", "REVISIONE", "ASSICURAZIONE"]),
@@ -20,21 +21,16 @@ const updateSchema = z.object({
   deadlines: z.array(deadlineInputSchema),
 });
 
-export async function GET(request: NextRequest) {
-  const token = request.cookies.get("dg_session")?.value;
-  if (!token) {
+export async function GET() {
+  const user = await getCurrentUser();
+  if (!user) {
     return NextResponse.json({ error: "Non autorizzato." }, { status: 401 });
-  }
-
-  const session = await db.session.findUnique({ where: { id: token } });
-  if (!session || session.expiresAt < new Date()) {
-    return NextResponse.json({ error: "Sessione scaduta." }, { status: 401 });
   }
 
   const deadlines = await db.deadline.findMany({
     where: {
       vehicle: {
-        userId: session.userId,
+        userId: user.id,
         deletedAt: null,
       },
       deletedAt: null,
@@ -51,14 +47,9 @@ export async function GET(request: NextRequest) {
 }
 
 export async function PUT(request: NextRequest) {
-  const token = request.cookies.get("dg_session")?.value;
-  if (!token) {
+  const user = await getCurrentUser();
+  if (!user) {
     return NextResponse.json({ error: "Non autorizzato." }, { status: 401 });
-  }
-
-  const session = await db.session.findUnique({ where: { id: token } });
-  if (!session || session.expiresAt < new Date()) {
-    return NextResponse.json({ error: "Sessione scaduta." }, { status: 401 });
   }
 
   const body = await request.json().catch(() => null);
@@ -69,7 +60,7 @@ export async function PUT(request: NextRequest) {
 
   const { vehicleId, deadlines } = parsed.data;
   const vehicle = await db.vehicle.findFirst({
-    where: { id: vehicleId, userId: session.userId, deletedAt: null },
+    where: { id: vehicleId, userId: user.id, deletedAt: null },
   });
 
   if (!vehicle) {
