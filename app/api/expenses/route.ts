@@ -1,11 +1,45 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import { db } from "@/lib/db";
-import { requireUser } from "@/lib/auth";
+import { getCurrentUser } from "@/lib/auth";
+import { logApiError } from "@/lib/error-handling";
+
+const expenseSchema = z.object({
+  vehicleId: z.string().min(1),
+  date: z.string().min(1),
+  category: z.enum([
+    "RIFORNIMENTO",
+    "MANUTENZIONE",
+    "ASSICURAZIONE",
+    "BOLLO",
+    "MULTA",
+    "PARCHEGGIO",
+    "LAVAGGIO",
+    "PEDAGGI",
+    "ALTRO",
+  ]),
+  amountEur: z.coerce.number().positive(),
+  odometerKm: z.coerce.number().int().nonnegative().nullable().optional(),
+  description: z.string().max(160).nullish(),
+  notes: z.string().max(500).nullish(),
+});
 
 export async function POST(req: NextRequest) {
   try {
-    const user = await requireUser();
-    const body = await req.json();
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json({ error: "Non autorizzato." }, { status: 401 });
+    }
+
+    const body = await req.json().catch(() => null);
+    const parsed = expenseSchema.safeParse(body);
+
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Dati spesa non validi." },
+        { status: 400 },
+      );
+    }
 
     const {
       vehicleId,
@@ -15,9 +49,8 @@ export async function POST(req: NextRequest) {
       odometerKm,
       description,
       notes,
-    } = body;
+    } = parsed.data;
 
-    // Verifica che il veicolo appartenga all'utente
     const vehicle = await db.vehicle.findFirst({
       where: { id: vehicleId, userId: user.id, deletedAt: null },
     });
@@ -29,30 +62,36 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Crea la spesa
+    const expenseDate = new Date(date);
+    if (Number.isNaN(expenseDate.getTime())) {
+      return NextResponse.json(
+        { error: "Data spesa non valida." },
+        { status: 400 },
+      );
+    }
+
     const expense = await db.expense.create({
       data: {
         vehicleId,
-        date: new Date(date),
+        date: expenseDate,
         category,
-        amountEur: parseFloat(amountEur),
-        odometerKm: odometerKm ? parseInt(odometerKm) : null,
-        description,
-        notes,
+        amountEur,
+        odometerKm: odometerKm ?? null,
+        description: description?.trim() || null,
+        notes: notes?.trim() || null,
       },
     });
 
-    // Aggiorna il chilometraggio del veicolo se specificato e maggiore
     if (odometerKm && odometerKm > (vehicle.odometerKm || 0)) {
       await db.vehicle.update({
         where: { id: vehicleId },
-        data: { odometerKm: parseInt(odometerKm) },
+        data: { odometerKm },
       });
     }
 
     return NextResponse.json(expense);
   } catch (error) {
-    console.error("Errore creazione spesa:", error);
+    logApiError("expenses/create", error);
     return NextResponse.json(
       { error: "Errore durante il salvataggio" },
       { status: 500 }
@@ -62,7 +101,11 @@ export async function POST(req: NextRequest) {
 
 export async function GET(req: NextRequest) {
   try {
-    const user = await requireUser();
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json({ error: "Non autorizzato." }, { status: 401 });
+    }
+
     const { searchParams } = new URL(req.url);
     const vehicleId = searchParams.get("vehicleId");
 
@@ -73,7 +116,6 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // Verifica che il veicolo appartenga all'utente
     const vehicle = await db.vehicle.findFirst({
       where: { id: vehicleId, userId: user.id, deletedAt: null },
     });
@@ -92,7 +134,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(expenses);
   } catch (error) {
-    console.error("Errore recupero spese:", error);
+    logApiError("expenses/list", error);
     return NextResponse.json(
       { error: "Errore durante il recupero" },
       { status: 500 }

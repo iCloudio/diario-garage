@@ -1,11 +1,47 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import { db } from "@/lib/db";
-import { requireUser } from "@/lib/auth";
+import { getCurrentUser } from "@/lib/auth";
+import { logApiError } from "@/lib/error-handling";
+
+const refuelSchema = z.object({
+  vehicleId: z.string().min(1),
+  date: z.string().min(1),
+  liters: z.coerce.number().positive().nullable().optional(),
+  kwh: z.coerce.number().positive().nullable().optional(),
+  litersPrimary: z.coerce.number().positive().nullable().optional(),
+  litersSecondary: z.coerce.number().positive().nullable().optional(),
+  amountEur: z.coerce.number().positive(),
+  odometerKm: z.coerce.number().int().nonnegative(),
+  fuelType: z.enum([
+    "BENZINA",
+    "DIESEL",
+    "GPL",
+    "METANO",
+    "ELETTRICO",
+    "IBRIDO_BENZINA",
+    "IBRIDO_DIESEL",
+  ]),
+  pricePerLiter: z.coerce.number().positive().nullable().optional(),
+  notes: z.string().max(500).nullish(),
+});
 
 export async function POST(req: NextRequest) {
   try {
-    const user = await requireUser();
-    const body = await req.json();
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json({ error: "Non autorizzato." }, { status: 401 });
+    }
+
+    const body = await req.json().catch(() => null);
+    const parsed = refuelSchema.safeParse(body);
+
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Dati rifornimento non validi." },
+        { status: 400 },
+      );
+    }
 
     const {
       vehicleId,
@@ -19,9 +55,8 @@ export async function POST(req: NextRequest) {
       fuelType,
       pricePerLiter,
       notes,
-    } = body;
+    } = parsed.data;
 
-    // Verifica che il veicolo appartenga all'utente
     const vehicle = await db.vehicle.findFirst({
       where: { id: vehicleId, userId: user.id, deletedAt: null },
     });
@@ -33,34 +68,40 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Crea il rifornimento
+    const refuelDate = new Date(date);
+    if (Number.isNaN(refuelDate.getTime())) {
+      return NextResponse.json(
+        { error: "Data rifornimento non valida." },
+        { status: 400 },
+      );
+    }
+
     const refuel = await db.refuel.create({
       data: {
         vehicleId,
-        date: new Date(date),
-        liters: liters ? parseFloat(liters) : null,
-        kwh: kwh ? parseFloat(kwh) : null,
-        litersPrimary: litersPrimary ? parseFloat(litersPrimary) : null,
-        litersSecondary: litersSecondary ? parseFloat(litersSecondary) : null,
-        amountEur: parseFloat(amountEur),
-        odometerKm: parseInt(odometerKm),
+        date: refuelDate,
+        liters: liters ?? null,
+        kwh: kwh ?? null,
+        litersPrimary: litersPrimary ?? null,
+        litersSecondary: litersSecondary ?? null,
+        amountEur,
+        odometerKm,
         fuelType,
-        pricePerLiter: pricePerLiter ? parseFloat(pricePerLiter) : null,
-        notes,
+        pricePerLiter: pricePerLiter ?? null,
+        notes: notes?.trim() || null,
       },
     });
 
-    // Aggiorna il chilometraggio del veicolo se maggiore
     if (odometerKm > (vehicle.odometerKm || 0)) {
       await db.vehicle.update({
         where: { id: vehicleId },
-        data: { odometerKm: parseInt(odometerKm) },
+        data: { odometerKm },
       });
     }
 
     return NextResponse.json(refuel);
   } catch (error) {
-    console.error("Errore creazione rifornimento:", error);
+    logApiError("refuels/create", error);
     return NextResponse.json(
       { error: "Errore durante il salvataggio" },
       { status: 500 }
@@ -70,7 +111,11 @@ export async function POST(req: NextRequest) {
 
 export async function GET(req: NextRequest) {
   try {
-    const user = await requireUser();
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json({ error: "Non autorizzato." }, { status: 401 });
+    }
+
     const { searchParams } = new URL(req.url);
     const vehicleId = searchParams.get("vehicleId");
 
@@ -81,7 +126,6 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // Verifica che il veicolo appartenga all'utente
     const vehicle = await db.vehicle.findFirst({
       where: { id: vehicleId, userId: user.id, deletedAt: null },
     });
@@ -100,7 +144,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(refuels);
   } catch (error) {
-    console.error("Errore recupero rifornimenti:", error);
+    logApiError("refuels/list", error);
     return NextResponse.json(
       { error: "Errore durante il recupero" },
       { status: 500 }

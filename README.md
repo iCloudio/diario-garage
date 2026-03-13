@@ -1,24 +1,43 @@
 # DiarioGarage
 
-Web app per tenere sotto controllo scadenze e costi del proprio veicolo.
+Web app per tenere sotto controllo scadenze, rifornimenti, spese e dati essenziali dei propri veicoli.
 
 ## Stack
+
 - Next.js (App Router) + TypeScript
-- Tailwind + Shadcn UI
-- Prisma + Postgres
+- Tailwind CSS + shadcn/ui
+- Prisma + PostgreSQL
 
 ## Avvio locale
+
 ```bash
 npm run dev
 ```
 
-## Migrazioni Prisma
+## Prisma
+
 ```bash
 npx prisma migrate dev --name <nome_migrazione>
 npx prisma generate
 ```
 
-## Note
-- Tema system light/dark, accent viola.
-- Roadmap unica: `../ROADMAP.md`.
+## Documentazione utile
 
+### Prodotto
+
+- `PRODUCT-PLAYBOOK.md`
+  Visione del prodotto, stato attuale, priorita' e milestone.
+
+### Go-to-market
+
+- `GO-TO-MARKET.md`
+  Pricing, monetizzazione, legale, marketing, email, lancio.
+
+### Database e infrastruttura
+
+- `DBPROVIDER.md`
+  Analisi della scelta del provider database e del rapporto con Cloudflare.
+
+## Stato della documentazione
+
+La documentazione e' stata ripulita e consolidata per evitare sovrapposizioni tra roadmap, analisi UX e note strategiche.

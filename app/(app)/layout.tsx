@@ -3,6 +3,7 @@ import { AppMobileNav } from "@/components/app-mobile-nav";
 import { AppUserMenu } from "@/components/app-user-menu";
 
 const navItems = [
+  { href: "/dashboard", label: "Dashboard", icon: "layout-dashboard" as const },
   { href: "/vehicles", label: "Veicoli", icon: "car" as const },
   { href: "/settings", label: "Impostazioni", icon: "settings" as const },
 ];

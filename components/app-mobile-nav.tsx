@@ -2,16 +2,17 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Car, Settings } from "lucide-react";
+import { Car, LayoutDashboard, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type NavItem = {
   href: string;
   label: string;
-  icon: "car" | "settings";
+  icon: "car" | "settings" | "layout-dashboard";
 };
 
 const iconMap = {
+  "layout-dashboard": LayoutDashboard,
   car: Car,
   settings: Settings,
 } as const;
@@ -39,6 +40,7 @@ export function AppMobileNav({ items }: { items: NavItem[] }) {
                   : "hover:bg-accent/40 hover:text-foreground",
               )}
               href={item.href}
+              aria-current={isActive ? "page" : undefined}
             >
               <Icon className={cn("h-4 w-4", isActive && "text-primary")} />
               <span>{item.label}</span>

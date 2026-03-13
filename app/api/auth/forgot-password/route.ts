@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { normalizeEmail } from "@/lib/auth";
 
 const schema = z.object({
   email: z.string().email().max(255),
@@ -12,6 +13,8 @@ export async function POST(request: Request) {
   if (!parsed.success) {
     return NextResponse.json({ error: "Email non valida." }, { status: 400 });
   }
+
+  normalizeEmail(parsed.data.email);
 
   return NextResponse.json({
     ok: true,

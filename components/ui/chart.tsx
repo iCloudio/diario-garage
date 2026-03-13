@@ -94,6 +94,8 @@ export function ChartContainer({
         data-chart={chartId}
         className={cn(
           "flex h-64 w-full justify-center text-xs",
+          "[&_.recharts-wrapper]:overflow-visible",
+          "[&_.recharts-surface]:overflow-visible",
           "[&_.recharts-cartesian-axis-tick_text]:fill-muted-foreground",
           "[&_.recharts-cartesian-grid_line[stroke='#ccc']]:stroke-border/60",
           "[&_.recharts-curve.recharts-tooltip-cursor]:stroke-border",

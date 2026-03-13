@@ -16,6 +16,8 @@ import {
 } from "@/lib/license-status";
 import { DEADLINE_LABELS, VEHICLE_LABELS, FUEL_LABELS } from "@/lib/constants/labels";
 import { calculateDaysAgo, formatDaysAgoLabel } from "@/lib/services/expense-service";
+import { WelcomeChecklist } from "@/components/onboarding/welcome-checklist";
+import { EmptyVehicles } from "@/components/empty-states";
 
 export default async function VehiclesPage() {
   const user = await requireUser();
@@ -59,6 +61,13 @@ export default async function VehiclesPage() {
   const now = new Date();
   const currency = profile?.currency ?? "EUR";
 
+  // Calculate onboarding progress
+  const hasVehicles = vehicles.length > 0;
+  const hasDeadlines = vehicles.some((v) => v.deadlines.length > 0);
+  const hasExpensesOrRefuels = vehicles.some(
+    (v) => v.refuels.length > 0 || v.expenses?.length > 0
+  );
+
   return (
     <div className="space-y-6">
       <FuelPriceRegionDialog
@@ -68,23 +77,15 @@ export default async function VehiclesPage() {
         sourceUrl={regionalFuelTable.sourceUrl}
       />
 
+      {/* Welcome onboarding for new users */}
+      <WelcomeChecklist
+        hasVehicles={hasVehicles}
+        hasDeadlines={hasDeadlines}
+        hasExpensesOrRefuels={hasExpensesOrRefuels}
+      />
+
       {vehicles.length === 0 ? (
-        <Card className="border-dashed border-border/80 bg-card/75 p-8">
-          <div className="max-w-xl">
-            <p className="text-sm font-medium text-foreground">
-              Nessun veicolo inserito
-            </p>
-            <p className="mt-2 text-sm leading-6 text-muted-foreground">
-              Aggiungi il primo mezzo per iniziare a monitorare documenti,
-              scadenze, spese e rifornimenti in un unico posto.
-            </p>
-            <div className="mt-5">
-              <Button asChild>
-                <Link href="/vehicles/new">Crea il primo veicolo</Link>
-              </Button>
-            </div>
-          </div>
-        </Card>
+        <EmptyVehicles />
       ) : (
         <div className="grid auto-rows-fr gap-4 md:grid-cols-2 xl:grid-cols-3">
           {vehicles.map((item) => {

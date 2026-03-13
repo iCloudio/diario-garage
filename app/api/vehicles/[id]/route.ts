@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 import { db } from "@/lib/db";
+import { getSession } from "@/lib/auth";
 
 const schema = z.object({
   plate: z.string().min(5).max(10).optional(),
@@ -27,13 +28,8 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const token = request.cookies.get("dg_session")?.value;
-  if (!token) {
-    return NextResponse.json({ error: "Non autorizzato." }, { status: 401 });
-  }
-
-  const session = await db.session.findUnique({ where: { id: token } });
-  if (!session || session.expiresAt < new Date()) {
+  const session = await getSession();
+  if (!session) {
     return NextResponse.json({ error: "Sessione scaduta." }, { status: 401 });
   }
 
@@ -66,10 +62,31 @@ export async function PATCH(
     soldPrice,
     soldNotes,
   } = parsed.data;
+  const normalizedPlate = plate ? plate.replace(/\s+/g, "").toUpperCase() : null;
+
+  if (normalizedPlate && normalizedPlate !== vehicle.plate) {
+    const duplicate = await db.vehicle.findFirst({
+      where: {
+        userId: session.userId,
+        plate: normalizedPlate,
+        deletedAt: null,
+        id: { not: vehicle.id },
+      },
+      select: { id: true },
+    });
+
+    if (duplicate) {
+      return NextResponse.json(
+        { error: "Esiste già un veicolo con questa targa." },
+        { status: 409 },
+      );
+    }
+  }
+
   const updated = await db.vehicle.update({
     where: { id: vehicle.id },
     data: {
-      plate: plate ? plate.replace(/\s+/g, "").toUpperCase() : undefined,
+      plate: normalizedPlate ?? undefined,
       make: make === "" ? null : make?.trim(),
       model: model === "" ? null : model?.trim(),
       modelDetail: modelDetail === "" ? null : modelDetail?.trim(),
@@ -96,13 +113,8 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const token = request.cookies.get("dg_session")?.value;
-  if (!token) {
-    return NextResponse.json({ error: "Non autorizzato." }, { status: 401 });
-  }
-
-  const session = await db.session.findUnique({ where: { id: token } });
-  if (!session || session.expiresAt < new Date()) {
+  const session = await getSession();
+  if (!session) {
     return NextResponse.json({ error: "Sessione scaduta." }, { status: 401 });
   }
 

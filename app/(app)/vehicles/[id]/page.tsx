@@ -7,8 +7,8 @@ import { buildActivitiesTimeline, formatActivitiesForDisplay, getLatestRefuelSum
 import { buildChartDatasets } from "@/lib/services/chart-service";
 import { DEADLINE_LABELS } from "@/lib/constants/labels";
 import { VehicleSaleAnalysis } from "@/components/vehicle-sale-analysis";
-import { VehicleOverviewHub } from "@/components/vehicle-overview-hub";
-import { formatCurrency } from "@/lib/currency";
+import { FABMenu } from "@/components/quick-actions/fab-menu";
+import { VehicleDetailHero } from "@/components/vehicle/vehicle-detail-hero";
 
 export default async function VehicleOverviewPage({
   params,
@@ -103,21 +103,27 @@ export default async function VehicleOverviewPage({
     initialInsuranceCompartmentExpiry: vehicle.insuranceCompartmentExpiry?.toISOString() ?? null,
   };
 
+  // Calculate stats for hero card
+  const totalExpenses = vehicle.expenses.length;
+  const totalRefuels = vehicle.refuels.length;
+
   return (
     <div className="space-y-6">
-      <VehicleOverviewHub
+      <VehicleDetailHero
         vehicleId={vehicle.id}
         vehiclePlate={vehicle.plate}
+        vehicleFuelType={vehicle.fuelType}
+        vehicleOdometerKm={vehicle.odometerKm}
         currency={currency}
+        totalExpenses={totalExpenses}
+        totalRefuels={totalRefuels}
+        lifetimeTotal={lifetimeTotal}
         deadlineRows={deadlinesWithStatus}
         deadlineInputs={deadlineInputs}
         drivers={assignedDrivers}
         availableDrivers={unassignedDrivers}
         latestRefuelSummary={latestRefuelSummary}
-        currentOdometer={vehicle.odometerKm ?? 0}
-        vehicleFuelType={vehicle.fuelType}
         activities={hubActivities}
-        totalRecordedLabel={formatCurrency(lifetimeTotal, currency)}
         chartDatasets={chartDatasets}
         vehicleEditData={vehicleEditData}
       />
@@ -133,6 +139,9 @@ export default async function VehicleOverviewPage({
           odometerKm={vehicle.odometerKm}
         />
       ) : null}
+
+      {/* FAB Menu - Mobile only quick actions */}
+      <FABMenu vehicleId={vehicle.id} />
     </div>
   );
 }

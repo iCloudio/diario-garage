@@ -30,6 +30,34 @@ export async function createSession(userId: string) {
   return { token, expiresAt, session };
 }
 
+export function normalizeEmail(email: string) {
+  return email.trim().toLowerCase();
+}
+
+export function applySessionCookie(
+  response: NextResponse,
+  token: string,
+  expiresAt: Date,
+) {
+  response.cookies.set(SESSION_COOKIE, token, {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    expires: expiresAt,
+  });
+}
+
+export function clearSessionCookieOnResponse(response: NextResponse) {
+  response.cookies.set(SESSION_COOKIE, "", {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    expires: new Date(0),
+  });
+}
+
 export async function setSessionCookie(token: string, expiresAt: Date) {
   const cookieStore = await cookies();
   cookieStore.set(SESSION_COOKIE, token, {

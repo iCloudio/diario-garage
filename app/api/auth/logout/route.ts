@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { db } from "@/lib/db";
+import { clearSessionCookieOnResponse } from "@/lib/auth";
 
 export async function POST(request: NextRequest) {
   const token = request.cookies.get("dg_session")?.value;
@@ -9,13 +10,7 @@ export async function POST(request: NextRequest) {
   }
 
   const response = NextResponse.json({ ok: true });
-  response.cookies.set("dg_session", "", {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    path: "/",
-    expires: new Date(0),
-  });
+  clearSessionCookieOnResponse(response);
 
   return response;
 }

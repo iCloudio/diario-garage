@@ -12,6 +12,7 @@ import { VehicleEditForm } from "@/components/vehicle-edit-form";
 import { VehicleExpensesChart } from "@/components/vehicle-expenses-chart";
 import { VehicleDangerZone } from "@/components/vehicle-danger-zone";
 import { ResponsiveOverlay } from "@/components/responsive-overlay";
+import { EmptyChart } from "@/components/empty-states";
 import { getDeadlinePriority } from "@/lib/deadline-status";
 
 type DeadlineRow = {
@@ -373,11 +374,36 @@ export function VehicleOverviewHub({
             </p>
           </div>
 
-          {chartDatasets.length > 0 ? (
-            <div className="mt-5">
-              <VehicleExpensesChart currency={currency} datasets={chartDatasets} />
-            </div>
-          ) : null}
+          {(() => {
+            // Count total movements (expenses + refuels) for chart threshold
+            const totalMovements = activities.length;
+            const minMovements = 3;
+            const hasEnoughData = totalMovements >= minMovements;
+
+            if (!hasEnoughData) {
+              return (
+                <div className="mt-5">
+                  <EmptyChart
+                    currentCount={totalMovements}
+                    requiredCount={minMovements}
+                    dataType="movimenti"
+                    ctaLabel="Aggiungi movimento"
+                    ctaHref={`/vehicles/${vehicleId}`}
+                  />
+                </div>
+              );
+            }
+
+            if (chartDatasets.length > 0) {
+              return (
+                <div className="mt-5">
+                  <VehicleExpensesChart currency={currency} datasets={chartDatasets} />
+                </div>
+              );
+            }
+
+            return null;
+          })()}
 
           <div className="mt-6">
             {activities.length === 0 ? (

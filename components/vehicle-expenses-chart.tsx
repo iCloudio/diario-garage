@@ -60,29 +60,29 @@ export function VehicleExpensesChart({
   const lineChartConfig = {
     total: {
       label: selected.label,
-      color: "hsl(var(--chart-1))",
+      color: "var(--chart-1)",
     },
     fuel: {
       label: "Carburante",
-      color: "hsl(var(--chart-2))",
+      color: "var(--chart-2)",
     },
   } satisfies ChartConfig;
   const pieChartConfig = {
     carburante: {
       label: "Carburante",
-      color: "hsl(var(--chart-1))",
+      color: "var(--chart-1)",
     },
     manutenzione: {
       label: "Manutenzione",
-      color: "hsl(var(--chart-2))",
+      color: "var(--chart-2)",
     },
     assicurazione: {
       label: "Assicurazione",
-      color: "hsl(var(--chart-3))",
+      color: "var(--chart-3)",
     },
     bollo: {
       label: "Bollo",
-      color: "hsl(var(--chart-4))",
+      color: "var(--chart-4)",
     },
   } satisfies ChartConfig;
   const selectedPieData = selected.pieData.map((entry) => ({
@@ -118,21 +118,21 @@ export function VehicleExpensesChart({
                 : `${selected.label} mese per mese.`}
             </p>
           </div>
-          <ChartContainer config={lineChartConfig}>
+          <ChartContainer className="h-[18rem]" config={lineChartConfig}>
             <LineChart
               accessibilityLayer
               data={selected.monthlyData}
-              margin={{ top: 8, right: 8, left: -16, bottom: 0 }}
+              margin={{ top: 8, right: 16, left: 8, bottom: 8 }}
             >
               <CartesianGrid strokeDasharray="3 3" vertical={false} />
               <XAxis
                 dataKey="month"
                 tickLine={false}
                 axisLine={false}
-                tickMargin={10}
+                tickMargin={12}
               />
               <YAxis
-                width={42}
+                width={64}
                 tickLine={false}
                 axisLine={false}
                 tickFormatter={(value: number) => `${currencySymbol} ${value}`}
@@ -179,7 +179,7 @@ export function VehicleExpensesChart({
               Nessun dato disponibile.
             </div>
           ) : (
-            <ChartContainer className="h-64" config={pieChartConfig}>
+            <ChartContainer className="h-[18rem]" config={pieChartConfig}>
               <PieChart accessibilityLayer>
                 <ChartTooltip
                   content={

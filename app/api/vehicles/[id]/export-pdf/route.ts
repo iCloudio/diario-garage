@@ -1,14 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { requireUser } from "@/lib/auth";
+import { getCurrentUser } from "@/lib/auth";
 import { generateVehiclePDF } from "@/lib/pdf-generator";
+import { logApiError } from "@/lib/error-handling";
 
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const user = await requireUser();
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json({ error: "Non autorizzato." }, { status: 401 });
+    }
+
     const { id } = await params;
 
     // Recupera il veicolo con tutti i dati
@@ -68,7 +73,7 @@ export async function GET(
       },
     });
   } catch (error) {
-    console.error("Errore generazione PDF:", error);
+    logApiError("vehicles/export-pdf", error);
     return NextResponse.json(
       { error: "Errore durante la generazione del PDF" },
       { status: 500 }

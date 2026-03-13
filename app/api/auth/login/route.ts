@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
 import { db } from "@/lib/db";
-import { createSession } from "@/lib/auth";
+import { applySessionCookie, createSession, normalizeEmail } from "@/lib/auth";
 
 const schema = z.object({
   email: z.string().email().max(255),
@@ -18,8 +18,9 @@ export async function POST(request: Request) {
   }
 
   const { email, password } = parsed.data;
+  const normalizedEmail = normalizeEmail(email);
   const user = await db.user.findFirst({
-    where: { email, deletedAt: null },
+    where: { email: normalizedEmail, deletedAt: null },
   });
 
   if (!user) {
@@ -33,13 +34,7 @@ export async function POST(request: Request) {
 
   const { token, expiresAt } = await createSession(user.id);
   const response = NextResponse.json({ ok: true });
-  response.cookies.set("dg_session", token, {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    path: "/",
-    expires: expiresAt,
-  });
+  applySessionCookie(response, token, expiresAt);
 
   return response;
 }

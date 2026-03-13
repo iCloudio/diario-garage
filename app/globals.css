@@ -166,4 +166,14 @@
   .deadline-chip-alert {
     animation: soft-pulse 1.4s ease-in-out infinite;
   }
+
+  /* Scrollbar utilities */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
 }

@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 import { db } from "@/lib/db";
+import { getSession } from "@/lib/auth";
 import {
   buildInsuranceDeadlineFromLookup,
   buildVehicleDataFromLookup,
@@ -20,13 +21,8 @@ const schema = z.object({
 });
 
 export async function GET(request: NextRequest) {
-  const token = request.cookies.get("dg_session")?.value;
-  if (!token) {
-    return NextResponse.json({ error: "Non autorizzato." }, { status: 401 });
-  }
-
-  const session = await db.session.findUnique({ where: { id: token } });
-  if (!session || session.expiresAt < new Date()) {
+  const session = await getSession();
+  if (!session) {
     return NextResponse.json({ error: "Sessione scaduta." }, { status: 401 });
   }
 
@@ -48,13 +44,8 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const token = request.cookies.get("dg_session")?.value;
-  if (!token) {
-    return NextResponse.json({ error: "Non autorizzato." }, { status: 401 });
-  }
-
-  const session = await db.session.findUnique({ where: { id: token } });
-  if (!session || session.expiresAt < new Date()) {
+  const session = await getSession();
+  if (!session) {
     return NextResponse.json({ error: "Sessione scaduta." }, { status: 401 });
   }
 
@@ -76,6 +67,22 @@ export async function POST(request: NextRequest) {
     plateLookupCacheId,
   } = parsed.data;
   const normalizedPlate = plate.replace(/\s+/g, "").toUpperCase();
+  const existingVehicle = await db.vehicle.findFirst({
+    where: {
+      userId: session.userId,
+      plate: normalizedPlate,
+      deletedAt: null,
+    },
+    select: { id: true },
+  });
+
+  if (existingVehicle) {
+    return NextResponse.json(
+      { error: "Esiste già un veicolo con questa targa." },
+      { status: 409 },
+    );
+  }
+
   const plateLookupCache = plateLookupCacheId
     ? await getPlateLookupCacheById(plateLookupCacheId)
     : null;
