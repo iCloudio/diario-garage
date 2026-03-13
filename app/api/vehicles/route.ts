@@ -20,7 +20,7 @@ const schema = z.object({
   plateLookupCacheId: z.string().min(1).optional(),
 });
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   const session = await getSession();
   if (!session) {
     return NextResponse.json({ error: "Sessione scaduta." }, { status: 401 });

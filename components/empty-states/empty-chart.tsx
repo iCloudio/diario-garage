@@ -113,7 +113,7 @@ export function EmptyChart({
             ) : (
               <>
                 Registra almeno <span className="font-semibold">{requiredCount}</span>{" "}
-                {dataType} per visualizzare i grafici e analizzare l'andamento.
+                {dataType} per visualizzare i grafici e analizzare l&apos;andamento.
               </>
             )}
           </p>

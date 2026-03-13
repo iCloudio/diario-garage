@@ -5,7 +5,7 @@
 
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useState, useCallback } from "react";
 import {
   getOnboardingState,
   dismissOnboarding,
@@ -16,17 +16,12 @@ import {
 } from "@/lib/onboarding-state";
 
 export function useOnboarding(hasVehicles: boolean) {
-  const [state, setState] = useState<OnboardingState | null>(null);
-  const [isClient, setIsClient] = useState(false);
-
-  // SSR: Wait for client-side hydration
-  useEffect(() => {
-    setIsClient(true);
-    setState(getOnboardingState());
-  }, []);
+  const [state, setState] = useState<OnboardingState | null>(() =>
+    typeof window === "undefined" ? null : getOnboardingState(),
+  );
 
   // Check if onboarding should be visible
-  const shouldShow = isClient && shouldShowOnboarding(hasVehicles);
+  const shouldShow = state !== null && shouldShowOnboarding(hasVehicles);
 
   // Calculate progress (0-100)
   const progress = state

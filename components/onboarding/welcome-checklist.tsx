@@ -115,7 +115,7 @@ export function WelcomeChecklist({
 
       {/* Steps list */}
       <div className="space-y-3">
-        {steps.map((step, index) => {
+        {steps.map((step) => {
           const Icon = step.icon;
           const StepIcon = step.completed ? CheckCircle2 : Circle;
 

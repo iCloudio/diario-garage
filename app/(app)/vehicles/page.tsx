@@ -3,7 +3,6 @@ import { db } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { DeadlineStatusChip } from "@/components/deadline-status-chip";
 import { formatCurrency } from "@/lib/currency";
 import { FuelPriceRegionDialog } from "@/components/fuel-price-region-dialog";

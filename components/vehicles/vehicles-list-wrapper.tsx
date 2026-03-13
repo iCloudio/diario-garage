@@ -1,14 +1,9 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { DeadlineStatusChip } from "@/components/deadline-status-chip";
 import { VehicleSearchBar } from "./vehicle-search-bar";
 import { VehicleFilters } from "./vehicle-filters";
 import { useVehicleSearch } from "@/hooks/use-vehicle-search";
-import { cn } from "@/lib/utils";
 import type { DEADLINE_LABELS, FUEL_LABELS, VEHICLE_LABELS } from "@/lib/constants/labels";
 
 type Vehicle = {
