@@ -8,20 +8,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { ResponsiveOverlay } from "@/components/responsive-overlay";
 import {
   formatLicenseExpiryLabel,
   getLicenseExpiryAnimationClass,
@@ -170,20 +163,25 @@ export function VehicleDriversSection({
       <div
         className={
           embedded
-            ? "rounded-3xl border border-border/80 bg-card/90 p-5"
+            ? "rounded-3xl border border-border/80 bg-card/90 p-4"
             : "rounded-3xl border border-border/80 bg-card/90 p-6"
         }
       >
-        <div className="flex items-start justify-between gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">
               Guidatori
             </p>
             <p className="mt-2 text-sm text-muted-foreground">
-              Persone associate al veicolo e scadenza patente.
+              Guidatori associati e patente.
             </p>
           </div>
-          <Button size="sm" variant="ghost" onClick={() => setIsAddOpen(true)}>
+          <Button
+            size="sm"
+            variant="ghost"
+            className="w-full sm:w-auto"
+            onClick={() => setIsAddOpen(true)}
+          >
             <Plus className="mr-2 h-4 w-4" />
             Aggiungi
           </Button>
@@ -199,40 +197,42 @@ export function VehicleDriversSection({
               return (
                 <div
                   key={driver.id}
-                  className="flex flex-col gap-3 py-3 first:pt-0 last:pb-0 md:flex-row md:items-center md:justify-between"
+                  className="rounded-2xl bg-background/55 px-3 py-3"
                 >
-                  <div>
-                    <p className="font-medium text-foreground">{driver.name}</p>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      Patente {formatLicenseExpiryLabel(licenseExpiry)}
-                    </p>
-                  </div>
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <p className="font-medium text-foreground">{driver.name}</p>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        Patente {formatLicenseExpiryLabel(licenseExpiry)}
+                      </p>
+                    </div>
 
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span
-                      className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-medium ${getLicenseExpiryClass(
-                        licenseExpiry,
-                      )} ${getLicenseExpiryAnimationClass(licenseExpiry)}`}
-                    >
-                      {formatLicenseExpiryLabel(licenseExpiry)}
-                    </span>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => setEditingDriver(driver)}
-                    >
-                      <Pencil className="mr-2 h-3.5 w-3.5" />
-                      Modifica
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => handleDetachDriver(driver.id)}
-                      disabled={pending}
-                    >
-                      <Unlink className="mr-2 h-3.5 w-3.5" />
-                      Scollega
-                    </Button>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span
+                        className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-medium ${getLicenseExpiryClass(
+                          licenseExpiry,
+                        )} ${getLicenseExpiryAnimationClass(licenseExpiry)}`}
+                      >
+                        {formatLicenseExpiryLabel(licenseExpiry)}
+                      </span>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setEditingDriver(driver)}
+                      >
+                        <Pencil className="mr-2 h-3.5 w-3.5" />
+                        Modifica
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleDetachDriver(driver.id)}
+                        disabled={pending}
+                      >
+                        <Unlink className="mr-2 h-3.5 w-3.5" />
+                        Scollega
+                      </Button>
+                    </div>
                   </div>
                 </div>
               );
@@ -241,116 +241,131 @@ export function VehicleDriversSection({
         </div>
       </div>
 
-      <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Gestisci guidatori</DialogTitle>
-            <DialogDescription>
-              Puoi associare un guidatore esistente oppure crearne uno nuovo senza uscire dalla scheda veicolo.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-6">
-            {availableDriverOptions.length > 0 ? (
-              <div className="space-y-3">
-                <div>
-                  <p className="text-sm font-medium text-foreground">Associa guidatore esistente</p>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    Se hai gia inserito un guidatore, puoi collegarlo a questo veicolo.
-                  </p>
-                </div>
-                <Select value={selectedDriverId} onValueChange={setSelectedDriverId}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleziona guidatore" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {availableDriverOptions.map((driver) => (
-                      <SelectItem key={driver.id} value={driver.id}>
-                        {driver.name} · {formatLicenseExpiryLabel(new Date(driver.licenseExpiry))}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={handleAssignExistingDriver}
-                  disabled={pending}
-                >
-                  {pending ? "Salvataggio..." : "Associa guidatore"}
-                </Button>
-              </div>
-            ) : null}
-
+      <ResponsiveOverlay
+        open={isAddOpen}
+        onOpenChange={setIsAddOpen}
+        title="Gestisci guidatori"
+        description="Associa un guidatore esistente oppure creane uno nuovo senza uscire dalla scheda."
+        desktopClassName="max-w-lg"
+      >
+        <div className="space-y-6">
+          {availableDriverOptions.length > 0 ? (
             <div className="space-y-3">
               <div>
-                <p className="text-sm font-medium text-foreground">Nuovo guidatore</p>
+                <p className="text-sm font-medium text-foreground">Associa guidatore esistente</p>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  Per iniziare bastano nome e scadenza della patente.
+                  Seleziona un profilo già presente e collegalo a questo veicolo.
                 </p>
               </div>
-
-              <form className="space-y-4" onSubmit={handleCreateDriver}>
-                <div className="space-y-2">
-                  <Label htmlFor="driver-name">Nome</Label>
-                  <Input id="driver-name" name="name" placeholder="es. Mario Rossi" required />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="driver-license-expiry">Scadenza patente</Label>
-                  <Input id="driver-license-expiry" name="licenseExpiry" type="date" required />
-                </div>
-
-                <DialogFooter>
-                  <Button type="submit" disabled={pending}>
-                    {pending ? "Salvataggio..." : "Crea e collega"}
-                  </Button>
-                </DialogFooter>
-              </form>
+              <Select value={selectedDriverId} onValueChange={setSelectedDriverId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleziona guidatore" />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableDriverOptions.map((driver) => (
+                    <SelectItem key={driver.id} value={driver.id}>
+                      {driver.name} · {formatLicenseExpiryLabel(new Date(driver.licenseExpiry))}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Button
+                type="button"
+                variant="secondary"
+                className="w-full sm:w-auto"
+                onClick={handleAssignExistingDriver}
+                disabled={pending}
+              >
+                {pending ? "Salvataggio..." : "Associa guidatore"}
+              </Button>
             </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={!!editingDriver} onOpenChange={(open) => (!open ? setEditingDriver(null) : undefined)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Modifica guidatore</DialogTitle>
-            <DialogDescription>
-              Aggiorni nome e patente direttamente dalla scheda del veicolo.
-            </DialogDescription>
-          </DialogHeader>
-
-          {editingDriver ? (
-            <form className="space-y-4" onSubmit={handleUpdateDriver}>
-              <div className="space-y-2">
-                <Label htmlFor="edit-driver-name">Nome</Label>
-                <Input
-                  id="edit-driver-name"
-                  name="name"
-                  defaultValue={editingDriver.name}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="edit-driver-license-expiry">Scadenza patente</Label>
-                <Input
-                  id="edit-driver-license-expiry"
-                  name="licenseExpiry"
-                  type="date"
-                  defaultValue={editingDriver.licenseExpiry.slice(0, 10)}
-                  required
-                />
-              </div>
-
-              <DialogFooter>
-                <Button type="submit" disabled={pending}>
-                  {pending ? "Salvataggio..." : "Salva modifiche"}
-                </Button>
-              </DialogFooter>
-            </form>
           ) : null}
-        </DialogContent>
-      </Dialog>
+
+          <div className="space-y-3">
+            <div>
+              <p className="text-sm font-medium text-foreground">Nuovo guidatore</p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Per iniziare bastano nome e scadenza della patente.
+              </p>
+            </div>
+
+            <form className="space-y-4" onSubmit={handleCreateDriver}>
+              <div className="space-y-2">
+                <Label htmlFor="driver-name">Nome</Label>
+                <Input id="driver-name" name="name" placeholder="es. Mario Rossi" required />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="driver-license-expiry">Scadenza patente</Label>
+                <Input id="driver-license-expiry" name="licenseExpiry" type="date" required />
+              </div>
+
+              <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => setIsAddOpen(false)}
+                  disabled={pending}
+                >
+                  Annulla
+                </Button>
+                <Button type="submit" disabled={pending}>
+                  {pending ? "Salvataggio..." : "Crea e collega"}
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </ResponsiveOverlay>
+
+      <ResponsiveOverlay
+        open={!!editingDriver}
+        onOpenChange={(open) => {
+          if (!open) {
+            setEditingDriver(null);
+          }
+        }}
+        title="Modifica guidatore"
+        description="Aggiorna nome e scadenza patente direttamente dalla scheda veicolo."
+        desktopClassName="max-w-md"
+      >
+        {editingDriver ? (
+          <form className="space-y-4" onSubmit={handleUpdateDriver}>
+            <div className="space-y-2">
+              <Label htmlFor="edit-driver-name">Nome</Label>
+              <Input
+                id="edit-driver-name"
+                name="name"
+                defaultValue={editingDriver.name}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-driver-license-expiry">Scadenza patente</Label>
+              <Input
+                id="edit-driver-license-expiry"
+                name="licenseExpiry"
+                type="date"
+                defaultValue={editingDriver.licenseExpiry.slice(0, 10)}
+                required
+              />
+            </div>
+
+            <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => setEditingDriver(null)}
+                disabled={pending}
+              >
+                Annulla
+              </Button>
+              <Button type="submit" disabled={pending}>
+                {pending ? "Salvataggio..." : "Salva modifiche"}
+              </Button>
+            </div>
+          </form>
+        ) : null}
+      </ResponsiveOverlay>
     </>
   );
 

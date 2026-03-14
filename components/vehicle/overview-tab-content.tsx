@@ -70,49 +70,59 @@ export function OverviewTabContent({
   const urgentDeadlines = deadlineRows.filter((d) => d.diffDays !== null && d.diffDays <= 7);
   const missingDeadlines = deadlineRows.filter((d) => d.dueDate === null);
   const isDeadlineSetupPending = missingDeadlines.length > 0;
+  const deadlinesSummary =
+    urgentDeadlines.length > 0
+      ? urgentDeadlines.length === 1
+        ? "1 urgente"
+        : `${urgentDeadlines.length} urgenti`
+      : missingDeadlines.length > 0
+        ? missingDeadlines.length === 1
+          ? "1 da inserire"
+          : `${missingDeadlines.length} da inserire`
+        : "In ordine";
 
   return (
     <>
-      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+      <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
         {/* Deadlines Section */}
-        <section className="rounded-3xl border border-border/80 bg-card/90 p-5">
-          <div className="flex items-start justify-between gap-3">
+        <section className="rounded-3xl border border-border/80 bg-card/90 p-4 sm:p-5">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div>
               <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">
                 Scadenze
               </p>
-              <p className="mt-2 text-sm text-muted-foreground">
-                {urgentDeadlines.length > 0
-                  ? urgentDeadlines.length === 1
-                    ? "Una scadenza richiede attenzione immediata."
-                    : `${urgentDeadlines.length} scadenze richiedono attenzione immediata.`
-                  : missingDeadlines.length > 0
-                    ? missingDeadlines.length === 1
-                      ? "Manca ancora una scadenza principale."
-                      : `Mancano ancora ${missingDeadlines.length} scadenze principali.`
-                    : "Tutte le scadenze principali risultano registrate."}
-              </p>
+              <p className="mt-2 text-sm text-muted-foreground">{deadlinesSummary}</p>
             </div>
-            <Button size="sm" variant="ghost" onClick={() => setIsDeadlinesOpen(true)}>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="w-full sm:w-auto"
+              onClick={() => setIsDeadlinesOpen(true)}
+            >
               <CalendarClock className="mr-2 h-4 w-4" />
               {isDeadlineSetupPending ? "Imposta" : "Modifica"}
             </Button>
           </div>
 
-          <div className="mt-5 space-y-3">
+          <div className="mt-4 space-y-3">
             {sortedDeadlines.map((item) => (
-              <div key={item.type} className="flex items-center justify-between gap-4 text-sm">
-                <div>
+              <div
+                key={item.type}
+                className="flex items-start justify-between gap-4 rounded-2xl bg-background/55 px-3 py-3 text-sm"
+              >
+                <div className="min-w-0">
                   <p className="font-medium text-foreground">{item.label}</p>
-                  <p className="text-muted-foreground">{item.dueDateLabel}</p>
+                  <p className="mt-1 text-muted-foreground">{item.dueDateLabel}</p>
                 </div>
-                {item.dueDate ? (
-                  <DeadlineStatusChip dueDate={new Date(item.dueDate)} />
-                ) : (
-                  <span className="inline-flex items-center rounded-full border border-border px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
-                    Da inserire
-                  </span>
-                )}
+                <div className="shrink-0">
+                  {item.dueDate ? (
+                    <DeadlineStatusChip dueDate={new Date(item.dueDate)} />
+                  ) : (
+                    <span className="inline-flex items-center rounded-full border border-border px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
+                      Da inserire
+                    </span>
+                  )}
+                </div>
               </div>
             ))}
           </div>
@@ -127,17 +137,17 @@ export function OverviewTabContent({
         />
 
         {/* Refuel Section */}
-        <section className="rounded-3xl border border-border/80 bg-card/90 p-5">
-          <div className="flex items-start justify-between gap-3">
+        <section className="rounded-3xl border border-border/80 bg-card/90 p-4 sm:p-5">
+          <div className="flex flex-col gap-3">
             <div>
               <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">
                 Carburante
               </p>
               <p className="mt-2 text-sm text-muted-foreground">
-                Ultimo rifornimento registrato e azioni rapide.
+                Ultimo rifornimento e azioni rapide.
               </p>
             </div>
-            <div className="flex items-center gap-1">
+            <div className="grid grid-cols-2 gap-2">
               <Button size="sm" variant="ghost" onClick={() => setIsRefuelOpen(true)}>
                 <Fuel className="mr-2 h-4 w-4" />
                 Rifornimento
@@ -149,12 +159,14 @@ export function OverviewTabContent({
             </div>
           </div>
 
-          <div className="mt-5">
+          <div className="mt-4">
             {latestRefuelSummary ? (
-              <div className="grid grid-cols-3 gap-3 text-sm">
-                <p className="text-left text-foreground">{latestRefuelSummary.fuel}</p>
-                <p className="text-center text-foreground">{latestRefuelSummary.amount}</p>
-                <p className="text-right text-foreground">{latestRefuelSummary.when}</p>
+              <div className="rounded-2xl bg-background/55 px-3 py-3 text-sm">
+                <p className="font-medium text-foreground">{latestRefuelSummary.fuel}</p>
+                <div className="mt-1 flex items-center justify-between gap-3 text-muted-foreground">
+                  <span>{latestRefuelSummary.amount}</span>
+                  <span>{latestRefuelSummary.when}</span>
+                </div>
               </div>
             ) : (
               <p className="italic text-muted-foreground">Nessun rifornimento</p>

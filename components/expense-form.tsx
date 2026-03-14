@@ -194,7 +194,7 @@ export function ExpenseForm({
           </details>
         </div>
 
-        <div className="mt-6 flex gap-3">
+        <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end sm:gap-3">
           <Button type="submit" disabled={isSubmitting}>
             {isSubmitting ? "Salvataggio..." : "Salva spesa"}
           </Button>
@@ -225,7 +225,7 @@ export function ExpenseForm({
 
   return (
     <form onSubmit={handleSubmit}>
-      {embedded ? content : <Card className="border-border/80 bg-card/90 p-6">{content}</Card>}
+      {embedded ? content : <Card className="border-border/80 bg-card/90 p-5 sm:p-6">{content}</Card>}
     </form>
   );
 }

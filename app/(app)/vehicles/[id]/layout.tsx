@@ -56,10 +56,39 @@ export default async function VehicleLayout({
   const hasMissingProfileData =
     !vehicle.make || !vehicle.model || !vehicle.firstRegistrationDate || !formattedKm || !vehicle.fuelType;
 
+  const profileFacts = [
+    {
+      label: "Immatr.",
+      value: firstRegistrationLabel ?? "—",
+      muted: !firstRegistrationLabel,
+    },
+    {
+      label: "Tipo",
+      value: vehicleTypeLabel,
+      muted: false,
+    },
+    {
+      label: "Km",
+      value: formattedKm ? `${formattedKm} km` : "—",
+      muted: !formattedKm,
+    },
+    {
+      label: "Alim.",
+      value: vehicleFuelLabel ?? "—",
+      muted: !vehicleFuelLabel,
+    },
+    {
+      label: "Potenza",
+      value: vehiclePowerLabel ?? "—",
+      muted: !vehiclePowerLabel,
+      wide: true,
+    },
+  ];
+
   return (
-    <div className="space-y-6">
-      <Card className="border-border/80 bg-card/90 p-6">
-        <div className="flex flex-col gap-5">
+    <div className="space-y-4 sm:space-y-6">
+      <Card className="border-border/80 bg-card/90 p-4 sm:p-6">
+        <div className="flex flex-col gap-4 sm:gap-5">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <Link
               className="inline-flex items-center gap-2 rounded-full border border-border/80 bg-background/70 px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:bg-background hover:text-foreground"
@@ -81,7 +110,7 @@ export default async function VehicleLayout({
 
           <div className="max-w-3xl">
             <div className="flex flex-wrap items-center gap-3">
-              <p className="text-4xl font-semibold tracking-tight md:text-5xl">
+              <p className="text-3xl font-semibold tracking-tight sm:text-4xl md:text-5xl">
                 {vehicle.plate}
               </p>
               <Badge variant={vehicle.status === "ATTIVO" ? "outline" : "secondary"}>
@@ -90,41 +119,35 @@ export default async function VehicleLayout({
             </div>
 
             {vehicleIdentity ? (
-              <p className="mt-3 text-base text-foreground/85">{vehicleIdentity}</p>
+              <p className="mt-2 text-sm text-foreground/85 sm:mt-3 sm:text-base">
+                {vehicleIdentity}
+              </p>
             ) : (
-              <p className="mt-3 text-base italic text-muted-foreground">
+              <p className="mt-2 text-sm italic text-muted-foreground sm:mt-3 sm:text-base">
                 Marca e modello non ancora inseriti
               </p>
             )}
 
-            <div className="mt-4 flex flex-wrap gap-2">
-              <Badge
-                variant="outline"
-                className={firstRegistrationLabel ? "" : "text-muted-foreground"}
-              >
-                {firstRegistrationLabel
-                  ? `Immatr. ${firstRegistrationLabel}`
-                  : "Immatricolazione non inserita"}
-              </Badge>
-              <Badge variant="outline">{vehicleTypeLabel}</Badge>
-              <Badge
-                variant="outline"
-                className={formattedKm ? "" : "text-muted-foreground"}
-              >
-                {formattedKm ? `${formattedKm} km` : "Km non inseriti"}
-              </Badge>
-              <Badge
-                variant="outline"
-                className={vehicleFuelLabel ? "" : "text-muted-foreground"}
-              >
-                {vehicleFuelLabel ?? "Alimentazione non inserita"}
-              </Badge>
-              <Badge
-                variant="outline"
-                className={vehiclePowerLabel ? "" : "text-muted-foreground"}
-              >
-                {vehiclePowerLabel ?? "Potenza non inserita"}
-              </Badge>
+            <div className="mt-4 grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
+              {profileFacts.map((fact) => (
+                <div
+                  key={fact.label}
+                  className={`rounded-2xl border border-border/70 bg-background/60 px-3 py-2.5 ${
+                    fact.wide ? "col-span-2" : ""
+                  } sm:min-w-[8.5rem]`}
+                >
+                  <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+                    {fact.label}
+                  </p>
+                  <p
+                    className={`mt-1 text-sm font-medium ${
+                      fact.muted ? "text-muted-foreground" : "text-foreground"
+                    }`}
+                  >
+                    {fact.value}
+                  </p>
+                </div>
+              ))}
             </div>
           </div>
         </div>

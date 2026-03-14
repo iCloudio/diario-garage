@@ -107,7 +107,7 @@ export function VehicleTabs({
   return (
     <div className="border-b border-border/80">
       <div
-        className="flex gap-1 overflow-x-auto scrollbar-hide"
+        className="grid grid-cols-3 gap-1 sm:flex sm:overflow-x-auto sm:scrollbar-hide"
         role="tablist"
         aria-label="Vehicle sections"
       >
@@ -127,7 +127,7 @@ export function VehicleTabs({
               tabIndex={isActive ? 0 : -1}
               onClick={() => handleTabChange(tab.id)}
               className={cn(
-                "flex items-center gap-2 whitespace-nowrap border-b-2 px-4 py-3 text-sm font-medium transition-colors",
+                "flex flex-col items-center justify-center gap-1 whitespace-nowrap border-b-2 px-2 py-3 text-xs font-medium transition-colors sm:flex-row sm:gap-2 sm:px-4 sm:text-sm",
                 "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
                 isActive
                   ? "border-primary text-foreground"
@@ -163,7 +163,7 @@ export function TabPanel({ tabId, activeTab, children }: TabPanelProps) {
       id={`tabpanel-${tabId}`}
       aria-labelledby={`tab-${tabId}`}
       hidden={!isActive}
-      className={cn("pt-6", !isActive && "hidden")}
+      className={cn("pt-4 sm:pt-6", !isActive && "hidden")}
     >
       {children}
     </div>

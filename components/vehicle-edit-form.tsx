@@ -333,7 +333,7 @@ export function VehicleEditForm({
           )}
         </div>
 
-        <div className="flex justify-end gap-3">
+        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end sm:gap-3">
           {embedded && onCancel ? (
             <Button type="button" variant="outline" onClick={onCancel} disabled={pending}>
               Annulla

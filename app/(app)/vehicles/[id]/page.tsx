@@ -7,7 +7,6 @@ import { buildActivitiesTimeline, formatActivitiesForDisplay, getLatestRefuelSum
 import { buildChartDatasets } from "@/lib/services/chart-service";
 import { DEADLINE_LABELS } from "@/lib/constants/labels";
 import { VehicleSaleAnalysis } from "@/components/vehicle-sale-analysis";
-import { FABMenu } from "@/components/quick-actions/fab-menu";
 import { VehicleDetailHero } from "@/components/vehicle/vehicle-detail-hero";
 
 export default async function VehicleOverviewPage({
@@ -139,9 +138,6 @@ export default async function VehicleOverviewPage({
           odometerKm={vehicle.odometerKm}
         />
       ) : null}
-
-      {/* FAB Menu - Mobile only quick actions */}
-      <FABMenu vehicleId={vehicle.id} />
     </div>
   );
 }
