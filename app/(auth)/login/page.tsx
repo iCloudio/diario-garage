@@ -37,16 +37,9 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="space-y-4">
-      <Card className="border-border/80 bg-card/88 p-6 shadow-2xl backdrop-blur">
-        <p className="text-xs uppercase tracking-[0.26em] text-primary/75">Accesso</p>
-        <h2 className="mt-3 text-2xl font-semibold tracking-tight text-foreground">
-          Bentornato
-        </h2>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Accedi al tuo libretto digitale in pochi secondi.
-        </p>
-        <form className="mt-6 space-y-4" onSubmit={onSubmit}>
+    <div className="w-full">
+      <Card className="border-border/80 bg-card/88 p-5 shadow-2xl backdrop-blur sm:p-6">
+        <form className="space-y-4" onSubmit={onSubmit}>
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <Input
@@ -73,7 +66,7 @@ export default function LoginPage() {
             {pending ? "Accesso..." : "Entra"}
           </Button>
         </form>
-        <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground">
+        <div className="mt-4 flex flex-col items-center gap-3 text-xs text-muted-foreground sm:flex-row sm:justify-between sm:gap-0">
           <Link className="transition hover:text-foreground" href="/forgot-password">
             Password dimenticata?
           </Link>
