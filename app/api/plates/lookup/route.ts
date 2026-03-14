@@ -3,6 +3,7 @@ import { z } from "zod";
 import { lookupPlate } from "@/lib/plate-lookup";
 import { getSession } from "@/lib/auth";
 import { logApiError } from "@/lib/error-handling";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 
 const schema = z.object({
   plate: z.string().min(5).max(10),
@@ -27,6 +28,24 @@ export async function POST(request: Request) {
   }
 
   const normalizedPlate = parsed.data.plate.replace(/\s+/g, "").toUpperCase();
+  const rateLimit = checkRateLimit({
+    scope: "plates:lookup",
+    key: `${session.userId}:${getClientIp(request)}`,
+    limit: 20,
+    windowMs: 15 * 60 * 1000,
+  });
+
+  if (!rateLimit.ok) {
+    return NextResponse.json(
+      { error: "Hai raggiunto il limite temporaneo di lookup targa." },
+      {
+        status: 429,
+        headers: {
+          "Retry-After": Math.ceil(rateLimit.retryAfterMs / 1000).toString(),
+        },
+      },
+    );
+  }
 
   let result = null;
   try {

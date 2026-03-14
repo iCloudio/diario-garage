@@ -69,6 +69,7 @@ model User {
   updatedAt    DateTime   @updatedAt
   deletedAt    DateTime?
   sessions     Session[]
+  passwordResetTokens PasswordResetToken[]
   vehicles     Vehicle[]
   drivers      Driver[]
 }
@@ -78,6 +79,19 @@ model Session {
   userId    String
   createdAt DateTime @default(now())
   expiresAt DateTime
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  userId    String
+  tokenHash String   @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id])
 
   @@index([userId])
