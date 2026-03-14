@@ -3,19 +3,23 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 import { getSession } from "@/lib/auth";
 
+const optionalIntegerField = z.preprocess((value) => {
+  if (value === "" || value == null) return undefined;
+  if (typeof value === "number") return value;
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    return trimmed === "" ? undefined : Number(trimmed);
+  }
+  return value;
+}, z.number().int().nonnegative().optional());
+
 const schema = z.object({
-  plate: z.string().min(5).max(10).optional(),
-  make: z.string().max(60).optional().or(z.literal("")),
-  model: z.string().max(60).optional().or(z.literal("")),
-  modelDetail: z.string().max(160).optional().or(z.literal("")),
-  firstRegistrationDate: z.string().nullable().optional(),
-  odometerKm: z
-    .coerce
-    .number()
-    .int()
-    .nonnegative()
-    .nullable()
-    .optional(),
+  plate: z.string().trim().min(5).max(10).optional(),
+  make: z.string().max(60).nullish(),
+  model: z.string().max(60).nullish(),
+  modelDetail: z.string().max(160).nullish(),
+  firstRegistrationDate: z.string().nullish(),
+  odometerKm: optionalIntegerField,
   type: z.enum(["AUTO", "MOTO", "CAMPER"]).optional(),
   fuelType: z.enum(["BENZINA", "DIESEL", "GPL", "METANO", "ELETTRICO", "IBRIDO_BENZINA", "IBRIDO_DIESEL"]).nullable().optional(),
   status: z.enum(["ATTIVO", "VENDUTO", "ROTTAMATO"]).optional(),
