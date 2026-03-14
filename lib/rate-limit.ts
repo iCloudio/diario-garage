@@ -1,5 +1,3 @@
-"use server";
-
 type RateLimitEntry = {
   count: number;
   resetAt: number;
